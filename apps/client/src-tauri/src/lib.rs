@@ -1,6 +1,8 @@
+pub mod commands;
 pub mod core;
 pub mod error;
 pub mod models;
+pub mod state;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
