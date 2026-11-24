@@ -1,0 +1,1999 @@
+use std::collections::HashSet;
+use std::path::Path;
+use std::sync::Mutex;
+
+use rusqlite::{params, params_from_iter, Connection, OptionalExtension, ToSql, Transaction};
+use uuid::Uuid;
+
+use crate::error::AppError;
+use crate::models::competency::{CompetencyMapResponse, CompetencySkillItem, RoleJobCount};
+use crate::models::job::{
+    ExtractedJobSkill, GapAnalysis, JobFilterInput, JobMatchDetail, JobMatchSkillRef,
+    JobMatchSummary, JobSource, RequirementType, WorkMode,
+};
+use crate::models::profile::{
+    ConfirmedProfileInput, ExperienceLevel, FitType, Proficiency, ScrapeKeywordItem, SkillCategory,
+    UserProfileDetail, UserSkillItem,
+};
+use crate::models::roadmap::{
+    GeneratedRoadmap, RoadmapDetail, RoadmapStepItem, RoadmapSummary, SkillRef, StepStatus,
+    StepUpdateResult,
+};
+
+const INITIAL_SCHEMA_SQL: &str =
+    include_str!("../../../../../shared/migrations/001_initial_schema.sql");
+
+const PRAGMAS_SQL: &str = "
+PRAGMA foreign_keys = ON;
+PRAGMA journal_mode = WAL;
+PRAGMA synchronous = NORMAL;
+PRAGMA busy_timeout = 5000;
+";
+
+#[derive(Debug, Clone)]
+pub struct ProfileMatchRecord {
+    pub user_id: String,
+    pub experience_level: ExperienceLevel,
+    pub embedding: Option<Vec<u8>>,
+    pub skill_ids: HashSet<i64>,
+}
+
+#[derive(Debug, Clone)]
+pub struct JobSkillRow {
+    pub skill_id: i64,
+    pub canonical_name: String,
+    pub category: SkillCategory,
+    pub requirement_type: RequirementType,
+    pub weight: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct JobMatchRecord {
+    pub job_id: String,
+    pub experience_level: ExperienceLevel,
+    pub embedding: Option<Vec<u8>>,
+    pub skills: Vec<JobSkillRow>,
+}
+
+#[derive(Debug, Clone)]
+pub struct NewJobRecord {
+    pub id: String,
+    pub source: JobSource,
+    pub external_id: String,
+    pub url: Option<String>,
+    pub title: String,
+    pub normalized_role: String,
+    pub company: String,
+    pub location: Option<String>,
+    pub work_mode: WorkMode,
+    pub experience_level: ExperienceLevel,
+    pub raw_description: String,
+    pub extracted_summary_json: Option<String>,
+    pub embedding: Option<Vec<u8>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct JobMatchUpsert {
+    pub user_id: String,
+    pub job_id: String,
+    pub vector_score: f64,
+    pub skill_overlap_score: f64,
+    pub level_score: f64,
+    pub final_score: f64,
+    pub matched_skills_json: String,
+    pub missing_skills_json: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct MissingSkillDemand {
+    pub skill_id: i64,
+    pub canonical_name: String,
+    pub category: SkillCategory,
+    pub demand_count: u32,
+}
+
+pub struct Database {
+    conn: Mutex<Connection>,
+}
+
+fn db_err(context: &str, err: rusqlite::Error) -> AppError {
+    AppError::db_error(format!("{context}: {err}"))
+}
+
+fn configure_connection(conn: &Connection) -> Result<(), AppError> {
+    conn.execute_batch(PRAGMAS_SQL)
+        .map_err(|e| db_err("Gagal menerapkan pragma SQLite", e))
+}
+
+impl Database {
+    pub fn open(path: &Path) -> Result<Self, AppError> {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| {
+                AppError::db_error(format!("Gagal membuat direktori database: {e}"))
+            })?;
+        }
+        let conn = Connection::open(path)
+            .map_err(|e| db_err("Gagal membuka koneksi database SQLite", e))?;
+        configure_connection(&conn)?;
+        let db = Self {
+            conn: Mutex::new(conn),
+        };
+        db.run_migrations()?;
+        Ok(db)
+    }
+
+    pub fn open_in_memory() -> Result<Self, AppError> {
+        let conn = Connection::open_in_memory()
+            .map_err(|e| db_err("Gagal membuka database SQLite in-memory", e))?;
+        configure_connection(&conn)?;
+        let db = Self {
+            conn: Mutex::new(conn),
+        };
+        db.run_migrations()?;
+        Ok(db)
+    }
+
+    pub fn run_migrations(&self) -> Result<(), AppError> {
+        self.with_tx(|tx| {
+            tx.execute_batch(INITIAL_SCHEMA_SQL)
+                .map_err(|e| db_err("Gagal menjalankan migrasi 001_initial_schema", e))?;
+            tx.execute(
+                "INSERT OR IGNORE INTO schema_migrations (version, name) VALUES (?1, ?2)",
+                params![1i64, "001_initial_schema"],
+            )
+            .map_err(|e| db_err("Gagal mencatat versi migrasi", e))?;
+            Ok(())
+        })
+    }
+
+    pub fn with_conn<F, T>(&self, f: F) -> Result<T, AppError>
+    where
+        F: FnOnce(&Connection) -> Result<T, AppError>,
+    {
+        let guard = self
+            .conn
+            .lock()
+            .map_err(|_| AppError::db_error("Database mutex poisoned"))?;
+        f(&guard)
+    }
+
+    pub fn with_tx<F, T>(&self, f: F) -> Result<T, AppError>
+    where
+        F: FnOnce(&Transaction<'_>) -> Result<T, AppError>,
+    {
+        let mut guard = self
+            .conn
+            .lock()
+            .map_err(|_| AppError::db_error("Database mutex poisoned"))?;
+        let tx = guard
+            .transaction()
+            .map_err(|e| db_err("Gagal memulai transaksi SQLite", e))?;
+        let result = f(&tx)?;
+        tx.commit()
+            .map_err(|e| db_err("Gagal commit transaksi SQLite", e))?;
+        Ok(result)
+    }
+
+    pub fn upsert_skill(
+        tx: &Transaction<'_>,
+        canonical_name: &str,
+        category: SkillCategory,
+        aliases: &[String],
+    ) -> Result<i64, AppError> {
+        let trimmed = canonical_name.trim();
+        if trimmed.is_empty() {
+            return Err(AppError::validation_error("Nama skill tidak boleh kosong."));
+        }
+
+        // 1. Exact case-insensitive match on canonical_name
+        let existing: Option<(i64, String)> = tx
+            .query_row(
+                "SELECT id, aliases_json FROM skills WHERE canonical_name = ?1 COLLATE NOCASE",
+                [trimmed],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .optional()
+            .map_err(|e| db_err("Gagal mencari skill baku", e))?;
+
+        if let Some((skill_id, existing_aliases_json)) = existing {
+            merge_skill_aliases(tx, skill_id, &existing_aliases_json, aliases)?;
+            return Ok(skill_id);
+        }
+
+        // 2. Fallback scan against aliases_json (case-insensitive)
+        let needle = trimmed.to_lowercase();
+        let mut stmt = tx
+            .prepare("SELECT id, aliases_json FROM skills")
+            .map_err(|e| db_err("Gagal menyiapkan scan alias skill", e))?;
+        let rows = stmt
+            .query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?)))
+            .map_err(|e| db_err("Gagal membaca daftar alias skill", e))?;
+
+        let mut alias_match: Option<(i64, String)> = None;
+        for row in rows {
+            let (sid, aliases_json) = row.map_err(|e| db_err("Gagal membaca baris skill", e))?;
+            let parsed: Vec<String> = serde_json::from_str(&aliases_json).unwrap_or_default();
+            if parsed.iter().any(|a| a.trim().to_lowercase() == needle) {
+                alias_match = Some((sid, aliases_json));
+                break;
+            }
+        }
+        drop(stmt);
+
+        if let Some((skill_id, existing_aliases_json)) = alias_match {
+            merge_skill_aliases(tx, skill_id, &existing_aliases_json, aliases)?;
+            return Ok(skill_id);
+        }
+
+        // 3. Insert new canonical skill
+        let deduped_aliases = normalize_alias_list(aliases);
+        let aliases_json = serde_json::to_string(&deduped_aliases)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi aliases: {e}")))?;
+
+        tx.execute(
+            "INSERT INTO skills (canonical_name, category, aliases_json) VALUES (?1, ?2, ?3)",
+            params![trimmed, category.as_str(), aliases_json],
+        )
+        .map_err(|e| db_err("Gagal menyimpan skill baru", e))?;
+
+        Ok(tx.last_insert_rowid())
+    }
+
+    pub fn get_top_canonical_skills(&self, limit: usize) -> Result<Vec<String>, AppError> {
+        self.with_conn(|conn| {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT s.canonical_name
+                     FROM skills s
+                     LEFT JOIN job_skills js ON js.skill_id = s.id
+                     LEFT JOIN user_skills us ON us.skill_id = s.id
+                     GROUP BY s.id
+                     ORDER BY (COUNT(DISTINCT js.job_id) + COUNT(DISTINCT us.user_id)) DESC, s.canonical_name ASC
+                     LIMIT ?1",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan query top skills", e))?;
+
+            let rows = stmt
+                .query_map([limit as i64], |r| r.get::<_, String>(0))
+                .map_err(|e| db_err("Gagal menjalankan query top skills", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal membaca top skill", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn save_profile_atomic(
+        &self,
+        input: &ConfirmedProfileInput,
+        embedding: Option<&[u8]>,
+    ) -> Result<UserProfileDetail, AppError> {
+        let profile_name = input.profile_name.trim();
+        if profile_name.is_empty() {
+            return Err(AppError::validation_error("Nama profil tidak boleh kosong."));
+        }
+
+        let user_id = input
+            .id
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| Uuid::new_v4().to_string());
+
+        let target_roles_json = serde_json::to_string(&input.target_roles)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi target_roles: {e}")))?;
+
+        self.with_tx(|tx| {
+            tx.execute("UPDATE user_profiles SET is_active = 0 WHERE id != ?1", [&user_id])
+                .map_err(|e| db_err("Gagal menonaktifkan profil lama", e))?;
+
+            tx.execute(
+                "INSERT INTO user_profiles (
+                    id, profile_name, target_roles_json, raw_story_text, summary,
+                    experience_level, embedding, is_active, created_at, updated_at
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                 ON CONFLICT(id) DO UPDATE SET
+                    profile_name = excluded.profile_name,
+                    target_roles_json = excluded.target_roles_json,
+                    raw_story_text = excluded.raw_story_text,
+                    summary = excluded.summary,
+                    experience_level = excluded.experience_level,
+                    embedding = excluded.embedding,
+                    is_active = 1,
+                    updated_at = CURRENT_TIMESTAMP",
+                params![
+                    user_id,
+                    profile_name,
+                    target_roles_json,
+                    input.raw_story_text,
+                    input.summary,
+                    input.experience_level.as_str(),
+                    embedding,
+                ],
+            )
+            .map_err(|e| db_err("Gagal menyimpan profil pengguna", e))?;
+
+            tx.execute("DELETE FROM user_skills WHERE user_id = ?1", [&user_id])
+                .map_err(|e| db_err("Gagal mereset user_skills", e))?;
+
+            for skill in &input.skills {
+                let skill_id = Self::upsert_skill(tx, &skill.canonical_name, skill.category, &[])?;
+                tx.execute(
+                    "INSERT INTO user_skills (user_id, skill_id, proficiency, evidence)
+                     VALUES (?1, ?2, ?3, ?4)
+                     ON CONFLICT(user_id, skill_id) DO UPDATE SET
+                        proficiency = excluded.proficiency,
+                        evidence = excluded.evidence",
+                    params![
+                        user_id,
+                        skill_id,
+                        skill.proficiency.as_str(),
+                        skill.evidence
+                    ],
+                )
+                .map_err(|e| db_err("Gagal menyimpan user_skill", e))?;
+            }
+
+            tx.execute(
+                "DELETE FROM user_scrape_keywords WHERE user_id = ?1",
+                [&user_id],
+            )
+            .map_err(|e| db_err("Gagal mereset user_scrape_keywords", e))?;
+
+            for kw in &input.keywords {
+                let role_label = kw.role_label.trim();
+                if role_label.is_empty() {
+                    continue;
+                }
+                let queries = if kw.scrape_queries.is_empty() {
+                    vec![role_label.to_string()]
+                } else {
+                    kw.scrape_queries.clone()
+                };
+                let queries_json = serde_json::to_string(&queries)
+                    .map_err(|e| AppError::db_error(format!("Gagal serialisasi queries: {e}")))?;
+                tx.execute(
+                    "INSERT INTO user_scrape_keywords (
+                        user_id, role_label, fit_type, scrape_queries_json, match_reason, is_active
+                     ) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                    params![
+                        user_id,
+                        role_label,
+                        kw.fit_type.as_str(),
+                        queries_json,
+                        kw.match_reason,
+                        if kw.is_active { 1i64 } else { 0i64 },
+                    ],
+                )
+                .map_err(|e| db_err("Gagal menyimpan keyword scraping", e))?;
+            }
+
+            load_profile_by_id_conn(tx, &user_id)?
+                .ok_or_else(|| AppError::db_error("Profil tidak ditemukan setelah disimpan"))
+        })
+    }
+
+    pub fn get_active_profile(&self) -> Result<Option<UserProfileDetail>, AppError> {
+        self.with_conn(|conn| {
+            let active_id: Option<String> = conn
+                .query_row(
+                    "SELECT id FROM user_profiles WHERE is_active = 1 ORDER BY updated_at DESC LIMIT 1",
+                    [],
+                    |r| r.get(0),
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal membaca profil aktif", e))?;
+
+            match active_id {
+                Some(id) => load_profile_by_id_conn(conn, &id),
+                None => Ok(None),
+            }
+        })
+    }
+
+    pub fn get_profile_by_id(&self, user_id: &str) -> Result<Option<UserProfileDetail>, AppError> {
+        self.with_conn(|conn| load_profile_by_id_conn(conn, user_id))
+    }
+
+    pub fn get_profile_for_matching(
+        &self,
+        user_id: &str,
+    ) -> Result<Option<ProfileMatchRecord>, AppError> {
+        self.with_conn(|conn| {
+            let row: Option<(String, Option<Vec<u8>>)> = conn
+                .query_row(
+                    "SELECT experience_level, embedding FROM user_profiles WHERE id = ?1",
+                    [user_id],
+                    |r| Ok((r.get(0)?, r.get(1)?)),
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal memuat profil untuk matching", e))?;
+
+            let Some((level_str, embedding)) = row else {
+                return Ok(None);
+            };
+
+            let mut stmt = conn
+                .prepare("SELECT skill_id FROM user_skills WHERE user_id = ?1")
+                .map_err(|e| db_err("Gagal memuat skill pengguna", e))?;
+            let skill_rows = stmt
+                .query_map([user_id], |r| r.get::<_, i64>(0))
+                .map_err(|e| db_err("Gagal membaca skill pengguna", e))?;
+
+            let mut skill_ids = HashSet::new();
+            for sid in skill_rows {
+                skill_ids.insert(sid.map_err(|e| db_err("Gagal membaca skill_id", e))?);
+            }
+
+            Ok(Some(ProfileMatchRecord {
+                user_id: user_id.to_string(),
+                experience_level: ExperienceLevel::from_db_str(&level_str),
+                embedding,
+                skill_ids,
+            }))
+        })
+    }
+
+    pub fn toggle_scrape_keyword(&self, keyword_id: i64, is_active: bool) -> Result<(), AppError> {
+        self.with_conn(|conn| {
+            let changed = conn
+                .execute(
+                    "UPDATE user_scrape_keywords SET is_active = ?1 WHERE id = ?2",
+                    params![if is_active { 1i64 } else { 0i64 }, keyword_id],
+                )
+                .map_err(|e| db_err("Gagal mengubah status keyword", e))?;
+
+            if changed == 0 {
+                return Err(AppError::validation_error(format!(
+                    "Keyword dengan ID {keyword_id} tidak ditemukan."
+                )));
+            }
+            Ok(())
+        })
+    }
+
+    pub fn add_custom_keyword(
+        &self,
+        user_id: &str,
+        role_label: &str,
+        queries: &[String],
+    ) -> Result<ScrapeKeywordItem, AppError> {
+        let trimmed_label = role_label.trim();
+        if trimmed_label.is_empty() {
+            return Err(AppError::validation_error(
+                "Label peran kustom tidak boleh kosong.",
+            ));
+        }
+
+        let cleaned_queries: Vec<String> = queries
+            .iter()
+            .map(|q| q.trim().to_string())
+            .filter(|q| !q.is_empty())
+            .collect();
+        let final_queries = if cleaned_queries.is_empty() {
+            vec![trimmed_label.to_string()]
+        } else {
+            cleaned_queries
+        };
+        let queries_json = serde_json::to_string(&final_queries)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi queries: {e}")))?;
+
+        self.with_conn(|conn| {
+            conn.execute(
+                "INSERT INTO user_scrape_keywords (
+                    user_id, role_label, fit_type, scrape_queries_json, match_reason, is_active
+                 ) VALUES (?1, ?2, 'custom', ?3, NULL, 1)",
+                params![user_id, trimmed_label, queries_json],
+            )
+            .map_err(|e| db_err("Gagal menambah keyword kustom", e))?;
+
+            let id = conn.last_insert_rowid();
+            Ok(ScrapeKeywordItem {
+                id,
+                user_id: user_id.to_string(),
+                role_label: trimmed_label.to_string(),
+                fit_type: FitType::Custom,
+                scrape_queries: final_queries,
+                match_reason: None,
+                is_active: true,
+                last_scraped_at: None,
+            })
+        })
+    }
+
+    pub fn list_active_scrape_queries(&self, user_id: &str) -> Result<Vec<String>, AppError> {
+        self.with_conn(|conn| {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT scrape_queries_json FROM user_scrape_keywords
+                     WHERE user_id = ?1 AND is_active = 1
+                     ORDER BY id ASC",
+                )
+                .map_err(|e| db_err("Gagal membaca keyword scraping aktif", e))?;
+
+            let rows = stmt
+                .query_map([user_id], |r| r.get::<_, String>(0))
+                .map_err(|e| db_err("Gagal iterasi keyword scraping aktif", e))?;
+
+            let mut seen = HashSet::new();
+            let mut out = Vec::new();
+            for row in rows {
+                let json_str = row.map_err(|e| db_err("Gagal baca queries_json", e))?;
+                let parsed: Vec<String> = serde_json::from_str(&json_str).unwrap_or_default();
+                for q in parsed {
+                    let t = q.trim();
+                    if !t.is_empty() && seen.insert(t.to_lowercase()) {
+                        out.push(t.to_string());
+                    }
+                }
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn touch_active_keywords_scraped(&self, user_id: &str) -> Result<(), AppError> {
+        self.with_conn(|conn| {
+            conn.execute(
+                "UPDATE user_scrape_keywords SET last_scraped_at = CURRENT_TIMESTAMP
+                 WHERE user_id = ?1 AND is_active = 1",
+                [user_id],
+            )
+            .map_err(|e| db_err("Gagal memperbarui last_scraped_at", e))?;
+            Ok(())
+        })
+    }
+
+    pub fn job_exists_by_source_external_id(
+        &self,
+        source: JobSource,
+        external_id: &str,
+    ) -> Result<Option<String>, AppError> {
+        self.with_conn(|conn| {
+            conn.query_row(
+                "SELECT id FROM jobs WHERE source = ?1 AND external_id = ?2",
+                params![source.as_str(), external_id],
+                |r| r.get::<_, String>(0),
+            )
+            .optional()
+            .map_err(|e| db_err("Gagal memeriksa duplikat lowongan", e))
+        })
+    }
+
+    pub fn insert_job_with_skills(
+        &self,
+        job: &NewJobRecord,
+        extracted_skills: &[ExtractedJobSkill],
+    ) -> Result<JobMatchRecord, AppError> {
+        self.with_tx(|tx| {
+            tx.execute(
+                "INSERT INTO jobs (
+                    id, source, external_id, url, title, normalized_role, company,
+                    location, work_mode, experience_level, raw_description,
+                    extracted_summary_json, embedding
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+                params![
+                    job.id,
+                    job.source.as_str(),
+                    job.external_id,
+                    job.url,
+                    job.title,
+                    job.normalized_role,
+                    job.company,
+                    job.location,
+                    job.work_mode.as_str(),
+                    job.experience_level.as_str(),
+                    job.raw_description,
+                    job.extracted_summary_json,
+                    job.embedding.as_deref(),
+                ],
+            )
+            .map_err(|e| db_err("Gagal menyimpan lowongan", e))?;
+
+            let mut skill_rows = Vec::new();
+            let mut seen_ids = HashSet::new();
+
+            for skill in extracted_skills {
+                let trimmed = skill.canonical_name.trim();
+                if trimmed.is_empty() {
+                    continue;
+                }
+                let skill_id = Self::upsert_skill(
+                    tx,
+                    trimmed,
+                    skill.category,
+                    &skill.matched_aliases,
+                )?;
+                let weight = skill.requirement_type.default_weight();
+
+                tx.execute(
+                    "INSERT INTO job_skills (job_id, skill_id, requirement_type, weight)
+                     VALUES (?1, ?2, ?3, ?4)
+                     ON CONFLICT(job_id, skill_id) DO UPDATE SET
+                        requirement_type = CASE
+                            WHEN job_skills.requirement_type = 'mandatory' OR excluded.requirement_type = 'mandatory'
+                            THEN 'mandatory'
+                            ELSE 'nice_to_have'
+                        END,
+                        weight = MAX(job_skills.weight, excluded.weight)",
+                    params![job.id, skill_id, skill.requirement_type.as_str(), weight],
+                )
+                .map_err(|e| db_err("Gagal menyimpan job_skill", e))?;
+
+                if seen_ids.insert(skill_id) {
+                    let (canonical_name, cat_str): (String, String) = tx
+                        .query_row(
+                            "SELECT canonical_name, category FROM skills WHERE id = ?1",
+                            [skill_id],
+                            |r| Ok((r.get(0)?, r.get(1)?)),
+                        )
+                        .map_err(|e| db_err("Gagal memuat nama skill baku", e))?;
+
+                    skill_rows.push(JobSkillRow {
+                        skill_id,
+                        canonical_name,
+                        category: SkillCategory::from_db_str(&cat_str),
+                        requirement_type: skill.requirement_type,
+                        weight,
+                    });
+                }
+            }
+
+            Ok(JobMatchRecord {
+                job_id: job.id.clone(),
+                experience_level: job.experience_level,
+                embedding: job.embedding.clone(),
+                skills: skill_rows,
+            })
+        })
+    }
+
+    pub fn upsert_job_match_tx(tx: &Transaction<'_>, row: &JobMatchUpsert) -> Result<(), AppError> {
+        let match_id = Uuid::new_v4().to_string();
+        tx.execute(
+            "INSERT INTO job_matches (
+                id, user_id, job_id, vector_score, skill_overlap_score, level_score,
+                final_score, matched_skills_json, missing_skills_json, computed_at
+             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, CURRENT_TIMESTAMP)
+             ON CONFLICT(user_id, job_id) DO UPDATE SET
+                vector_score = excluded.vector_score,
+                skill_overlap_score = excluded.skill_overlap_score,
+                level_score = excluded.level_score,
+                final_score = excluded.final_score,
+                matched_skills_json = excluded.matched_skills_json,
+                missing_skills_json = excluded.missing_skills_json,
+                computed_at = CURRENT_TIMESTAMP",
+            params![
+                match_id,
+                row.user_id,
+                row.job_id,
+                row.vector_score,
+                row.skill_overlap_score,
+                row.level_score,
+                row.final_score,
+                row.matched_skills_json,
+                row.missing_skills_json,
+            ],
+        )
+        .map_err(|e| db_err("Gagal menyimpan skor matching lowongan", e))?;
+        Ok(())
+    }
+
+    pub fn upsert_job_matches(&self, rows: &[JobMatchUpsert]) -> Result<(), AppError> {
+        self.with_tx(|tx| {
+            for row in rows {
+                Self::upsert_job_match_tx(tx, row)?;
+            }
+            Ok(())
+        })
+    }
+
+    pub fn load_all_jobs_for_matching(&self) -> Result<Vec<JobMatchRecord>, AppError> {
+        self.with_conn(|conn| {
+            let mut job_stmt = conn
+                .prepare("SELECT id, experience_level, embedding FROM jobs")
+                .map_err(|e| db_err("Gagal memuat daftar lowongan untuk matching", e))?;
+            let job_rows = job_stmt
+                .query_map([], |r| {
+                    Ok((
+                        r.get::<_, String>(0)?,
+                        r.get::<_, String>(1)?,
+                        r.get::<_, Option<Vec<u8>>>(2)?,
+                    ))
+                })
+                .map_err(|e| db_err("Gagal iterasi lowongan untuk matching", e))?;
+
+            let mut jobs = Vec::new();
+            for row in job_rows {
+                let (job_id, level_str, embedding) =
+                    row.map_err(|e| db_err("Gagal membaca baris lowongan", e))?;
+                let skills = load_job_skills_conn(conn, &job_id)?;
+                jobs.push(JobMatchRecord {
+                    job_id,
+                    experience_level: ExperienceLevel::from_db_str(&level_str),
+                    embedding,
+                    skills,
+                });
+            }
+            Ok(jobs)
+        })
+    }
+
+    pub fn load_job_for_matching(&self, job_id: &str) -> Result<Option<JobMatchRecord>, AppError> {
+        self.with_conn(|conn| {
+            let row: Option<(String, Option<Vec<u8>>)> = conn
+                .query_row(
+                    "SELECT experience_level, embedding FROM jobs WHERE id = ?1",
+                    [job_id],
+                    |r| Ok((r.get(0)?, r.get(1)?)),
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal memuat lowongan untuk matching", e))?;
+
+            let Some((level_str, embedding)) = row else {
+                return Ok(None);
+            };
+            let skills = load_job_skills_conn(conn, job_id)?;
+            Ok(Some(JobMatchRecord {
+                job_id: job_id.to_string(),
+                experience_level: ExperienceLevel::from_db_str(&level_str),
+                embedding,
+                skills,
+            }))
+        })
+    }
+
+    pub fn list_ranked_jobs(
+        &self,
+        user_id: &str,
+        filter: &JobFilterInput,
+    ) -> Result<Vec<JobMatchSummary>, AppError> {
+        self.with_conn(|conn| {
+            let mut sql = String::from(
+                "SELECT
+                    j.id, j.source, j.url, j.title, j.normalized_role, j.company,
+                    j.location, j.work_mode, j.experience_level,
+                    jm.vector_score, jm.skill_overlap_score, jm.level_score, jm.final_score,
+                    jm.matched_skills_json, jm.missing_skills_json,
+                    jm.ai_gap_analysis_json, jm.is_saved, j.scraped_at
+                 FROM job_matches jm
+                 JOIN jobs j ON j.id = jm.job_id
+                 WHERE jm.user_id = ?",
+            );
+            let mut bind: Vec<Box<dyn ToSql>> = vec![Box::new(user_id.to_string())];
+
+            if let Some(role) = filter.normalized_role.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+                sql.push_str(" AND j.normalized_role = ?");
+                bind.push(Box::new(role.to_string()));
+            }
+            if let Some(work_mode) = filter.work_mode {
+                sql.push_str(" AND j.work_mode = ?");
+                bind.push(Box::new(work_mode.as_str().to_string()));
+            }
+            if let Some(source) = filter.source {
+                sql.push_str(" AND j.source = ?");
+                bind.push(Box::new(source.as_str().to_string()));
+            }
+            if filter.saved_only == Some(true) {
+                sql.push_str(" AND jm.is_saved = 1");
+            }
+            if let Some(min_score) = filter.min_score {
+                sql.push_str(" AND jm.final_score >= ?");
+                bind.push(Box::new(min_score));
+            }
+            if let Some(q) = filter.search_query.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+                sql.push_str(" AND (LOWER(j.title) LIKE ? OR LOWER(j.company) LIKE ?)");
+                let pattern = format!("%{}%", q.to_lowercase());
+                bind.push(Box::new(pattern.clone()));
+                bind.push(Box::new(pattern));
+            }
+
+            sql.push_str(" ORDER BY jm.final_score DESC, j.scraped_at DESC");
+
+            if let Some(limit) = filter.limit {
+                sql.push_str(" LIMIT ?");
+                bind.push(Box::new(limit as i64));
+                if let Some(offset) = filter.offset {
+                    sql.push_str(" OFFSET ?");
+                    bind.push(Box::new(offset as i64));
+                }
+            }
+
+            let mut stmt = conn
+                .prepare(&sql)
+                .map_err(|e| db_err("Gagal menyiapkan query daftar lowongan", e))?;
+            let rows = stmt
+                .query_map(params_from_iter(bind.iter().map(|b| b.as_ref())), |r| {
+                    let source_str: String = r.get(1)?;
+                    let work_mode_str: String = r.get(7)?;
+                    let level_str: String = r.get(8)?;
+                    let matched_json: String = r.get(13)?;
+                    let missing_json: String = r.get(14)?;
+                    let gap_json: Option<String> = r.get(15)?;
+                    let is_saved: i64 = r.get(16)?;
+
+                    let matched: Vec<JobMatchSkillRef> =
+                        serde_json::from_str(&matched_json).unwrap_or_default();
+                    let missing: Vec<JobMatchSkillRef> =
+                        serde_json::from_str(&missing_json).unwrap_or_default();
+
+                    Ok(JobMatchSummary {
+                        job_id: r.get(0)?,
+                        source: JobSource::from_db_str(&source_str),
+                        url: r.get(2)?,
+                        title: r.get(3)?,
+                        normalized_role: r.get(4)?,
+                        company: r.get(5)?,
+                        location: r.get(6)?,
+                        work_mode: WorkMode::from_db_str(&work_mode_str),
+                        experience_level: ExperienceLevel::from_db_str(&level_str),
+                        vector_score: r.get(9)?,
+                        skill_overlap_score: r.get(10)?,
+                        level_score: r.get(11)?,
+                        final_score: r.get(12)?,
+                        matched_skills_count: matched.len() as u32,
+                        missing_skills_count: missing.len() as u32,
+                        has_gap_analysis: gap_json.is_some(),
+                        is_saved: is_saved != 0,
+                        scraped_at: r.get(17)?,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca daftar lowongan", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal parsing baris daftar lowongan", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn get_job_detail(
+        &self,
+        user_id: &str,
+        job_id: &str,
+    ) -> Result<JobMatchDetail, AppError> {
+        self.with_conn(|conn| {
+            let row = conn
+                .query_row(
+                    "SELECT
+                        j.id, j.source, j.external_id, j.url, j.title, j.normalized_role,
+                        j.company, j.location, j.work_mode, j.experience_level,
+                        j.raw_description, j.extracted_summary_json,
+                        jm.vector_score, jm.skill_overlap_score, jm.level_score, jm.final_score,
+                        jm.matched_skills_json, jm.missing_skills_json,
+                        jm.ai_gap_analysis_json, jm.is_saved, j.scraped_at
+                     FROM jobs j
+                     JOIN job_matches jm ON jm.job_id = j.id AND jm.user_id = ?1
+                     WHERE j.id = ?2",
+                    params![user_id, job_id],
+                    |r| {
+                        let source_str: String = r.get(1)?;
+                        let work_mode_str: String = r.get(8)?;
+                        let level_str: String = r.get(9)?;
+                        let extracted_json: Option<String> = r.get(11)?;
+                        let matched_json: String = r.get(16)?;
+                        let missing_json: String = r.get(17)?;
+                        let gap_json: Option<String> = r.get(18)?;
+                        let is_saved: i64 = r.get(19)?;
+
+                        let role_summary = extracted_json.as_deref().and_then(|s| {
+                            serde_json::from_str::<serde_json::Value>(s)
+                                .ok()
+                                .and_then(|v| {
+                                    v.get("role_summary")
+                                        .and_then(|rs| rs.as_str())
+                                        .map(str::to_string)
+                                })
+                        });
+                        let matched_skills: Vec<JobMatchSkillRef> =
+                            serde_json::from_str(&matched_json).unwrap_or_default();
+                        let missing_skills: Vec<JobMatchSkillRef> =
+                            serde_json::from_str(&missing_json).unwrap_or_default();
+                        let ai_gap_analysis: Option<GapAnalysis> = gap_json
+                            .as_deref()
+                            .and_then(|s| serde_json::from_str(s).ok());
+
+                        Ok(JobMatchDetail {
+                            job_id: r.get(0)?,
+                            source: JobSource::from_db_str(&source_str),
+                            external_id: r.get(2)?,
+                            url: r.get(3)?,
+                            title: r.get(4)?,
+                            normalized_role: r.get(5)?,
+                            company: r.get(6)?,
+                            location: r.get(7)?,
+                            work_mode: WorkMode::from_db_str(&work_mode_str),
+                            experience_level: ExperienceLevel::from_db_str(&level_str),
+                            raw_description: r.get(10)?,
+                            role_summary,
+                            vector_score: r.get(12)?,
+                            skill_overlap_score: r.get(13)?,
+                            level_score: r.get(14)?,
+                            final_score: r.get(15)?,
+                            matched_skills,
+                            missing_skills,
+                            ai_gap_analysis,
+                            is_saved: is_saved != 0,
+                            scraped_at: r.get(20)?,
+                        })
+                    },
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal memuat detail lowongan", e))?;
+
+            row.ok_or_else(|| {
+                AppError::validation_error(format!(
+                    "Detail lowongan '{job_id}' untuk pengguna '{user_id}' tidak ditemukan."
+                ))
+            })
+        })
+    }
+
+    pub fn toggle_save_job(&self, user_id: &str, job_id: &str) -> Result<bool, AppError> {
+        self.with_tx(|tx| {
+            let updated = tx
+                .execute(
+                    "UPDATE job_matches SET is_saved = 1 - is_saved WHERE user_id = ?1 AND job_id = ?2",
+                    params![user_id, job_id],
+                )
+                .map_err(|e| db_err("Gagal toggle simpan lowongan", e))?;
+            if updated == 0 {
+                return Err(AppError::validation_error(format!(
+                    "Lowongan '{job_id}' untuk pengguna '{user_id}' tidak ditemukan."
+                )));
+            }
+            let saved: i64 = tx
+                .query_row(
+                    "SELECT is_saved FROM job_matches WHERE user_id = ?1 AND job_id = ?2",
+                    params![user_id, job_id],
+                    |r| r.get(0),
+                )
+                .map_err(|e| db_err("Gagal membaca status simpan lowongan", e))?;
+            Ok(saved != 0)
+        })
+    }
+
+    pub fn get_cached_gap_analysis(
+        &self,
+        user_id: &str,
+        job_id: &str,
+    ) -> Result<Option<GapAnalysis>, AppError> {
+        self.with_conn(|conn| {
+            let raw: Option<Option<String>> = conn
+                .query_row(
+                    "SELECT ai_gap_analysis_json FROM job_matches WHERE user_id = ?1 AND job_id = ?2",
+                    params![user_id, job_id],
+                    |r| r.get(0),
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal membaca cache gap analysis", e))?;
+
+            let Some(maybe_json) = raw else {
+                return Err(AppError::validation_error(format!(
+                    "Data matching untuk lowongan '{job_id}' tidak ditemukan."
+                )));
+            };
+
+            match maybe_json {
+                Some(json_str) => {
+                    let parsed: GapAnalysis = serde_json::from_str(&json_str).map_err(|e| {
+                        AppError::db_error(format!("Cache gap analysis korup: {e}"))
+                    })?;
+                    Ok(Some(parsed))
+                }
+                None => Ok(None),
+            }
+        })
+    }
+
+    pub fn save_gap_analysis(
+        &self,
+        user_id: &str,
+        job_id: &str,
+        gap: &GapAnalysis,
+    ) -> Result<(), AppError> {
+        let json = serde_json::to_string(gap)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi gap analysis: {e}")))?;
+        self.with_conn(|conn| {
+            let changed = conn
+                .execute(
+                    "UPDATE job_matches SET ai_gap_analysis_json = ?1 WHERE user_id = ?2 AND job_id = ?3",
+                    params![json, user_id, job_id],
+                )
+                .map_err(|e| db_err("Gagal menyimpan cache gap analysis", e))?;
+            if changed == 0 {
+                return Err(AppError::validation_error(format!(
+                    "Data matching untuk lowongan '{job_id}' tidak ditemukan."
+                )));
+            }
+            Ok(())
+        })
+    }
+
+    pub fn list_available_roles(&self) -> Result<Vec<RoleJobCount>, AppError> {
+        self.with_conn(|conn| {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT normalized_role, COUNT(*) AS job_count
+                     FROM jobs
+                     GROUP BY normalized_role
+                     ORDER BY job_count DESC, normalized_role ASC",
+                )
+                .map_err(|e| db_err("Gagal memuat daftar peran tersedia", e))?;
+
+            let rows = stmt
+                .query_map([], |r| {
+                    Ok(RoleJobCount {
+                        normalized_role: r.get(0)?,
+                        job_count: r.get::<_, i64>(1)? as u32,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca daftar peran", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal parsing peran", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn get_competency_map(
+        &self,
+        user_id: &str,
+        target_role: &str,
+    ) -> Result<CompetencyMapResponse, AppError> {
+        let role = target_role.trim();
+        self.with_conn(|conn| {
+            let total_jobs: i64 = conn
+                .query_row(
+                    "SELECT COUNT(*) FROM jobs WHERE normalized_role = ?1",
+                    [role],
+                    |r| r.get(0),
+                )
+                .map_err(|e| db_err("Gagal menghitung jumlah lowongan untuk peran", e))?;
+
+            if total_jobs == 0 {
+                return Ok(CompetencyMapResponse {
+                    target_role: role.to_string(),
+                    total_jobs: 0,
+                    is_small_sample: true,
+                    skills: Vec::new(),
+                });
+            }
+
+            // PRD Section 7.3 Query A
+            let mut stmt = conn
+                .prepare(
+                    "SELECT
+                        s.id AS skill_id,
+                        s.canonical_name,
+                        s.category,
+                        COUNT(js.job_id) AS demand_count,
+                        ROUND(100.0 * COUNT(js.job_id) / (
+                            SELECT COUNT(*) FROM jobs WHERE normalized_role = ?1
+                        ), 1) AS demand_percentage,
+                        CASE WHEN us.skill_id IS NOT NULL THEN 1 ELSE 0 END AS is_owned_by_user,
+                        us.proficiency AS user_proficiency
+                     FROM job_skills js
+                     JOIN jobs j ON j.id = js.job_id
+                     JOIN skills s ON s.id = js.skill_id
+                     LEFT JOIN user_skills us
+                         ON us.skill_id = s.id AND us.user_id = ?2
+                     WHERE j.normalized_role = ?1
+                     GROUP BY s.id
+                     ORDER BY demand_count DESC, s.canonical_name ASC
+                     LIMIT 30",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan query peta kompetensi", e))?;
+
+            let rows = stmt
+                .query_map(params![role, user_id], |r| {
+                    let cat_str: String = r.get(2)?;
+                    let is_owned: i64 = r.get(5)?;
+                    let prof_str: Option<String> = r.get(6)?;
+                    Ok(CompetencySkillItem {
+                        skill_id: r.get(0)?,
+                        canonical_name: r.get(1)?,
+                        category: SkillCategory::from_db_str(&cat_str),
+                        demand_count: r.get::<_, i64>(3)? as u32,
+                        demand_percentage: r.get(4)?,
+                        is_owned_by_user: is_owned != 0,
+                        user_proficiency: prof_str.as_deref().map(Proficiency::from_db_str),
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca peta kompetensi", e))?;
+
+            let mut skills = Vec::new();
+            for row in rows {
+                skills.push(row.map_err(|e| db_err("Gagal parsing baris kompetensi", e))?);
+            }
+
+            Ok(CompetencyMapResponse {
+                target_role: role.to_string(),
+                total_jobs: total_jobs as u32,
+                is_small_sample: total_jobs < 5,
+                skills,
+            })
+        })
+    }
+
+    pub fn get_top_missing_skills_for_role(
+        &self,
+        user_id: &str,
+        target_role: &str,
+        limit: usize,
+    ) -> Result<Vec<MissingSkillDemand>, AppError> {
+        self.with_conn(|conn| {
+            // PRD Section 7.3 Query B
+            let mut stmt = conn
+                .prepare(
+                    "SELECT s.id, s.canonical_name, s.category, COUNT(js.job_id) AS demand_count
+                     FROM job_skills js
+                     JOIN jobs j ON j.id = js.job_id
+                     JOIN skills s ON s.id = js.skill_id
+                     LEFT JOIN user_skills us ON us.skill_id = s.id AND us.user_id = ?1
+                     WHERE j.normalized_role = ?2
+                       AND us.skill_id IS NULL
+                     GROUP BY s.id
+                     ORDER BY demand_count DESC, s.canonical_name ASC
+                     LIMIT ?3",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan query top missing skills", e))?;
+
+            let rows = stmt
+                .query_map(params![user_id, target_role.trim(), limit as i64], |r| {
+                    let cat_str: String = r.get(2)?;
+                    Ok(MissingSkillDemand {
+                        skill_id: r.get(0)?,
+                        canonical_name: r.get(1)?,
+                        category: SkillCategory::from_db_str(&cat_str),
+                        demand_count: r.get::<_, i64>(3)? as u32,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca top missing skills", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal parsing missing skill", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn get_missing_skills_for_job(
+        &self,
+        user_id: &str,
+        job_id: &str,
+    ) -> Result<Vec<MissingSkillDemand>, AppError> {
+        self.with_conn(|conn| {
+            let exists: bool = conn
+                .query_row("SELECT 1 FROM jobs WHERE id = ?1", [job_id], |_| Ok(true))
+                .optional()
+                .map_err(|e| db_err("Gagal memeriksa keberadaan lowongan", e))?
+                .unwrap_or(false);
+            if !exists {
+                return Err(AppError::validation_error(format!(
+                    "Lowongan '{job_id}' tidak ditemukan."
+                )));
+            }
+
+            let mut stmt = conn
+                .prepare(
+                    "SELECT s.id, s.canonical_name, s.category
+                     FROM job_skills js
+                     JOIN skills s ON s.id = js.skill_id
+                     LEFT JOIN user_skills us ON us.skill_id = s.id AND us.user_id = ?1
+                     WHERE js.job_id = ?2 AND us.skill_id IS NULL
+                     ORDER BY js.weight DESC, s.canonical_name ASC",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan query missing skills lowongan", e))?;
+
+            let rows = stmt
+                .query_map(params![user_id, job_id], |r| {
+                    let cat_str: String = r.get(2)?;
+                    Ok(MissingSkillDemand {
+                        skill_id: r.get(0)?,
+                        canonical_name: r.get(1)?,
+                        category: SkillCategory::from_db_str(&cat_str),
+                        demand_count: 1,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca missing skills lowongan", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal parsing missing skill lowongan", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn insert_roadmap_with_steps(
+        &self,
+        user_id: &str,
+        source_job_id: Option<&str>,
+        generated: &GeneratedRoadmap,
+    ) -> Result<RoadmapDetail, AppError> {
+        let roadmap_id = Uuid::new_v4().to_string();
+        self.with_tx(|tx| {
+            tx.execute(
+                "INSERT INTO learning_roadmaps (
+                    id, user_id, target_role, source_job_id, title, total_estimated_weeks
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![
+                    roadmap_id,
+                    user_id,
+                    generated.target_role,
+                    source_job_id,
+                    generated.title,
+                    generated.total_estimated_weeks.max(1),
+                ],
+            )
+            .map_err(|e| db_err("Gagal menyimpan header roadmap", e))?;
+
+            for step in &generated.steps {
+                let step_id = Uuid::new_v4().to_string();
+                let skill_id = if step.target_skill.trim().is_empty() {
+                    None
+                } else {
+                    Some(Self::upsert_skill(
+                        tx,
+                        &step.target_skill,
+                        SkillCategory::CoreHard,
+                        &[],
+                    )?)
+                };
+                let keywords_json = serde_json::to_string(&step.learning_keywords)
+                    .map_err(|e| AppError::db_error(format!("Gagal serialisasi keywords: {e}")))?;
+
+                tx.execute(
+                    "INSERT INTO roadmap_steps (
+                        id, roadmap_id, skill_id, phase_order, phase_name, topic_title,
+                        learning_keywords_json, mini_project_idea, estimated_hours, status
+                     ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'todo')",
+                    params![
+                        step_id,
+                        roadmap_id,
+                        skill_id,
+                        step.phase_order,
+                        step.phase_name,
+                        step.topic_title,
+                        keywords_json,
+                        step.mini_project_idea,
+                        step.estimated_hours.max(1),
+                    ],
+                )
+                .map_err(|e| db_err("Gagal menyimpan langkah roadmap", e))?;
+            }
+
+            load_roadmap_detail_conn(tx, &roadmap_id)
+        })
+    }
+
+    pub fn list_roadmaps(&self, user_id: &str) -> Result<Vec<RoadmapSummary>, AppError> {
+        self.with_conn(|conn| {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT
+                        lr.id, lr.user_id, lr.target_role, lr.source_job_id, lr.title,
+                        lr.total_estimated_weeks, lr.created_at,
+                        COUNT(rs.id) AS total_steps,
+                        COALESCE(SUM(CASE WHEN rs.status = 'done' THEN 1 ELSE 0 END), 0) AS completed_steps
+                     FROM learning_roadmaps lr
+                     LEFT JOIN roadmap_steps rs ON rs.roadmap_id = lr.id
+                     WHERE lr.user_id = ?1
+                     GROUP BY lr.id
+                     ORDER BY lr.created_at DESC, lr.rowid DESC",
+                )
+                .map_err(|e| db_err("Gagal memuat daftar roadmap", e))?;
+
+            let rows = stmt
+                .query_map([user_id], |r| {
+                    let total_steps = r.get::<_, i64>(7)? as u32;
+                    let completed_steps = r.get::<_, i64>(8)? as u32;
+                    let progress_percentage = if total_steps == 0 {
+                        0.0
+                    } else {
+                        ((completed_steps as f64 / total_steps as f64) * 1000.0).round() / 10.0
+                    };
+                    Ok(RoadmapSummary {
+                        id: r.get(0)?,
+                        user_id: r.get(1)?,
+                        target_role: r.get(2)?,
+                        source_job_id: r.get(3)?,
+                        title: r.get(4)?,
+                        total_estimated_weeks: r.get(5)?,
+                        created_at: r.get(6)?,
+                        total_steps,
+                        completed_steps,
+                        progress_percentage,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca daftar roadmap", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal parsing roadmap summary", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn get_roadmap_detail(&self, roadmap_id: &str) -> Result<RoadmapDetail, AppError> {
+        self.with_conn(|conn| load_roadmap_detail_conn(conn, roadmap_id))
+    }
+
+    pub fn update_roadmap_step_status(
+        &self,
+        step_id: &str,
+        status: StepStatus,
+    ) -> Result<StepUpdateResult, AppError> {
+        self.with_tx(|tx| {
+            let changed = tx
+                .execute(
+                    "UPDATE roadmap_steps
+                     SET status = ?1,
+                         completed_at = CASE WHEN ?1 = 'done' THEN CURRENT_TIMESTAMP ELSE NULL END
+                     WHERE id = ?2",
+                    params![status.as_str(), step_id],
+                )
+                .map_err(|e| db_err("Gagal memperbarui status langkah roadmap", e))?;
+
+            if changed == 0 {
+                return Err(AppError::validation_error(format!(
+                    "Langkah roadmap '{step_id}' tidak ditemukan."
+                )));
+            }
+
+            let (user_id, skill_id, completed_at): (String, Option<i64>, Option<String>) = tx
+                .query_row(
+                    "SELECT lr.user_id, rs.skill_id, rs.completed_at
+                     FROM roadmap_steps rs
+                     JOIN learning_roadmaps lr ON lr.id = rs.roadmap_id
+                     WHERE rs.id = ?1",
+                    [step_id],
+                    |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+                )
+                .map_err(|e| db_err("Gagal membaca ulang langkah roadmap", e))?;
+
+            let suggest_add_skill = if status == StepStatus::Done {
+                if let Some(sid) = skill_id {
+                    let already_owned: bool = tx
+                        .query_row(
+                            "SELECT 1 FROM user_skills WHERE user_id = ?1 AND skill_id = ?2",
+                            params![user_id, sid],
+                            |_| Ok(true),
+                        )
+                        .optional()
+                        .map_err(|e| db_err("Gagal memeriksa kepemilikan skill", e))?
+                        .unwrap_or(false);
+
+                    if !already_owned {
+                        let (canonical_name, cat_str): (String, String) = tx
+                            .query_row(
+                                "SELECT canonical_name, category FROM skills WHERE id = ?1",
+                                [sid],
+                                |r| Ok((r.get(0)?, r.get(1)?)),
+                            )
+                            .map_err(|e| db_err("Gagal memuat detail skill saran", e))?;
+                        Some(SkillRef {
+                            skill_id: sid,
+                            canonical_name,
+                            category: SkillCategory::from_db_str(&cat_str),
+                        })
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+
+            Ok(StepUpdateResult {
+                step_id: step_id.to_string(),
+                status,
+                completed_at,
+                suggest_add_skill,
+            })
+        })
+    }
+
+    pub fn quick_add_user_skill_row(&self, user_id: &str, skill_id: i64) -> Result<(), AppError> {
+        self.with_conn(|conn| {
+            conn.execute(
+                "INSERT INTO user_skills (user_id, skill_id, proficiency, evidence)
+                 VALUES (?1, ?2, 'beginner', 'Selesai dipelajari melalui Vecta Roadmap')
+                 ON CONFLICT(user_id, skill_id) DO NOTHING",
+                params![user_id, skill_id],
+            )
+            .map_err(|e| db_err("Gagal menambahkan skill pengguna", e))?;
+            Ok(())
+        })
+    }
+}
+
+fn normalize_alias_list(aliases: &[String]) -> Vec<String> {
+    let mut seen = HashSet::new();
+    let mut out = Vec::new();
+    for alias in aliases {
+        let t = alias.trim();
+        if !t.is_empty() && seen.insert(t.to_lowercase()) {
+            out.push(t.to_string());
+        }
+    }
+    out
+}
+
+fn merge_skill_aliases(
+    tx: &Transaction<'_>,
+    skill_id: i64,
+    existing_json: &str,
+    new_aliases: &[String],
+) -> Result<(), AppError> {
+    if new_aliases.is_empty() {
+        return Ok(());
+    }
+    let mut merged: Vec<String> = serde_json::from_str(existing_json).unwrap_or_default();
+    let mut seen: HashSet<String> = merged.iter().map(|s| s.to_lowercase()).collect();
+    let mut changed = false;
+    for alias in new_aliases {
+        let t = alias.trim();
+        if !t.is_empty() && seen.insert(t.to_lowercase()) {
+            merged.push(t.to_string());
+            changed = true;
+        }
+    }
+    if changed {
+        let json = serde_json::to_string(&merged)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi aliases: {e}")))?;
+        tx.execute(
+            "UPDATE skills SET aliases_json = ?1 WHERE id = ?2",
+            params![json, skill_id],
+        )
+        .map_err(|e| db_err("Gagal memperbarui alias skill", e))?;
+    }
+    Ok(())
+}
+
+fn load_profile_by_id_conn(
+    conn: &Connection,
+    user_id: &str,
+) -> Result<Option<UserProfileDetail>, AppError> {
+    let row = conn
+        .query_row(
+            "SELECT
+                id, profile_name, target_roles_json, raw_story_text, summary,
+                experience_level, embedding IS NOT NULL, is_active, created_at, updated_at
+             FROM user_profiles
+             WHERE id = ?1",
+            [user_id],
+            |r| {
+                let target_roles_json: String = r.get(2)?;
+                let level_str: String = r.get(5)?;
+                let has_emb: i64 = r.get(6)?;
+                let is_active: i64 = r.get(7)?;
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    serde_json::from_str::<Vec<String>>(&target_roles_json).unwrap_or_default(),
+                    r.get::<_, Option<String>>(3)?,
+                    r.get::<_, Option<String>>(4)?,
+                    ExperienceLevel::from_db_str(&level_str),
+                    has_emb != 0,
+                    is_active != 0,
+                    r.get::<_, String>(8)?,
+                    r.get::<_, String>(9)?,
+                ))
+            },
+        )
+        .optional()
+        .map_err(|e| db_err("Gagal memuat profil pengguna", e))?;
+
+    let Some((
+        id,
+        profile_name,
+        target_roles,
+        raw_story_text,
+        summary,
+        experience_level,
+        has_embedding,
+        is_active,
+        created_at,
+        updated_at,
+    )) = row
+    else {
+        return Ok(None);
+    };
+
+    let mut skill_stmt = conn
+        .prepare(
+            "SELECT us.skill_id, s.canonical_name, s.category, us.proficiency, us.evidence
+             FROM user_skills us
+             JOIN skills s ON s.id = us.skill_id
+             WHERE us.user_id = ?1
+             ORDER BY s.canonical_name ASC",
+        )
+        .map_err(|e| db_err("Gagal menyiapkan query user_skills", e))?;
+    let skill_rows = skill_stmt
+        .query_map([&id], |r| {
+            let cat_str: String = r.get(2)?;
+            let prof_str: String = r.get(3)?;
+            Ok(UserSkillItem {
+                skill_id: r.get(0)?,
+                canonical_name: r.get(1)?,
+                category: SkillCategory::from_db_str(&cat_str),
+                proficiency: Proficiency::from_db_str(&prof_str),
+                evidence: r.get(4)?,
+            })
+        })
+        .map_err(|e| db_err("Gagal membaca user_skills", e))?;
+
+    let mut skills = Vec::new();
+    for s in skill_rows {
+        skills.push(s.map_err(|e| db_err("Gagal parsing user_skill", e))?);
+    }
+
+    let mut kw_stmt = conn
+        .prepare(
+            "SELECT id, user_id, role_label, fit_type, scrape_queries_json, match_reason, is_active, last_scraped_at
+             FROM user_scrape_keywords
+             WHERE user_id = ?1
+             ORDER BY id ASC",
+        )
+        .map_err(|e| db_err("Gagal menyiapkan query keywords", e))?;
+    let kw_rows = kw_stmt
+        .query_map([&id], |r| {
+            let fit_str: String = r.get(3)?;
+            let queries_json: String = r.get(4)?;
+            let active_int: i64 = r.get(6)?;
+            Ok(ScrapeKeywordItem {
+                id: r.get(0)?,
+                user_id: r.get(1)?,
+                role_label: r.get(2)?,
+                fit_type: FitType::from_db_str(&fit_str),
+                scrape_queries: serde_json::from_str(&queries_json).unwrap_or_default(),
+                match_reason: r.get(5)?,
+                is_active: active_int != 0,
+                last_scraped_at: r.get(7)?,
+            })
+        })
+        .map_err(|e| db_err("Gagal membaca keywords", e))?;
+
+    let mut keywords = Vec::new();
+    for kw in kw_rows {
+        keywords.push(kw.map_err(|e| db_err("Gagal parsing keyword", e))?);
+    }
+
+    Ok(Some(UserProfileDetail {
+        id,
+        profile_name,
+        target_roles,
+        raw_story_text,
+        summary,
+        experience_level,
+        has_embedding,
+        is_active,
+        skills,
+        keywords,
+        created_at,
+        updated_at,
+    }))
+}
+
+fn load_job_skills_conn(conn: &Connection, job_id: &str) -> Result<Vec<JobSkillRow>, AppError> {
+    let mut stmt = conn
+        .prepare(
+            "SELECT js.skill_id, s.canonical_name, s.category, js.requirement_type, js.weight
+             FROM job_skills js
+             JOIN skills s ON s.id = js.skill_id
+             WHERE js.job_id = ?1
+             ORDER BY js.weight DESC, s.canonical_name ASC",
+        )
+        .map_err(|e| db_err("Gagal menyiapkan query job_skills", e))?;
+
+    let rows = stmt
+        .query_map([job_id], |r| {
+            let cat_str: String = r.get(2)?;
+            let req_str: String = r.get(3)?;
+            Ok(JobSkillRow {
+                skill_id: r.get(0)?,
+                canonical_name: r.get(1)?,
+                category: SkillCategory::from_db_str(&cat_str),
+                requirement_type: RequirementType::from_db_str(&req_str),
+                weight: r.get(4)?,
+            })
+        })
+        .map_err(|e| db_err("Gagal membaca job_skills", e))?;
+
+    let mut out = Vec::new();
+    for row in rows {
+        out.push(row.map_err(|e| db_err("Gagal parsing job_skill", e))?);
+    }
+    Ok(out)
+}
+
+fn load_roadmap_detail_conn(
+    conn: &Connection,
+    roadmap_id: &str,
+) -> Result<RoadmapDetail, AppError> {
+    let header = conn
+        .query_row(
+            "SELECT id, user_id, target_role, source_job_id, title, total_estimated_weeks, created_at
+             FROM learning_roadmaps
+             WHERE id = ?1",
+            [roadmap_id],
+            |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, String>(2)?,
+                    r.get::<_, Option<String>>(3)?,
+                    r.get::<_, String>(4)?,
+                    r.get::<_, i32>(5)?,
+                    r.get::<_, String>(6)?,
+                ))
+            },
+        )
+        .optional()
+        .map_err(|e| db_err("Gagal membaca detail roadmap", e))?;
+
+    let Some((id, user_id, target_role, source_job_id, title, total_estimated_weeks, created_at)) =
+        header
+    else {
+        return Err(AppError::validation_error(format!(
+            "Roadmap '{roadmap_id}' tidak ditemukan."
+        )));
+    };
+
+    let mut stmt = conn
+        .prepare(
+            "SELECT
+                rs.id, rs.roadmap_id, rs.skill_id, s.canonical_name,
+                rs.phase_order, rs.phase_name, rs.topic_title,
+                rs.learning_keywords_json, rs.mini_project_idea,
+                rs.estimated_hours, rs.status, rs.completed_at
+             FROM roadmap_steps rs
+             LEFT JOIN skills s ON s.id = rs.skill_id
+             WHERE rs.roadmap_id = ?1
+             ORDER BY rs.phase_order ASC, rs.rowid ASC",
+        )
+        .map_err(|e| db_err("Gagal menyiapkan query langkah roadmap", e))?;
+
+    let rows = stmt
+        .query_map([&id], |r| {
+            let keywords_json: String = r.get(7)?;
+            let status_str: String = r.get(10)?;
+            Ok(RoadmapStepItem {
+                id: r.get(0)?,
+                roadmap_id: r.get(1)?,
+                skill_id: r.get(2)?,
+                skill_name: r.get(3)?,
+                phase_order: r.get(4)?,
+                phase_name: r.get(5)?,
+                topic_title: r.get(6)?,
+                learning_keywords: serde_json::from_str(&keywords_json).unwrap_or_default(),
+                mini_project_idea: r.get(8)?,
+                estimated_hours: r.get(9)?,
+                status: StepStatus::from_db_str(&status_str),
+                completed_at: r.get(11)?,
+            })
+        })
+        .map_err(|e| db_err("Gagal membaca langkah roadmap", e))?;
+
+    let mut steps = Vec::new();
+    for row in rows {
+        steps.push(row.map_err(|e| db_err("Gagal parsing langkah roadmap", e))?);
+    }
+
+    Ok(RoadmapDetail {
+        id,
+        user_id,
+        target_role,
+        source_job_id,
+        title,
+        total_estimated_weeks,
+        steps,
+        created_at,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::job::{GapSeverity, PrioritizedGap};
+    use crate::models::profile::{ConfirmedKeywordInput, ConfirmedSkillInput};
+    use crate::models::roadmap::GeneratedRoadmapStep;
+
+    fn sample_profile_input() -> ConfirmedProfileInput {
+        ConfirmedProfileInput {
+            id: Some("user-1".into()),
+            profile_name: "Primary".into(),
+            target_roles: vec!["Backend Engineer".into()],
+            raw_story_text: "I build Rust APIs and SQLite apps for local-first desktop products."
+                .into(),
+            summary: "Rust backend developer focused on local-first systems.".into(),
+            experience_level: ExperienceLevel::Junior,
+            skills: vec![ConfirmedSkillInput {
+                canonical_name: "Rust".into(),
+                category: SkillCategory::CoreHard,
+                proficiency: Proficiency::Intermediate,
+                evidence: Some("Built Tauri core".into()),
+            }],
+            keywords: vec![ConfirmedKeywordInput {
+                role_label: "Backend Engineer".into(),
+                fit_type: FitType::PrimaryFit,
+                scrape_queries: vec!["Backend Engineer".into(), "Rust Developer".into()],
+                match_reason: Some("Strong Rust skills".into()),
+                is_active: true,
+            }],
+        }
+    }
+
+    fn sample_job(id: &str, ext_id: &str, role: &str) -> NewJobRecord {
+        NewJobRecord {
+            id: id.into(),
+            source: JobSource::Linkedin,
+            external_id: ext_id.into(),
+            url: Some(format!("https://linkedin.com/jobs/view/{ext_id}")),
+            title: format!("{role} #{ext_id}"),
+            normalized_role: role.into(),
+            company: "PT Vecta".into(),
+            location: Some("Jakarta".into()),
+            work_mode: WorkMode::Hybrid,
+            experience_level: ExperienceLevel::Junior,
+            raw_description: "Full description text".into(),
+            extracted_summary_json: Some(r#"{"role_summary":"Build services"}"#.into()),
+            embedding: None,
+        }
+    }
+
+    #[test]
+    fn migrations_are_idempotent_and_pragmas_enabled() {
+        let db = Database::open_in_memory().expect("open_in_memory");
+        db.run_migrations()
+            .expect("second migration run should be idempotent");
+
+        let (fk, mig_count): (i64, i64) = db
+            .with_conn(|conn| {
+                let fk: i64 = conn
+                    .query_row("PRAGMA foreign_keys;", [], |r| r.get(0))
+                    .map_err(|e| AppError::db_error(e.to_string()))?;
+                let mig_count: i64 = conn
+                    .query_row("SELECT COUNT(*) FROM schema_migrations;", [], |r| r.get(0))
+                    .map_err(|e| AppError::db_error(e.to_string()))?;
+                Ok((fk, mig_count))
+            })
+            .expect("query pragmas");
+
+        assert_eq!(fk, 1);
+        assert_eq!(mig_count, 1);
+    }
+
+    #[test]
+    fn cascade_delete_removes_user_children() {
+        let db = Database::open_in_memory().expect("db");
+        let profile = db
+            .save_profile_atomic(&sample_profile_input(), None)
+            .expect("save profile");
+        db.insert_job_with_skills(&sample_job("job-1", "li-1", "Backend Engineer"), &[])
+            .expect("insert job");
+        db.upsert_job_matches(&[JobMatchUpsert {
+            user_id: profile.id.clone(),
+            job_id: "job-1".into(),
+            vector_score: 0.8,
+            skill_overlap_score: 0.7,
+            level_score: 1.0,
+            final_score: 0.785,
+            matched_skills_json: "[]".into(),
+            missing_skills_json: "[]".into(),
+        }])
+        .expect("upsert match");
+        db.insert_roadmap_with_steps(
+            &profile.id,
+            Some("job-1"),
+            &GeneratedRoadmap {
+                title: "Plan".into(),
+                target_role: "Backend Engineer".into(),
+                total_estimated_weeks: 4,
+                steps: vec![GeneratedRoadmapStep {
+                    phase_order: 1,
+                    phase_name: "Fundamental".into(),
+                    target_skill: "Docker".into(),
+                    topic_title: "Containers".into(),
+                    learning_keywords: vec!["docker basics".into()],
+                    mini_project_idea: "Containerize API".into(),
+                    estimated_hours: 4,
+                }],
+            },
+        )
+        .expect("insert roadmap");
+
+        db.with_conn(|conn| {
+            conn.execute("DELETE FROM user_profiles WHERE id = ?1", [&profile.id])
+                .map_err(|e| AppError::db_error(e.to_string()))?;
+            for table in [
+                "user_skills",
+                "user_scrape_keywords",
+                "job_matches",
+                "learning_roadmaps",
+                "roadmap_steps",
+            ] {
+                let count: i64 = conn
+                    .query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |r| r.get(0))
+                    .map_err(|e| AppError::db_error(e.to_string()))?;
+                assert_eq!(count, 0, "expected {table} to be empty after cascade delete");
+            }
+            Ok(())
+        })
+        .expect("verify cascade");
+    }
+
+    #[test]
+    fn unique_source_external_id_rejects_duplicate_job() {
+        let db = Database::open_in_memory().expect("db");
+        db.insert_job_with_skills(&sample_job("job-1", "li-dup", "Backend Engineer"), &[])
+            .expect("first insert");
+
+        let found = db
+            .job_exists_by_source_external_id(JobSource::Linkedin, "li-dup")
+            .expect("exists query");
+        assert_eq!(found.as_deref(), Some("job-1"));
+
+        let err = db
+            .insert_job_with_skills(&sample_job("job-2", "li-dup", "Backend Engineer"), &[])
+            .expect_err("duplicate (source, external_id) must fail");
+        assert_eq!(err.code, crate::error::ErrorCode::DbError);
+    }
+
+    #[test]
+    fn upsert_skill_normalizes_case_and_aliases() {
+        let db = Database::open_in_memory().expect("db");
+        let (id1, id2, id3) = db
+            .with_tx(|tx| {
+                let id1 = Database::upsert_skill(
+                    tx,
+                    "React",
+                    SkillCategory::ToolsTech,
+                    &["React.js".into(), "ReactJS".into()],
+                )?;
+                let id2 = Database::upsert_skill(tx, "react", SkillCategory::ToolsTech, &[])?;
+                let id3 = Database::upsert_skill(tx, "react.js", SkillCategory::ToolsTech, &[])?;
+                Ok((id1, id2, id3))
+            })
+            .expect("upsert skills");
+
+        assert_eq!(id1, id2);
+        assert_eq!(id1, id3);
+    }
+
+    #[test]
+    fn upsert_job_match_preserves_saved_and_gap_cache() {
+        let db = Database::open_in_memory().expect("db");
+        let profile = db
+            .save_profile_atomic(&sample_profile_input(), None)
+            .expect("save profile");
+        db.insert_job_with_skills(&sample_job("job-1", "li-save", "Backend Engineer"), &[])
+            .expect("insert job");
+        db.upsert_job_matches(&[JobMatchUpsert {
+            user_id: profile.id.clone(),
+            job_id: "job-1".into(),
+            vector_score: 0.5,
+            skill_overlap_score: 0.5,
+            level_score: 1.0,
+            final_score: 0.575,
+            matched_skills_json: "[]".into(),
+            missing_skills_json: "[]".into(),
+        }])
+        .expect("initial match");
+
+        assert!(db
+            .toggle_save_job(&profile.id, "job-1")
+            .expect("toggle save"));
+        let gap = GapAnalysis {
+            verdict_headline: "Cocok secara dasar".into(),
+            strength_highlights: vec!["Kuat di Rust".into()],
+            prioritized_gaps: vec![PrioritizedGap {
+                skill: "Docker".into(),
+                severity: GapSeverity::High,
+                reason: "Wajib untuk deployment".into(),
+            }],
+            cv_tailoring_tips: vec!["Tonjolkan proyek SQLite".into()],
+        };
+        db.save_gap_analysis(&profile.id, "job-1", &gap)
+            .expect("save gap");
+
+        db.upsert_job_matches(&[JobMatchUpsert {
+            user_id: profile.id.clone(),
+            job_id: "job-1".into(),
+            vector_score: 0.9,
+            skill_overlap_score: 0.9,
+            level_score: 1.0,
+            final_score: 0.915,
+            matched_skills_json: "[]".into(),
+            missing_skills_json: "[]".into(),
+        }])
+        .expect("re-upsert match");
+
+        let detail = db.get_job_detail(&profile.id, "job-1").expect("get detail");
+        assert!((detail.final_score - 0.915).abs() < 1e-6);
+        assert!(
+            detail.is_saved,
+            "is_saved bookmark must be preserved on match recompute"
+        );
+        assert_eq!(detail.ai_gap_analysis, Some(gap));
+    }
+
+    #[test]
+    fn competency_map_computes_exact_percentages_and_handles_zero_jobs() {
+        let db = Database::open_in_memory().expect("db");
+        let profile = db
+            .save_profile_atomic(&sample_profile_input(), None)
+            .expect("save profile");
+
+        for idx in 1..=4 {
+            let mut skills = vec![ExtractedJobSkill {
+                canonical_name: "Rust".into(),
+                category: SkillCategory::CoreHard,
+                requirement_type: RequirementType::Mandatory,
+                matched_aliases: vec![],
+            }];
+            if idx <= 3 {
+                skills.push(ExtractedJobSkill {
+                    canonical_name: "Docker".into(),
+                    category: SkillCategory::ToolsTech,
+                    requirement_type: RequirementType::Mandatory,
+                    matched_aliases: vec![],
+                });
+            }
+            if idx == 1 {
+                skills.push(ExtractedJobSkill {
+                    canonical_name: "Redis".into(),
+                    category: SkillCategory::ToolsTech,
+                    requirement_type: RequirementType::NiceToHave,
+                    matched_aliases: vec![],
+                });
+            }
+            db.insert_job_with_skills(
+                &sample_job(
+                    &format!("job-{idx}"),
+                    &format!("li-{idx}"),
+                    "Backend Engineer",
+                ),
+                &skills,
+            )
+            .expect("insert job");
+        }
+
+        let map = db
+            .get_competency_map(&profile.id, "Backend Engineer")
+            .expect("get competency map");
+        assert_eq!(map.total_jobs, 4);
+        assert!(map.is_small_sample);
+        assert_eq!(map.skills.len(), 3);
+        assert_eq!(map.skills[0].canonical_name, "Rust");
+        assert_eq!(map.skills[0].demand_count, 4);
+        assert!((map.skills[0].demand_percentage - 100.0).abs() < 0.01);
+        assert!(map.skills[0].is_owned_by_user);
+        assert_eq!(
+            map.skills[0].user_proficiency,
+            Some(Proficiency::Intermediate)
+        );
+
+        assert_eq!(map.skills[1].canonical_name, "Docker");
+        assert!((map.skills[1].demand_percentage - 75.0).abs() < 0.01);
+        assert!(!map.skills[1].is_owned_by_user);
+
+        let empty_map = db
+            .get_competency_map(&profile.id, "Nonexistent Role")
+            .expect("zero-job role must not error");
+        assert_eq!(empty_map.total_jobs, 0);
+        assert!(empty_map.is_small_sample);
+        assert!(empty_map.skills.is_empty());
+    }
+}
