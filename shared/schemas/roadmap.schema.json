@@ -1,0 +1,25 @@
+{
+  "type": "OBJECT",
+  "required": ["title", "target_role", "total_estimated_weeks", "steps"],
+  "properties": {
+    "title": { "type": "STRING" },
+    "target_role": { "type": "STRING" },
+    "total_estimated_weeks": { "type": "INTEGER" },
+    "steps": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "required": ["phase_order", "phase_name", "target_skill", "topic_title", "learning_keywords", "mini_project_idea", "estimated_hours"],
+        "properties": {
+          "phase_order": { "type": "INTEGER" },
+          "phase_name": { "type": "STRING" },
+          "target_skill": { "type": "STRING" },
+          "topic_title": { "type": "STRING" },
+          "learning_keywords": { "type": "ARRAY", "items": { "type": "STRING" } },
+          "mini_project_idea": { "type": "STRING" },
+          "estimated_hours": { "type": "INTEGER" }
+        }
+      }
+    }
+  }
+}

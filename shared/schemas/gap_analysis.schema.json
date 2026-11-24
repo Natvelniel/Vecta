@@ -1,0 +1,21 @@
+{
+  "type": "OBJECT",
+  "required": ["verdict_headline", "strength_highlights", "prioritized_gaps", "cv_tailoring_tips"],
+  "properties": {
+    "verdict_headline": { "type": "STRING" },
+    "strength_highlights": { "type": "ARRAY", "items": { "type": "STRING" } },
+    "prioritized_gaps": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "required": ["skill", "severity", "reason"],
+        "properties": {
+          "skill": { "type": "STRING" },
+          "severity": { "type": "STRING", "enum": ["high", "medium", "low"] },
+          "reason": { "type": "STRING" }
+        }
+      }
+    },
+    "cv_tailoring_tips": { "type": "ARRAY", "items": { "type": "STRING" } }
+  }
+}

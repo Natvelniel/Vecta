@@ -1,0 +1,34 @@
+{
+  "type": "OBJECT",
+  "required": ["professional_summary", "estimated_experience_level", "extracted_skills", "recommended_keywords"],
+  "properties": {
+    "professional_summary": { "type": "STRING" },
+    "estimated_experience_level": { "type": "STRING", "enum": ["intern", "junior", "mid", "senior", "unknown"] },
+    "extracted_skills": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "required": ["canonical_name", "category", "proficiency", "evidence"],
+        "properties": {
+          "canonical_name": { "type": "STRING" },
+          "category": { "type": "STRING", "enum": ["core_hard", "tools_tech", "soft_skill", "domain"] },
+          "proficiency": { "type": "STRING", "enum": ["beginner", "intermediate", "advanced"] },
+          "evidence": { "type": "STRING" }
+        }
+      }
+    },
+    "recommended_keywords": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "required": ["role_label", "fit_type", "match_reason", "scrape_queries"],
+        "properties": {
+          "role_label": { "type": "STRING" },
+          "fit_type": { "type": "STRING", "enum": ["primary_fit", "adjacent_fit"] },
+          "match_reason": { "type": "STRING" },
+          "scrape_queries": { "type": "ARRAY", "items": { "type": "STRING" } }
+        }
+      }
+    }
+  }
+}
