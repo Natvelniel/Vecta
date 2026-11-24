@@ -1,0 +1,26 @@
+# Rust / Tauri
+apps/client/src-tauri/target/
+**/*.rs.bk
+
+# Frontend / Node
+apps/client/node_modules/
+apps/client/dist/*
+!apps/client/dist/.gitkeep
+
+# Python / uv
+services/scraper-worker/.venv/
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Databases & Secrets
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+
+# Agent & Tooling Scratch
+.superpowers/
+graphify-out/
