@@ -115,6 +115,16 @@ impl WorkerClient for HttpWorkerClient {
                 )
             })?;
 
+        if matches!(
+            resp.status(),
+            reqwest::StatusCode::BAD_REQUEST | reqwest::StatusCode::UNPROCESSABLE_ENTITY
+        ) {
+            return Err(AppError::validation_error(format!(
+                "Parameter scraping ditolak oleh Python Worker (HTTP {}).",
+                resp.status().as_u16()
+            )));
+        }
+
         if !resp.status().is_success() {
             return Err(AppError::scraper_unreachable(format!(
                 "Endpoint scraping Python Worker gagal dengan HTTP {}.",
@@ -127,5 +137,50 @@ impl WorkerClient for HttpWorkerClient {
                 "Respons /api/v1/scrape Python Worker tidak dapat diparsing: {e}"
             ))
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    use tokio::net::TcpListener;
+
+    use super::*;
+    use crate::error::ErrorCode;
+
+    #[tokio::test]
+    async fn http_worker_client_maps_422_to_validation_error() {
+        let listener = TcpListener::bind("127.0.0.1:0").await.expect("bind");
+        let addr = listener.local_addr().expect("addr");
+        tokio::spawn(async move {
+            if let Ok((mut stream, _)) = listener.accept().await {
+                let mut buf = vec![0u8; 4096];
+                let _ = stream.read(&mut buf).await;
+                let body = r#"{"detail":"invalid source"}"#;
+                let resp = format!(
+                    "HTTP/1.1 422 Unprocessable Entity\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                    body.len(),
+                    body
+                );
+                let _ = stream.write_all(resp.as_bytes()).await;
+                let _ = stream.shutdown().await;
+            }
+        });
+
+        let client = HttpWorkerClient::new().expect("client");
+        let err = client
+            .scrape(
+                &format!("http://{addr}"),
+                &WorkerScrapeRequest {
+                    queries: vec!["Rust".into()],
+                    sources: vec!["invalid".into()],
+                    location: "Indonesia".into(),
+                    limit_per_query: 5,
+                },
+            )
+            .await
+            .expect_err("422 must fail");
+        assert_eq!(err.code, ErrorCode::ValidationError);
+        assert!(!err.retryable);
     }
 }

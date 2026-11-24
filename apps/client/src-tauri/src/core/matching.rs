@@ -107,12 +107,78 @@ pub fn format_job_embedding_text(
     )
 }
 
+pub struct PrecomputedUserEmbedding {
+    values: Vec<f32>,
+    norm: f64,
+}
+
+impl PrecomputedUserEmbedding {
+    pub fn from_bytes(bytes: &[u8]) -> Option<Self> {
+        let values = decode_embedding(bytes)?;
+        let mut norm_sq = 0.0f64;
+        for &x in &values {
+            let xf = x as f64;
+            norm_sq += xf * xf;
+        }
+        let norm = norm_sq.sqrt();
+        if norm == 0.0 || !norm.is_finite() {
+            return None;
+        }
+        Some(Self { values, norm })
+    }
+
+    pub fn cosine_with_bytes(&self, job_bytes: &[u8]) -> Option<f64> {
+        if job_bytes.len() != self.values.len() * 4 {
+            return None;
+        }
+        let mut dot = 0.0f64;
+        let mut norm_b_sq = 0.0f64;
+        for (&ux, chunk) in self.values.iter().zip(job_bytes.chunks_exact(4)) {
+            let jy = f32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
+            if !jy.is_finite() {
+                return None;
+            }
+            let xf = ux as f64;
+            let yf = jy as f64;
+            dot += xf * yf;
+            norm_b_sq += yf * yf;
+        }
+        let denom = self.norm * norm_b_sq.sqrt();
+        if denom == 0.0 || !denom.is_finite() {
+            return None;
+        }
+        Some((dot / denom).clamp(0.0, 1.0))
+    }
+}
+
 pub fn compute_hybrid_match(user: &ProfileMatchRecord, job: &JobMatchRecord) -> ComputedMatch {
-    let valid_vector = match (user.embedding.as_deref(), job.embedding.as_deref()) {
-        (Some(u_bytes), Some(j_bytes)) => match (decode_embedding(u_bytes), decode_embedding(j_bytes)) {
-            (Some(u_vec), Some(j_vec)) => cosine_similarity(&u_vec, &j_vec).map(|v| v as f64),
-            _ => None,
-        },
+    let precomputed = user
+        .embedding
+        .as_deref()
+        .and_then(PrecomputedUserEmbedding::from_bytes);
+    compute_hybrid_match_with_precomputed(user, precomputed.as_ref(), job)
+}
+
+pub fn compute_hybrid_matches_batch(
+    user: &ProfileMatchRecord,
+    jobs: &[JobMatchRecord],
+) -> Vec<ComputedMatch> {
+    let precomputed = user
+        .embedding
+        .as_deref()
+        .and_then(PrecomputedUserEmbedding::from_bytes);
+    jobs.iter()
+        .map(|job| compute_hybrid_match_with_precomputed(user, precomputed.as_ref(), job))
+        .collect()
+}
+
+fn compute_hybrid_match_with_precomputed(
+    user: &ProfileMatchRecord,
+    user_emb: Option<&PrecomputedUserEmbedding>,
+    job: &JobMatchRecord,
+) -> ComputedMatch {
+    let valid_vector = match (user_emb, job.embedding.as_deref()) {
+        (Some(u_emb), Some(j_bytes)) => u_emb.cosine_with_bytes(j_bytes),
         _ => None,
     };
 

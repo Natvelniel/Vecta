@@ -200,28 +200,58 @@ impl Database {
             return Ok(skill_id);
         }
 
-        // 2. Fallback scan against aliases_json (case-insensitive)
-        let needle = trimmed.to_lowercase();
+        // 2. Fallback scan against canonical_name & aliases_json in both directions (case-insensitive)
+        let mut incoming_needles = HashSet::new();
+        incoming_needles.insert(trimmed.to_lowercase());
+        for alias in aliases {
+            let a = alias.trim();
+            if !a.is_empty() {
+                incoming_needles.insert(a.to_lowercase());
+            }
+        }
+
         let mut stmt = tx
-            .prepare("SELECT id, aliases_json FROM skills")
+            .prepare("SELECT id, canonical_name, aliases_json FROM skills")
             .map_err(|e| db_err("Gagal menyiapkan scan alias skill", e))?;
         let rows = stmt
-            .query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?)))
+            .query_map([], |r| {
+                Ok((
+                    r.get::<_, i64>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, String>(2)?,
+                ))
+            })
             .map_err(|e| db_err("Gagal membaca daftar alias skill", e))?;
 
-        let mut alias_match: Option<(i64, String)> = None;
+        let mut alias_match: Option<(i64, String, String)> = None;
         for row in rows {
-            let (sid, aliases_json) = row.map_err(|e| db_err("Gagal membaca baris skill", e))?;
+            let (sid, existing_canonical, aliases_json) =
+                row.map_err(|e| db_err("Gagal membaca baris skill", e))?;
+            let canonical_lower = existing_canonical.trim().to_lowercase();
             let parsed: Vec<String> = serde_json::from_str(&aliases_json).unwrap_or_default();
-            if parsed.iter().any(|a| a.trim().to_lowercase() == needle) {
-                alias_match = Some((sid, aliases_json));
+            if incoming_needles.contains(&canonical_lower)
+                || parsed
+                    .iter()
+                    .any(|a| incoming_needles.contains(&a.trim().to_lowercase()))
+            {
+                alias_match = Some((sid, existing_canonical, aliases_json));
                 break;
             }
         }
         drop(stmt);
 
-        if let Some((skill_id, existing_aliases_json)) = alias_match {
-            merge_skill_aliases(tx, skill_id, &existing_aliases_json, aliases)?;
+        if let Some((skill_id, existing_canonical, existing_aliases_json)) = alias_match {
+            let mut to_merge: Vec<String> = Vec::with_capacity(aliases.len() + 1);
+            if !trimmed.eq_ignore_ascii_case(existing_canonical.trim()) {
+                to_merge.push(trimmed.to_string());
+            }
+            for alias in aliases {
+                let a = alias.trim();
+                if !a.is_empty() && !a.eq_ignore_ascii_case(existing_canonical.trim()) {
+                    to_merge.push(a.to_string());
+                }
+            }
+            merge_skill_aliases(tx, skill_id, &existing_aliases_json, &to_merge)?;
             return Ok(skill_id);
         }
 
@@ -592,9 +622,6 @@ impl Database {
             )
             .map_err(|e| db_err("Gagal menyimpan lowongan", e))?;
 
-            let mut skill_rows = Vec::new();
-            let mut seen_ids = HashSet::new();
-
             for skill in extracted_skills {
                 let trimmed = skill.canonical_name.trim();
                 if trimmed.is_empty() {
@@ -621,25 +648,9 @@ impl Database {
                     params![job.id, skill_id, skill.requirement_type.as_str(), weight],
                 )
                 .map_err(|e| db_err("Gagal menyimpan job_skill", e))?;
-
-                if seen_ids.insert(skill_id) {
-                    let (canonical_name, cat_str): (String, String) = tx
-                        .query_row(
-                            "SELECT canonical_name, category FROM skills WHERE id = ?1",
-                            [skill_id],
-                            |r| Ok((r.get(0)?, r.get(1)?)),
-                        )
-                        .map_err(|e| db_err("Gagal memuat nama skill baku", e))?;
-
-                    skill_rows.push(JobSkillRow {
-                        skill_id,
-                        canonical_name,
-                        category: SkillCategory::from_db_str(&cat_str),
-                        requirement_type: skill.requirement_type,
-                        weight,
-                    });
-                }
             }
+
+            let skill_rows = load_job_skills_conn(tx, &job.id)?;
 
             Ok(JobMatchRecord {
                 job_id: job.id.clone(),
@@ -652,39 +663,69 @@ impl Database {
 
     pub fn upsert_job_match_tx(tx: &Transaction<'_>, row: &JobMatchUpsert) -> Result<(), AppError> {
         let match_id = Uuid::new_v4().to_string();
-        tx.execute(
-            "INSERT INTO job_matches (
-                id, user_id, job_id, vector_score, skill_overlap_score, level_score,
-                final_score, matched_skills_json, missing_skills_json, computed_at
-             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, CURRENT_TIMESTAMP)
-             ON CONFLICT(user_id, job_id) DO UPDATE SET
-                vector_score = excluded.vector_score,
-                skill_overlap_score = excluded.skill_overlap_score,
-                level_score = excluded.level_score,
-                final_score = excluded.final_score,
-                matched_skills_json = excluded.matched_skills_json,
-                missing_skills_json = excluded.missing_skills_json,
-                computed_at = CURRENT_TIMESTAMP",
-            params![
-                match_id,
-                row.user_id,
-                row.job_id,
-                row.vector_score,
-                row.skill_overlap_score,
-                row.level_score,
-                row.final_score,
-                row.matched_skills_json,
-                row.missing_skills_json,
-            ],
-        )
+        let mut stmt = tx
+            .prepare_cached(
+                "INSERT INTO job_matches (
+                    id, user_id, job_id, vector_score, skill_overlap_score, level_score,
+                    final_score, matched_skills_json, missing_skills_json, computed_at
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, CURRENT_TIMESTAMP)
+                 ON CONFLICT(user_id, job_id) DO UPDATE SET
+                    vector_score = excluded.vector_score,
+                    skill_overlap_score = excluded.skill_overlap_score,
+                    level_score = excluded.level_score,
+                    final_score = excluded.final_score,
+                    matched_skills_json = excluded.matched_skills_json,
+                    missing_skills_json = excluded.missing_skills_json,
+                    computed_at = CURRENT_TIMESTAMP",
+            )
+            .map_err(|e| db_err("Gagal menyiapkan upsert job_match", e))?;
+        stmt.execute(params![
+            match_id,
+            row.user_id,
+            row.job_id,
+            row.vector_score,
+            row.skill_overlap_score,
+            row.level_score,
+            row.final_score,
+            row.matched_skills_json,
+            row.missing_skills_json,
+        ])
         .map_err(|e| db_err("Gagal menyimpan skor matching lowongan", e))?;
         Ok(())
     }
 
     pub fn upsert_job_matches(&self, rows: &[JobMatchUpsert]) -> Result<(), AppError> {
         self.with_tx(|tx| {
+            let mut stmt = tx
+                .prepare_cached(
+                    "INSERT INTO job_matches (
+                        id, user_id, job_id, vector_score, skill_overlap_score, level_score,
+                        final_score, matched_skills_json, missing_skills_json, computed_at
+                     ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, CURRENT_TIMESTAMP)
+                     ON CONFLICT(user_id, job_id) DO UPDATE SET
+                        vector_score = excluded.vector_score,
+                        skill_overlap_score = excluded.skill_overlap_score,
+                        level_score = excluded.level_score,
+                        final_score = excluded.final_score,
+                        matched_skills_json = excluded.matched_skills_json,
+                        missing_skills_json = excluded.missing_skills_json,
+                        computed_at = CURRENT_TIMESTAMP",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan batch upsert job_matches", e))?;
             for row in rows {
-                Self::upsert_job_match_tx(tx, row)?;
+                let match_id = Uuid::new_v4().to_string();
+                stmt.execute(params![
+                    match_id,
+                    row.user_id,
+                    row.job_id,
+                    row.vector_score,
+                    row.skill_overlap_score,
+                    row.level_score,
+                    row.final_score,
+                    row.matched_skills_json,
+                    row.missing_skills_json,
+                ])
+                .map_err(|e| db_err("Gagal menyimpan skor matching lowongan", e))?;
             }
             Ok(())
         })
@@ -692,8 +733,43 @@ impl Database {
 
     pub fn load_all_jobs_for_matching(&self) -> Result<Vec<JobMatchRecord>, AppError> {
         self.with_conn(|conn| {
+            let mut skills_by_job: std::collections::HashMap<String, Vec<JobSkillRow>> =
+                std::collections::HashMap::new();
+            {
+                let mut skill_stmt = conn
+                    .prepare_cached(
+                        "SELECT js.job_id, js.skill_id, s.canonical_name, s.category, js.requirement_type, js.weight
+                         FROM job_skills js
+                         JOIN skills s ON s.id = js.skill_id",
+                    )
+                    .map_err(|e| db_err("Gagal menyiapkan batch query job_skills", e))?;
+                let skill_rows = skill_stmt
+                    .query_map([], |r| {
+                        let job_id: String = r.get(0)?;
+                        let cat_str: String = r.get(3)?;
+                        let req_str: String = r.get(4)?;
+                        Ok((
+                            job_id,
+                            JobSkillRow {
+                                skill_id: r.get(1)?,
+                                canonical_name: r.get(2)?,
+                                category: SkillCategory::from_db_str(&cat_str),
+                                requirement_type: RequirementType::from_db_str(&req_str),
+                                weight: r.get(5)?,
+                            },
+                        ))
+                    })
+                    .map_err(|e| db_err("Gagal membaca batch job_skills", e))?;
+
+                for row in skill_rows {
+                    let (job_id, skill) =
+                        row.map_err(|e| db_err("Gagal parsing batch job_skill", e))?;
+                    skills_by_job.entry(job_id).or_default().push(skill);
+                }
+            }
+
             let mut job_stmt = conn
-                .prepare("SELECT id, experience_level, embedding FROM jobs")
+                .prepare_cached("SELECT id, experience_level, embedding FROM jobs")
                 .map_err(|e| db_err("Gagal memuat daftar lowongan untuk matching", e))?;
             let job_rows = job_stmt
                 .query_map([], |r| {
@@ -709,7 +785,7 @@ impl Database {
             for row in job_rows {
                 let (job_id, level_str, embedding) =
                     row.map_err(|e| db_err("Gagal membaca baris lowongan", e))?;
-                let skills = load_job_skills_conn(conn, &job_id)?;
+                let skills = skills_by_job.remove(&job_id).unwrap_or_default();
                 jobs.push(JobMatchRecord {
                     job_id,
                     experience_level: ExperienceLevel::from_db_str(&level_str),
@@ -1995,5 +2071,128 @@ mod tests {
         assert_eq!(empty_map.total_jobs, 0);
         assert!(empty_map.is_small_sample);
         assert!(empty_map.skills.is_empty());
+    }
+
+    #[test]
+    fn upsert_skill_resolves_reverse_order_aliases() {
+        let db = Database::open_in_memory().expect("db");
+        let (first_id, second_id, row_count) = db
+            .with_tx(|tx| {
+                let id1 = Database::upsert_skill(tx, "React.js", SkillCategory::CoreHard, &[])?;
+                let id2 = Database::upsert_skill(
+                    tx,
+                    "React",
+                    SkillCategory::CoreHard,
+                    &["React.js".into()],
+                )?;
+                let count: i64 = tx
+                    .query_row("SELECT COUNT(*) FROM skills", [], |r| r.get(0))
+                    .map_err(|e| db_err("count", e))?;
+                Ok((id1, id2, count))
+            })
+            .expect("reverse alias upsert");
+
+        assert_eq!(
+            first_id, second_id,
+            "incoming alias matching existing canonical_name must resolve to same skill_id"
+        );
+        assert_eq!(row_count, 1);
+    }
+
+    #[test]
+    fn insert_job_with_skills_reflects_upgraded_mandatory_weight_on_duplicate_alias() {
+        let db = Database::open_in_memory().expect("db");
+        let rec = db
+            .insert_job_with_skills(
+                &sample_job("job-dup-skill", "li-dup-skill", "Frontend Engineer"),
+                &[
+                    ExtractedJobSkill {
+                        canonical_name: "React.js".into(),
+                        category: SkillCategory::CoreHard,
+                        requirement_type: RequirementType::NiceToHave,
+                        matched_aliases: vec![],
+                    },
+                    ExtractedJobSkill {
+                        canonical_name: "React".into(),
+                        category: SkillCategory::CoreHard,
+                        requirement_type: RequirementType::Mandatory,
+                        matched_aliases: vec!["React.js".into()],
+                    },
+                ],
+            )
+            .expect("insert job");
+
+        assert_eq!(rec.skills.len(), 1);
+        assert_eq!(rec.skills[0].requirement_type, RequirementType::Mandatory);
+        assert!((rec.skills[0].weight - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn db_recalculate_1000_jobs_loads_and_upserts_under_100ms() {
+        use std::time::Instant;
+
+        use crate::core::matching::{
+            compute_hybrid_matches_batch, encode_embedding, to_match_upsert,
+        };
+
+        let db = Database::open_in_memory().expect("db");
+        let embedding = encode_embedding(&vec![0.25f32; 768]);
+        let profile = db
+            .save_profile_atomic(&sample_profile_input(), Some(embedding.as_slice()))
+            .expect("save profile");
+
+        // Seed 1,000 jobs x 5 skills each inside one setup transaction
+        db.with_tx(|tx| {
+            let mut skill_ids = Vec::new();
+            for name in ["Rust", "SQLite", "Docker", "PostgreSQL", "Linux"] {
+                skill_ids.push(Database::upsert_skill(
+                    tx,
+                    name,
+                    SkillCategory::CoreHard,
+                    &[],
+                )?);
+            }
+            for i in 0..1000 {
+                let jid = format!("perf-job-{i}");
+                tx.execute(
+                    "INSERT INTO jobs (id, source, external_id, title, normalized_role, company, work_mode, experience_level, raw_description, embedding)
+                     VALUES (?1, 'linkedin', ?2, 'Backend Engineer', 'Backend Engineer', 'PT Perf', 'remote', 'junior', 'desc', ?3)",
+                    params![jid, format!("li-perf-{i}"), embedding],
+                )
+                .map_err(|e| db_err("seed job", e))?;
+                for &sid in &skill_ids {
+                    tx.execute(
+                        "INSERT INTO job_skills (job_id, skill_id, requirement_type, weight) VALUES (?1, ?2, 'mandatory', 1.0)",
+                        params![jid, sid],
+                    )
+                    .map_err(|e| db_err("seed job_skill", e))?;
+                }
+            }
+            Ok(())
+        })
+        .expect("seed 1000 jobs");
+
+        let user_profile = db
+            .get_profile_for_matching(&profile.id)
+            .expect("profile")
+            .expect("some profile");
+
+        let start = Instant::now();
+        let jobs = db.load_all_jobs_for_matching().expect("load all jobs");
+        let computed_all = compute_hybrid_matches_batch(&user_profile, &jobs);
+        let mut upserts = Vec::with_capacity(jobs.len());
+        for (job, computed) in jobs.iter().zip(computed_all.iter()) {
+            upserts.push(to_match_upsert(&profile.id, &job.job_id, computed).expect("upsert"));
+        }
+        db.upsert_job_matches(&upserts).expect("upsert matches");
+        let elapsed = start.elapsed();
+
+        assert_eq!(jobs.len(), 1000);
+        assert!(jobs.iter().all(|j| j.skills.len() == 5));
+        assert!(
+            elapsed.as_millis() < 100,
+            "Full DB load + match + upsert for 1,000 jobs took {:?}, must be < 100ms",
+            elapsed
+        );
     }
 }

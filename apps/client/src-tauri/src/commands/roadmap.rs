@@ -58,6 +58,17 @@ pub async fn generate_learning_roadmap_impl(
         .map(|m| m.canonical_name)
         .collect();
 
+    if missing_skill_names.is_empty() {
+        let msg = if clean_source_job_id.is_some() {
+            "Tidak ada skill gap untuk lowongan ini — Anda sudah menguasai seluruh skill yang terdeteksi.".to_string()
+        } else {
+            format!(
+                "Tidak ada skill gap untuk peran '{role}'. Pastikan sudah ada lowongan untuk peran tersebut atau Anda sudah menguasai seluruh skill utamanya."
+            )
+        };
+        return Err(AppError::validation_error(msg));
+    }
+
     let prompt_input = RoadmapPromptInput {
         target_role: role.to_string(),
         user_level: profile.experience_level.as_str().to_string(),
@@ -294,5 +305,34 @@ mod tests {
         let update2 = update_roadmap_step_status_impl(&state, step2_id, StepStatus::Done)
             .expect("mark step 2 done");
         assert_eq!(update2.suggest_add_skill, None);
+    }
+
+    #[tokio::test]
+    async fn generate_roadmap_rejects_when_no_missing_skills_exist_without_calling_gemini() {
+        use crate::error::ErrorCode;
+
+        let gemini = Arc::new(MockGemini::default());
+        let state = build_test_state(
+            Some("AIzaSyTESTKEY1234"),
+            Arc::clone(&gemini),
+            Arc::new(MockWorker::default()),
+        );
+        let (user_id, _job_id) = setup_user_and_job(&state).await;
+
+        let err = generate_learning_roadmap_impl(
+            &state,
+            user_id,
+            "Role Tanpa Lowongan".into(),
+            None,
+            6,
+        )
+        .await
+        .expect_err("empty missing skills must return ValidationError");
+        assert_eq!(err.code, ErrorCode::ValidationError);
+        assert_eq!(
+            gemini.roadmap_calls.load(Ordering::SeqCst),
+            0,
+            "must NOT call Gemini when missing skill list is empty"
+        );
     }
 }

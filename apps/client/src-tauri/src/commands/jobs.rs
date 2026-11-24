@@ -4,7 +4,9 @@ use sha2::{Digest, Sha256};
 use tauri::State;
 use uuid::Uuid;
 
-use crate::core::config::{MAX_KNOWN_SKILLS_CONTEXT, MIN_MANUAL_JOB_CHARS};
+use crate::core::config::{
+    MAX_KNOWN_SKILLS_CONTEXT, MAX_MANUAL_JOB_CHARS, MIN_MANUAL_JOB_CHARS,
+};
 use crate::core::db::NewJobRecord;
 use crate::core::gemini::{EmbeddingTaskType, GapAnalysisPromptInput};
 use crate::core::matching::{
@@ -43,6 +45,7 @@ pub async fn ingest_manual_job_impl(
             "Teks deskripsi lowongan minimal {MIN_MANUAL_JOB_CHARS} karakter."
         )));
     }
+    let capped_text: String = trimmed_text.chars().take(MAX_MANUAL_JOB_CHARS).collect();
 
     let profile = state
         .db
@@ -56,7 +59,7 @@ pub async fn ingest_manual_job_impl(
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .map(str::to_string);
-    let external_id = compute_manual_external_id(clean_url.as_deref(), trimmed_text);
+    let external_id = compute_manual_external_id(clean_url.as_deref(), &capped_text);
 
     // Reuse existing manual job if identical text/URL was already ingested
     if let Some(existing_job_id) = state
@@ -75,7 +78,7 @@ pub async fn ingest_manual_job_impl(
     let known_skills = state.db.get_top_canonical_skills(MAX_KNOWN_SKILLS_CONTEXT)?;
     let extracted = state
         .gemini
-        .extract_job(&api_key, trimmed_text, &known_skills)
+        .extract_job(&api_key, &capped_text, &known_skills)
         .await?;
 
     let title = title_hint
@@ -127,7 +130,7 @@ pub async fn ingest_manual_job_impl(
         location: None,
         work_mode: extracted.work_mode,
         experience_level: extracted.experience_level,
-        raw_description: trimmed_text.to_string(),
+        raw_description: capped_text,
         extracted_summary_json: Some(extracted_json),
         embedding: Some(embedding_bytes),
     };
@@ -171,6 +174,16 @@ pub async fn run_scrape_for_active_keywords_impl(
             "Pilih minimal satu sumber portal lowongan.",
         ));
     }
+    for src in &clean_sources {
+        if !matches!(src.as_str(), "linkedin" | "glints" | "jobstreet") {
+            return Err(AppError::validation_error(format!(
+                "Sumber portal '{src}' tidak didukung. Gunakan: linkedin, glints, atau jobstreet."
+            )));
+        }
+    }
+
+    let _scrape_guard = state.try_acquire_scrape_guard()?;
+    let worker_url = state.get_worker_url();
 
     let worker_req = WorkerScrapeRequest {
         queries,
@@ -178,7 +191,7 @@ pub async fn run_scrape_for_active_keywords_impl(
         location: "Indonesia".to_string(),
         limit_per_query: limit_per_query.clamp(1, 50),
     };
-    let worker_resp = state.worker.scrape(&state.worker_url, &worker_req).await?;
+    let worker_resp = state.worker.scrape(&worker_url, &worker_req).await?;
 
     let total_fetched = worker_resp.jobs.len() as u32;
     let mut newly_ingested = 0u32;
@@ -220,7 +233,7 @@ pub async fn run_scrape_for_active_keywords_impl(
                 failed_extractions += 1;
                 warnings.push(ScrapeWarningItem {
                     source: scraped_job.source.clone(),
-                    code: format!("{:?}", err.code),
+                    code: err.code.as_str().to_string(),
                     message: format!("Gagal ekstraksi '{}': {}", scraped_job.title, err.message),
                 });
                 continue;
@@ -259,7 +272,7 @@ pub async fn run_scrape_for_active_keywords_impl(
             Err(err) => {
                 warnings.push(ScrapeWarningItem {
                     source: scraped_job.source.clone(),
-                    code: format!("{:?}", err.code),
+                    code: err.code.as_str().to_string(),
                     message: format!(
                         "Embedding gagal untuk '{}', skor memakai bobot skill+level: {}",
                         scraped_job.title, err.message
@@ -717,5 +730,109 @@ mod tests {
             .await
             .expect("force refresh");
         assert_eq!(gemini.gap_calls.load(Ordering::SeqCst), 2);
+    }
+
+    #[tokio::test]
+    async fn ingest_manual_job_caps_oversized_raw_text_to_12000_chars() {
+        let gemini = Arc::new(MockGemini::default());
+        let state = build_test_state(
+            Some("AIzaSyTESTKEY1234"),
+            Arc::clone(&gemini),
+            Arc::new(MockWorker::default()),
+        );
+        let user_id = seed_user(&state).await;
+
+        let oversized = "a".repeat(20_000);
+        let detail = ingest_manual_job_impl(
+            &state,
+            user_id,
+            Some("Big JD".into()),
+            None,
+            oversized,
+        )
+        .await
+        .expect("oversized manual JD should be capped and ingested");
+
+        assert_eq!(detail.raw_description.chars().count(), 12_000);
+        let sent_to_gemini = gemini
+            .last_extract_description
+            .lock()
+            .unwrap()
+            .clone()
+            .expect("extract called");
+        assert_eq!(sent_to_gemini.chars().count(), 12_000);
+    }
+
+    #[tokio::test]
+    async fn run_scrape_rejects_unknown_source_emits_screaming_snake_warning_and_blocks_concurrent_run(
+    ) {
+        let gemini = Arc::new(MockGemini::default());
+        let worker = Arc::new(MockWorker::default());
+        *worker.response.lock().unwrap() = Ok(WorkerScrapeResponse {
+            jobs: vec![WorkerScrapedJob {
+                source: "linkedin".into(),
+                external_id: "li-warn-1".into(),
+                url: None,
+                title: "Backend Dev".into(),
+                company: "PT Warn".into(),
+                location: Some("Jakarta".into()),
+                raw_description: "Membangun layanan API menggunakan Rust dan SQLite lokal.".into(),
+            }],
+            stats: WorkerScrapeStats {
+                total_fetched: 1,
+                deduplicated_in_batch: 0,
+                duration_ms: 10,
+            },
+            warnings: vec![],
+        });
+
+        let state = Arc::new(build_test_state(
+            Some("AIzaSyTESTKEY1234"),
+            Arc::clone(&gemini),
+            Arc::clone(&worker),
+        ));
+        let user_id = seed_user(&state).await;
+
+        // 1. Unknown source must be rejected as ValidationError
+        let bad_src_err = run_scrape_for_active_keywords_impl(
+            &state,
+            user_id.clone(),
+            vec!["indeed".into()],
+            5,
+        )
+        .await
+        .expect_err("unknown source must fail");
+        assert_eq!(bad_src_err.code, ErrorCode::ValidationError);
+
+        // 2. Extraction warning code must be SCREAMING_SNAKE_CASE
+        *gemini.fail_extract_error.lock().unwrap() =
+            Some(AppError::gemini_rate_limited("429 from mock"));
+        let report = run_scrape_for_active_keywords_impl(
+            &state,
+            user_id.clone(),
+            vec!["linkedin".into()],
+            5,
+        )
+        .await
+        .expect("scrape completes with warning");
+        assert_eq!(report.failed_extractions, 1);
+        assert_eq!(report.warnings[0].code, "GEMINI_RATE_LIMITED");
+        *gemini.fail_extract_error.lock().unwrap() = None;
+
+        // 3. Concurrent double-click scrape must fail fast with ValidationError
+        worker.scrape_delay_ms.store(120, Ordering::SeqCst);
+        let s1 = Arc::clone(&state);
+        let u1 = user_id.clone();
+        let handle = tokio::spawn(async move {
+            run_scrape_for_active_keywords_impl(&s1, u1, vec!["linkedin".into()], 5).await
+        });
+        tokio::time::sleep(Duration::from_millis(25)).await;
+        let concurrent_err =
+            run_scrape_for_active_keywords_impl(&state, user_id, vec!["linkedin".into()], 5)
+                .await
+                .expect_err("concurrent scrape must be rejected");
+        assert_eq!(concurrent_err.code, ErrorCode::ValidationError);
+        let first_res = handle.await.expect("join").expect("first scrape succeeds");
+        assert_eq!(first_res.newly_ingested, 1);
     }
 }

@@ -14,6 +14,20 @@ pub enum ErrorCode {
     ValidationError,
 }
 
+impl ErrorCode {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::ApiKeyMissing => "API_KEY_MISSING",
+            Self::ApiKeyInvalid => "API_KEY_INVALID",
+            Self::GeminiRateLimited => "GEMINI_RATE_LIMITED",
+            Self::GeminiParseFailed => "GEMINI_PARSE_FAILED",
+            Self::ScraperUnreachable => "SCRAPER_UNREACHABLE",
+            Self::DbError => "DB_ERROR",
+            Self::ValidationError => "VALIDATION_ERROR",
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type, Error)]
 #[error("[{code:?}] {message}")]
 pub struct AppError {

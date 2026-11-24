@@ -34,12 +34,33 @@ pub async fn check_worker_health_impl(
     state: &AppState,
     worker_url: Option<String>,
 ) -> Result<WorkerHealth, AppError> {
-    let url = worker_url
+    let custom = worker_url
         .as_deref()
         .map(str::trim)
         .filter(|s| !s.is_empty())
-        .unwrap_or(&state.worker_url);
-    state.worker.check_health(url).await
+        .map(|s| s.trim_end_matches('/').to_string());
+
+    let target_url = match &custom {
+        Some(url) => {
+            let lower = url.to_lowercase();
+            let rest = lower
+                .strip_prefix("http://")
+                .or_else(|| lower.strip_prefix("https://"));
+            if rest.map(|r| r.is_empty()).unwrap_or(true) {
+                return Err(AppError::validation_error(
+                    "URL Python Scraper Worker harus diawali http:// atau https://.",
+                ));
+            }
+            url.clone()
+        }
+        None => state.get_worker_url(),
+    };
+
+    let health = state.worker.check_health(&target_url).await?;
+    if custom.is_some() {
+        state.set_worker_url(target_url);
+    }
+    Ok(health)
 }
 
 #[tauri::command]
@@ -117,5 +138,36 @@ mod tests {
             .await
             .expect("worker health ok");
         assert_eq!(health.status, "ok");
+    }
+
+    #[tokio::test]
+    async fn check_worker_health_updates_active_worker_url_and_rejects_invalid_scheme() {
+        let worker = Arc::new(MockWorker::default());
+        let state = build_test_state(
+            Some("AIzaSyTEST1234"),
+            Arc::new(MockGemini::default()),
+            Arc::clone(&worker),
+        );
+
+        let bad_err = check_worker_health_impl(&state, Some("ftp://127.0.0.1:8001".into()))
+            .await
+            .expect_err("non-http scheme must be rejected");
+        assert_eq!(bad_err.code, ErrorCode::ValidationError);
+
+        check_worker_health_impl(&state, Some("http://127.0.0.1:8001/".into()))
+            .await
+            .expect("custom http url health ok");
+        assert_eq!(
+            worker.last_health_url.lock().unwrap().as_deref(),
+            Some("http://127.0.0.1:8001")
+        );
+
+        check_worker_health_impl(&state, None)
+            .await
+            .expect("subsequent default check should use updated url");
+        assert_eq!(
+            worker.last_health_url.lock().unwrap().as_deref(),
+            Some("http://127.0.0.1:8001")
+        );
     }
 }

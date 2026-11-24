@@ -129,4 +129,15 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn build_rs_gates_windows_manifest_on_target_env_not_host_cfg() {
+        let build_rs = include_str!("../build.rs");
+        assert!(
+            !build_rs.contains("#[cfg(target_os = \"windows\")]"),
+            "build.rs must check CARGO_CFG_TARGET_OS/ENV, not host #[cfg(target_os)]"
+        );
+        assert!(build_rs.contains("CARGO_CFG_TARGET_OS"));
+        assert!(build_rs.contains("CARGO_CFG_TARGET_ENV"));
+    }
 }

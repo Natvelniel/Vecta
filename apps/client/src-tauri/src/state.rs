@@ -1,20 +1,32 @@
-use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, RwLock};
 
 use crate::core::config::{DEFAULT_WORKER_URL, SCRAPE_GEMINI_PACING_MS};
 use crate::core::db::Database;
 use crate::core::gemini::{GeminiProvider, HttpGeminiClient};
 use crate::core::keychain::{OsKeyringStore, SecretStore};
-use crate::core::matching::{compute_hybrid_match, to_match_upsert};
+use crate::core::matching::{compute_hybrid_matches_batch, to_match_upsert};
 use crate::core::worker::{HttpWorkerClient, WorkerClient};
 use crate::error::AppError;
+
+pub struct ScrapeRunGuard<'a> {
+    flag: &'a AtomicBool,
+}
+
+impl Drop for ScrapeRunGuard<'_> {
+    fn drop(&mut self) {
+        self.flag.store(false, Ordering::SeqCst);
+    }
+}
 
 pub struct AppState {
     pub db: Database,
     pub secrets: Arc<dyn SecretStore>,
     pub gemini: Arc<dyn GeminiProvider>,
     pub worker: Arc<dyn WorkerClient>,
-    pub worker_url: String,
+    worker_url: RwLock<String>,
     pub scrape_pacing_ms: u64,
+    scrape_in_progress: AtomicBool,
 }
 
 impl AppState {
@@ -24,9 +36,35 @@ impl AppState {
             secrets: Arc::new(OsKeyringStore),
             gemini: Arc::new(HttpGeminiClient::new()?),
             worker: Arc::new(HttpWorkerClient::new()?),
-            worker_url: DEFAULT_WORKER_URL.to_string(),
+            worker_url: RwLock::new(DEFAULT_WORKER_URL.to_string()),
             scrape_pacing_ms: SCRAPE_GEMINI_PACING_MS,
+            scrape_in_progress: AtomicBool::new(false),
         })
+    }
+
+    pub fn get_worker_url(&self) -> String {
+        self.worker_url
+            .read()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+    }
+
+    pub fn set_worker_url(&self, url: String) {
+        let mut guard = self.worker_url.write().unwrap_or_else(|e| e.into_inner());
+        *guard = url;
+    }
+
+    pub fn try_acquire_scrape_guard(&self) -> Result<ScrapeRunGuard<'_>, AppError> {
+        self.scrape_in_progress
+            .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+            .map(|_| ScrapeRunGuard {
+                flag: &self.scrape_in_progress,
+            })
+            .map_err(|_| {
+                AppError::validation_error(
+                    "Proses scraping sedang berjalan. Tunggu hingga selesai sebelum menjalankan ulang.",
+                )
+            })
     }
 
     pub fn require_api_key(&self) -> Result<String, AppError> {
@@ -45,10 +83,10 @@ impl AppState {
             return Ok(());
         }
 
+        let computed_all = compute_hybrid_matches_batch(&profile, &jobs);
         let mut upserts = Vec::with_capacity(jobs.len());
-        for job in &jobs {
-            let computed = compute_hybrid_match(&profile, job);
-            upserts.push(to_match_upsert(user_id, &job.job_id, &computed)?);
+        for (job, computed) in jobs.iter().zip(computed_all.iter()) {
+            upserts.push(to_match_upsert(user_id, &job.job_id, computed)?);
         }
         self.db.upsert_job_matches(&upserts)
     }
@@ -56,8 +94,9 @@ impl AppState {
 
 #[cfg(test)]
 pub mod test_support {
-    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
+    use std::time::Duration;
 
     use async_trait::async_trait;
 
@@ -91,6 +130,8 @@ pub mod test_support {
         pub embed_calls: AtomicUsize,
         pub custom_extraction: Mutex<Option<JobExtractionResult>>,
         pub custom_roadmap: Mutex<Option<GeneratedRoadmap>>,
+        pub last_extract_description: Mutex<Option<String>>,
+        pub fail_extract_error: Mutex<Option<AppError>>,
     }
 
     impl Default for MockGemini {
@@ -104,6 +145,8 @@ pub mod test_support {
                 embed_calls: AtomicUsize::new(0),
                 custom_extraction: Mutex::new(None),
                 custom_roadmap: Mutex::new(None),
+                last_extract_description: Mutex::new(None),
+                fail_extract_error: Mutex::new(None),
             }
         }
     }
@@ -121,10 +164,14 @@ pub mod test_support {
         async fn extract_job(
             &self,
             _api_key: &str,
-            _raw_description: &str,
+            raw_description: &str,
             _known_skills: &[String],
         ) -> Result<JobExtractionResult, AppError> {
             self.extract_calls.fetch_add(1, Ordering::SeqCst);
+            *self.last_extract_description.lock().unwrap() = Some(raw_description.to_string());
+            if let Some(err) = self.fail_extract_error.lock().unwrap().clone() {
+                return Err(err);
+            }
             if let Some(custom) = self.custom_extraction.lock().unwrap().clone() {
                 return Ok(custom);
             }
@@ -256,6 +303,9 @@ pub mod test_support {
     pub struct MockWorker {
         pub response: Mutex<Result<WorkerScrapeResponse, AppError>>,
         pub health_ok: bool,
+        pub last_health_url: Mutex<Option<String>>,
+        pub last_scrape_url: Mutex<Option<String>>,
+        pub scrape_delay_ms: AtomicU64,
     }
 
     impl Default for MockWorker {
@@ -271,13 +321,17 @@ pub mod test_support {
                     warnings: vec![],
                 })),
                 health_ok: true,
+                last_health_url: Mutex::new(None),
+                last_scrape_url: Mutex::new(None),
+                scrape_delay_ms: AtomicU64::new(0),
             }
         }
     }
 
     #[async_trait]
     impl WorkerClient for MockWorker {
-        async fn check_health(&self, _base_url: &str) -> Result<WorkerHealth, AppError> {
+        async fn check_health(&self, base_url: &str) -> Result<WorkerHealth, AppError> {
+            *self.last_health_url.lock().unwrap() = Some(base_url.to_string());
             if self.health_ok {
                 Ok(WorkerHealth {
                     status: "ok".into(),
@@ -295,9 +349,14 @@ pub mod test_support {
 
         async fn scrape(
             &self,
-            _base_url: &str,
+            base_url: &str,
             _request: &WorkerScrapeRequest,
         ) -> Result<WorkerScrapeResponse, AppError> {
+            *self.last_scrape_url.lock().unwrap() = Some(base_url.to_string());
+            let delay = self.scrape_delay_ms.load(Ordering::SeqCst);
+            if delay > 0 {
+                tokio::time::sleep(Duration::from_millis(delay)).await;
+            }
             self.response.lock().unwrap().clone()
         }
     }
@@ -312,8 +371,9 @@ pub mod test_support {
             secrets: Arc::new(InMemorySecretStore::new(initial_key.map(str::to_string))),
             gemini,
             worker,
-            worker_url: "http://127.0.0.1:8000".into(),
+            worker_url: std::sync::RwLock::new("http://127.0.0.1:8000".into()),
             scrape_pacing_ms: 0,
+            scrape_in_progress: std::sync::atomic::AtomicBool::new(false),
         }
     }
 }

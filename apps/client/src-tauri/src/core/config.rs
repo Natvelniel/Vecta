@@ -19,4 +19,5 @@ pub const KEYCHAIN_USER: &str = "gemini_api_key";
 
 pub const MIN_STORY_CHARS: usize = 30;
 pub const MIN_MANUAL_JOB_CHARS: usize = 30;
+pub const MAX_MANUAL_JOB_CHARS: usize = 12_000;
 pub const MAX_KNOWN_SKILLS_CONTEXT: usize = 50;

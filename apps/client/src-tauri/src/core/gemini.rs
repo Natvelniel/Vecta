@@ -137,6 +137,8 @@ struct CandidateContent {
 #[derive(Deserialize)]
 struct ContentPart {
     text: Option<String>,
+    #[serde(default)]
+    thought: bool,
 }
 
 #[derive(Deserialize)]
@@ -179,13 +181,18 @@ impl HttpGeminiClient {
         api_key: &str,
         body: Option<&Value>,
     ) -> Result<String, AppError> {
+        let api_key_header = reqwest::header::HeaderValue::from_str(api_key).map_err(|_| {
+            AppError::api_key_invalid(
+                "Format Gemini API Key tidak valid (mengandung karakter tidak sah).",
+            )
+        })?;
         let url = format!("{}{}", self.base_url, path);
 
         for attempt in 0..=GEMINI_MAX_RETRIES {
             let mut req = self
                 .http
                 .request(method.clone(), &url)
-                .header("x-goog-api-key", api_key)
+                .header("x-goog-api-key", api_key_header.clone())
                 .header("content-type", "application/json");
             if let Some(payload) = body {
                 req = req.json(payload);
@@ -211,12 +218,25 @@ impl HttpGeminiClient {
                 return Ok(text);
             }
 
-            if matches!(
-                status,
-                StatusCode::BAD_REQUEST | StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN
-            ) {
+            if matches!(status, StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN) {
                 return Err(AppError::api_key_invalid(
-                    "Gemini API Key tidak valid atau ditolak (HTTP 400/401/403). Periksa kunci Anda di Google AI Studio.",
+                    "Gemini API Key tidak valid atau ditolak (HTTP 401/403). Periksa kunci Anda di Google AI Studio.",
+                ));
+            }
+
+            if status == StatusCode::BAD_REQUEST {
+                let lower = text.to_lowercase();
+                let is_key_error = method == Method::GET
+                    || lower.contains("api_key_invalid")
+                    || lower.contains("api key not valid")
+                    || lower.contains("invalid api key");
+                if is_key_error {
+                    return Err(AppError::api_key_invalid(
+                        "Gemini API Key tidak valid atau ditolak (HTTP 400). Periksa kunci Anda di Google AI Studio.",
+                    ));
+                }
+                return Err(AppError::validation_error(
+                    "Permintaan ke Gemini API ditolak (HTTP 400). Periksa panjang atau format teks input.",
                 ));
             }
 
@@ -290,6 +310,7 @@ impl HttpGeminiClient {
             .into_iter()
             .filter_map(|c| c.content)
             .flat_map(|c| c.parts)
+            .filter(|p| !p.thought)
             .find_map(|p| p.text)
             .ok_or_else(|| {
                 AppError::gemini_parse_failed("Respons Gemini tidak berisi kandidat teks JSON.")
@@ -451,11 +472,11 @@ impl GeminiProvider for HttpGeminiClient {
         let values = parsed
             .embedding
             .map(|e| e.values)
-            .filter(|v| !v.is_empty() && v.iter().all(|x| x.is_finite()))
+            .filter(|v| v.len() == EMBEDDING_DIMENSIONS && v.iter().all(|x| x.is_finite()))
             .ok_or_else(|| {
-                AppError::gemini_parse_failed(
-                    "Respons embedding Gemini kosong atau mengandung nilai non-finite.",
-                )
+                AppError::gemini_parse_failed(format!(
+                    "Respons embedding Gemini tidak valid (harus berisi tepat {EMBEDDING_DIMENSIONS} nilai finite)."
+                ))
             })?;
 
         Ok(values)
@@ -753,5 +774,92 @@ mod tests {
         assert!(!err.retryable);
         assert!(!err.message.contains("AIzaSyINVALIDKEY9999"));
         assert_eq!(count.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn http_client_rejects_invalid_header_api_key_immediately_without_retry() {
+        use std::time::Instant;
+
+        let (url, count, _) = spawn_mock_http_server(vec![]).await;
+        let client = HttpGeminiClient::with_base_url(url, 150).expect("client");
+        let start = Instant::now();
+        let err = client
+            .test_api_key("AIzaSyBAD\nNEWLINEKEY")
+            .await
+            .expect_err("newline in API key must fail fast");
+        assert_eq!(err.code, ErrorCode::ApiKeyInvalid);
+        assert!(!err.retryable);
+        assert_eq!(count.load(Ordering::SeqCst), 0);
+        assert!(
+            start.elapsed().as_millis() < 200,
+            "Invalid header key must not sleep through retry backoff"
+        );
+    }
+
+    #[tokio::test]
+    async fn http_client_maps_non_key_400_on_generate_to_validation_error_not_api_key_invalid() {
+        let (url, count, _) = spawn_mock_http_server(vec![
+            (
+                400,
+                r#"{"error":{"code":400,"message":"Request payload size exceeds the limit","status":"INVALID_ARGUMENT"}}"#
+                    .into(),
+            ),
+            (
+                400,
+                r#"{"error":{"code":400,"message":"API key not valid. Please pass a valid API key.","status":"INVALID_ARGUMENT"}}"#
+                    .into(),
+            ),
+        ])
+        .await;
+        let client = HttpGeminiClient::with_base_url(url, 1).expect("client");
+
+        let payload_err = client
+            .extract_job("AIzaSyVALIDKEY1234", "some long jd", &[])
+            .await
+            .expect_err("non-key 400 must fail");
+        assert_eq!(payload_err.code, ErrorCode::ValidationError);
+
+        let key_err = client
+            .extract_job("AIzaSyBADKEY1234", "some jd", &[])
+            .await
+            .expect_err("API key 400 must fail");
+        assert_eq!(key_err.code, ErrorCode::ApiKeyInvalid);
+        assert_eq!(count.load(Ordering::SeqCst), 2);
+    }
+
+    #[tokio::test]
+    async fn generate_structured_skips_thought_parts_from_gemini_25_flash() {
+        let response_body = serde_json::json!({
+            "candidates": [{
+                "content": {
+                    "parts": [
+                        { "text": "Let me carefully analyze this job description first...", "thought": true },
+                        { "text": r#"{"normalized_role":"Backend Engineer","experience_level":"junior","work_mode":"remote","role_summary":"Membangun REST API.","skills":[]}"# }
+                    ]
+                }
+            }]
+        })
+        .to_string();
+
+        let (url, _, _) = spawn_mock_http_server(vec![(200, response_body)]).await;
+        let client = HttpGeminiClient::with_base_url(url, 1).expect("client");
+        let parsed = client
+            .extract_job("AIzaSyVALIDKEY1234", "Backend Engineer Rust", &[])
+            .await
+            .expect("must skip thought:true part and parse JSON part");
+        assert_eq!(parsed.normalized_role, "Backend Engineer");
+    }
+
+    #[tokio::test]
+    async fn embed_text_rejects_wrong_dimension_vector() {
+        let bad_embed_body =
+            serde_json::json!({ "embedding": { "values": [0.1f32, 0.2, 0.3] } }).to_string();
+        let (url, _, _) = spawn_mock_http_server(vec![(200, bad_embed_body)]).await;
+        let client = HttpGeminiClient::with_base_url(url, 1).expect("client");
+        let err = client
+            .embed_text("AIzaSyVALIDKEY1234", "Rust", EmbeddingTaskType::RetrievalQuery)
+            .await
+            .expect_err("wrong embedding dimension must fail");
+        assert_eq!(err.code, ErrorCode::GeminiParseFailed);
     }
 }

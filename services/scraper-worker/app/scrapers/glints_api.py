@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 import httpx
@@ -6,6 +7,37 @@ from app.config import WorkerSettings
 from app.pipeline.cleaner import clean_html_description, make_deterministic_external_id
 from app.pipeline.schemas import ScrapedJob, SourceName
 from app.scrapers.base import BaseScraper, ScraperError
+
+
+def _extract_glints_description(item: dict[str, Any], max_chars: int) -> str:
+    raw_value = item.get("descriptionJsonString") or item.get("description")
+    if not isinstance(raw_value, str) or not raw_value.strip():
+        return ""
+
+    stripped = raw_value.strip()
+    if stripped.startswith("{"):
+        try:
+            parsed = json.loads(stripped)
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, dict) and isinstance(parsed.get("blocks"), list):
+            lines: list[str] = []
+            for block in parsed["blocks"]:
+                if not isinstance(block, dict):
+                    continue
+                text = str(block.get("text") or "").strip()
+                if not text:
+                    continue
+                block_type = str(block.get("type") or "")
+                if block_type in {"unordered-list-item", "ordered-list-item"}:
+                    lines.append(f"- {text}")
+                else:
+                    lines.append(text)
+            if lines:
+                return clean_html_description("\n".join(lines), max_chars=max_chars)
+            return ""
+
+    return clean_html_description(stripped, max_chars=max_chars)
 
 _GLINTS_GRAPHQL_URL = "https://glints.com/api/v2-cms/graphql"
 _GLINTS_SEARCH_QUERY = """
@@ -84,23 +116,42 @@ class GlintsApiScraper(BaseScraper):
             )
 
         try:
-            body: dict[str, Any] = response.json()
-            items = body.get("data", {}).get("searchJobsV3", {}).get("jobsInPage") or []
+            body: Any = response.json()
         except Exception as exc:  # noqa: BLE001
             raise ScraperError(
                 "PARSE_ERROR", f"Respons JSON Glints tidak dapat diparsing: {exc}"
             ) from exc
 
+        if not isinstance(body, dict):
+            raise ScraperError("PARSE_ERROR", "Respons JSON Glints bukan objek.")
+
+        errors = body.get("errors")
+        if errors:
+            first_msg = (
+                errors[0].get("message")
+                if isinstance(errors, list) and errors and isinstance(errors[0], dict)
+                else str(errors)
+            )
+            raise ScraperError(
+                "UPSTREAM_ERROR",
+                f"Glints GraphQL mengembalikan error untuk query '{query}': {first_msg}",
+            )
+
+        data_node = body.get("data") or {}
+        search_node = data_node.get("searchJobsV3") if isinstance(data_node, dict) else None
+        items = (search_node.get("jobsInPage") if isinstance(search_node, dict) else None) or []
+
         jobs: list[ScrapedJob] = []
         for item in items[:limit]:
+            if not isinstance(item, dict):
+                continue
             title = str(item.get("title") or "").strip()
             company = str((item.get("company") or {}).get("name") or "Unknown Company").strip()
             city = str((item.get("city") or {}).get("name") or "").strip()
             country = str((item.get("country") or {}).get("name") or location).strip()
             job_location = ", ".join(part for part in (city, country) if part) or location
-            raw_desc = clean_html_description(
-                str(item.get("descriptionJsonString") or item.get("description") or title),
-                max_chars=self._settings.max_description_chars,
+            raw_desc = _extract_glints_description(
+                item, max_chars=self._settings.max_description_chars
             )
             if not title or not raw_desc:
                 continue
