@@ -2,6 +2,11 @@
 
 **Local-First Universal Career Intelligence OS for Desktop & Mobile**
 
+[![Latest Release](https://img.shields.io/github/v/release/Natvelniel/Vecta?label=Download%20Vecta&color=3B6AF0)](https://github.com/Natvelniel/Vecta/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+> **Download Installer (Windows x64, 100% Offline AI Included):** Get the ready-to-install `.exe` setup, `.msi` installer, or portable `.zip` directly from [GitHub Releases](https://github.com/Natvelniel/Vecta/releases/latest). No Python setup and no API key required.
+
 Vecta is a privacy-first career platform built with **Tauri 2.0, Rust, SQLite WAL, and Vue 3** that helps job seekers across **all 14 Indonesian academic and professional domains** discover relevant vacancies, measure honest skill gaps, avoid recruitment scams, export tailored ATS-friendly PDF resumes, track applications, and follow structured learning roadmaps.
 
 Core discovery, PDF CV import, multi-portal scraping, cross-domain skill matching, 101-language semantic embeddings, scam/red-flag detection, and 1-click ATS PDF export run **100% locally on your device with zero API keys and zero cloud lock-in**. Optional generative workflows (Cover Note Copilot, deep Gap Analysis, Learning Roadmaps) support **BYOK (Bring Your Own Key)** via Google Gemini API with built-in batching and Free-Tier RPM protection.

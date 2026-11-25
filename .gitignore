@@ -1,5 +1,6 @@
 # Rust / Tauri
 /target/
+/release-local/
 apps/client/src-tauri/target/
 **/*.rs.bk
 /*.exe
