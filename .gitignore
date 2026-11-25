@@ -37,4 +37,10 @@ services/scraper-worker/.venv/
 .opencode/
 .superpowers/
 graphify-out/
+
+# Internal Docs & Specs (local only)
 product_requirements_document_prd_vecta.md
+PRODUCT.md
+VECTA_DESIGN_SYSTEM.md
+docs/audits/
+docs/superpowers/

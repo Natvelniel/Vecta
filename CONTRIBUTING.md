@@ -36,7 +36,7 @@ Guidelines for adding skills:
 ## 2. Code & UI Contributions
 
 1. Fork the repository and create a topic branch from `Development` (or `main`).
-2. Follow the design system tokens in `VECTA_DESIGN_SYSTEM.md` for all Vue 3 UI changes.
+2. Follow the CSS design tokens in `apps/client/src/styles/tokens.css` for all Vue 3 UI changes.
 3. Run all verification checks locally before submitting a pull request:
    ```bash
    cargo test --workspace

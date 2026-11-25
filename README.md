@@ -73,7 +73,6 @@ Vecta/
 ├── scripts/
 │   └── fetch_offline_ai_model.py      # Reproducible builder for the 124 MB INT8 offline AI model
 ├── docs/
-│   ├── audits/                        # Security, system, and UI audit reports
 │   └── mobile-build-guide.md          # Tauri 2.0 Android & iOS cross-compilation guide
 ├── LICENSE                            # MIT License
 ├── SECURITY.md                        # Local-first security & privacy model
