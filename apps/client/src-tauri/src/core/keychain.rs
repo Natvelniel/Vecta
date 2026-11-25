@@ -80,14 +80,35 @@ impl SecretStore for OsKeyringStore {
 }
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
+fn mobile_session_key() -> &'static Mutex<Option<String>> {
+    static MOBILE_KEY: std::sync::OnceLock<Mutex<Option<String>>> = std::sync::OnceLock::new();
+    MOBILE_KEY.get_or_init(|| Mutex::new(None))
+}
+
+#[cfg(any(target_os = "android", target_os = "ios"))]
 impl SecretStore for OsKeyringStore {
     fn get_api_key(&self) -> Result<Option<String>, AppError> {
-        Ok(None)
+        let guard = mobile_session_key()
+            .lock()
+            .map_err(|_| AppError::db_error("SecretStore mutex poisoned"))?;
+        Ok(guard.clone())
     }
-    fn set_api_key(&self, _key: &str) -> Result<(), AppError> {
+    fn set_api_key(&self, key: &str) -> Result<(), AppError> {
+        let trimmed = key.trim();
+        if trimmed.is_empty() {
+            return Err(AppError::validation_error("API Key tidak boleh kosong."));
+        }
+        let mut guard = mobile_session_key()
+            .lock()
+            .map_err(|_| AppError::db_error("SecretStore mutex poisoned"))?;
+        *guard = Some(trimmed.to_string());
         Ok(())
     }
     fn delete_api_key(&self) -> Result<(), AppError> {
+        let mut guard = mobile_session_key()
+            .lock()
+            .map_err(|_| AppError::db_error("SecretStore mutex poisoned"))?;
+        *guard = None;
         Ok(())
     }
 }

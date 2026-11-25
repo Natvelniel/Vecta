@@ -5,7 +5,10 @@
 [![Latest Release](https://img.shields.io/github/v/release/Natvelniel/Vecta?label=Download%20Vecta&color=3B6AF0)](https://github.com/Natvelniel/Vecta/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **Download Installer (Windows x64, 100% Offline AI Included):** Get the ready-to-install `.exe` setup, `.msi` installer, or portable `.zip` directly from [GitHub Releases](https://github.com/Natvelniel/Vecta/releases/latest). No Python setup and no API key required.
+> **Download Ready-to-Install Packages:**
+> - **Windows x64 (100% Offline AI Included):** Download `.exe` setup, `.msi`, or portable `.zip` from [GitHub Releases](https://github.com/Natvelniel/Vecta/releases/latest).
+> - **Android (`arm64-v8a`):** Download the signed `.apk` directly on your phone from [GitHub Releases](https://github.com/Natvelniel/Vecta/releases/latest), tap to install (no ZIP extraction required).
+> - Zero Python setup and zero API keys required for core features.
 
 Vecta is a privacy-first career platform built with **Tauri 2.0, Rust, SQLite WAL, and Vue 3** that helps job seekers across **all 14 Indonesian academic and professional domains** discover relevant vacancies, measure honest skill gaps, avoid recruitment scams, export tailored ATS-friendly PDF resumes, track applications, and follow structured learning roadmaps.
 

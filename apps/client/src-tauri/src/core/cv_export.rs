@@ -12,6 +12,10 @@ use crate::models::cv::{
 
 const ATS_CLASSIC_TEMPLATE: &str =
     include_str!("../../../../../shared/templates/ats_classic.typ");
+const EMBEDDED_FONT_REGULAR: &[u8] =
+    include_bytes!("../../resources/fonts/LiberationSans-Regular.ttf");
+const EMBEDDED_FONT_BOLD: &[u8] =
+    include_bytes!("../../resources/fonts/LiberationSans-Bold.ttf");
 
 #[derive(Serialize)]
 struct AtsTemplateLabels {
@@ -64,18 +68,10 @@ fn load_bundled_fonts(font_dirs: &[PathBuf]) -> Vec<Vec<u8>> {
         }
     }
 
-    // Safe Windows / Linux system fallback if resource fonts aren't present during unit tests
+    // Embedded open-source ATS fonts fallback (guarantees 100% offline PDF export on Android/iOS/desktop)
     if loaded.is_empty() {
-        for sys_path in [
-            r"C:\Windows\Fonts\arial.ttf",
-            r"C:\Windows\Fonts\arialbd.ttf",
-            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        ] {
-            if let Ok(bytes) = std::fs::read(sys_path) {
-                loaded.push(bytes);
-            }
-        }
+        loaded.push(EMBEDDED_FONT_REGULAR.to_vec());
+        loaded.push(EMBEDDED_FONT_BOLD.to_vec());
     }
     loaded
 }

@@ -102,6 +102,10 @@ pub fn run() {
             }
             resource_dirs.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources"));
 
+            #[cfg(target_os = "android")]
+            let export_dir = data_dir.join("Vecta_CVs");
+
+            #[cfg(not(target_os = "android"))]
             let export_dir = app
                 .path()
                 .document_dir()

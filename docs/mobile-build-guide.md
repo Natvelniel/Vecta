@@ -31,6 +31,18 @@ npm.cmd run tauri android init
 npm.cmd run tauri android build -- --apk --target aarch64
 ```
 
-Perkiraan ukuran hasil build Android (`arm64-v8a`, termasuk model multilingual offline 101 bahasa ~142 MB + font ATS):
-- **Full Offline APK (`arm64-v8a`):** ~155 - 170 MB (bekerja 100% offline tanpa internet maupun API key).
-- **Play Store AAB (tanpa bundle model, unduh model via Play Asset Delivery):** ~14 - 18 MB unduhan awal.
+Perkiraan ukuran hasil build Android (`arm64-v8a`):
+- **Click-to-Install Release APK (`arm64-v8a`, via GitHub Actions `release.yml`):** ~25 - 35 MB (ringan untuk unduhan jaringan seluler, tanpa perlu ekstrak ZIP; mencakup taksonomi 14 domain, scraper Rust 5 portal, red-flag scam detector, import CV PDF, dan ekspor PDF ATS Typst dengan font tertanam).
+- **Full Offline APK dengan model 101-bahasa (build lokal opsional):** ~155 - 170 MB jika menyertakan `resources/models/potion-m128-i8/`.
+
+## Automated Signed APK via GitHub Actions
+
+Workflow `.github/workflows/release.yml` otomatis membangun dan menandatangani file `Vecta_<tag>_android_arm64.apk` di runner `ubuntu-latest` setiap kali tag `v*` di-push.
+
+Untuk memastikan update versi berikutnya dapat di-install menimpa versi lama (in-place upgrade) tanpa uninstall terlebih dahulu, tambahkan 4 GitHub Repository Secrets berikut di **Settings -> Secrets and variables -> Actions**:
+- `ANDROID_KEYSTORE_BASE64` (keystore `.jks` dalam format Base64)
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+Jika 4 secrets tersebut belum diisi, CI tetap menghasilkan APK signed yang valid agar pengguna Android bisa langsung klik dan install.

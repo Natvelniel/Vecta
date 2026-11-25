@@ -1,6 +1,6 @@
 [package]
 name = "vecta"
-version = "0.3.0"
+version = "0.3.1"
 description = "Vecta local-first AI career intelligence core engine"
 authors = ["Vecta"]
 edition = "2021"
