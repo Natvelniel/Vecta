@@ -36,3 +36,4 @@ services/scraper-worker/.venv/
 .opencode/
 .superpowers/
 graphify-out/
+product_requirements_document_prd_vecta.md
