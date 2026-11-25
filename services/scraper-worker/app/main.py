@@ -1,3 +1,4 @@
+import logging
 import time
 from collections.abc import Mapping
 
@@ -16,10 +17,12 @@ from app.pipeline.schemas import (
 )
 from app.scrapers.base import BaseScraper, ScraperError
 from app.scrapers.glints_api import GlintsApiScraper
+from app.scrapers.indeed_scraper import IndeedScraper
 from app.scrapers.jobstreet_api import JobStreetApiScraper
 from app.scrapers.linkedin_guest import LinkedInGuestScraper
 
-_AVAILABLE_SOURCES: list[SourceName] = ["linkedin", "glints", "jobstreet"]
+logger = logging.getLogger(__name__)
+_AVAILABLE_SOURCES: list[SourceName] = ["linkedin", "jobstreet", "indeed", "glints"]
 
 
 def create_app(
@@ -32,8 +35,9 @@ def create_app(
         if scrapers is not None
         else {
             "linkedin": LinkedInGuestScraper(cfg),
-            "glints": GlintsApiScraper(cfg),
             "jobstreet": JobStreetApiScraper(cfg),
+            "indeed": IndeedScraper(cfg),
+            "glints": GlintsApiScraper(cfg),
         }
     )
 
@@ -74,18 +78,24 @@ def create_app(
                         query=trimmed,
                         location=request.location,
                         limit=request.limit_per_query,
+                        max_pages=request.max_pages,
+                        posted_within_days=request.posted_within_days,
+                        work_mode=request.work_mode,
                     )
                     collected.extend(fetched)
                 except ScraperError as exc:
                     warnings.append(
                         ScrapeWarning(source=source, code=exc.code, message=exc.message)
                     )
-                except Exception as exc:  # noqa: BLE001
+                except Exception:  # noqa: BLE001
+                    logger.exception(
+                        "Unexpected scraper error on source=%s query=%s", source, trimmed
+                    )
                     warnings.append(
                         ScrapeWarning(
                             source=source,
                             code="UNEXPECTED_ERROR",
-                            message=f"Kesalahan tak terduga pada sumber '{source}' untuk query '{trimmed}': {exc}",
+                            message=f"Terjadi kesalahan internal sementara saat mengambil lowongan dari '{source}'.",
                         )
                     )
 

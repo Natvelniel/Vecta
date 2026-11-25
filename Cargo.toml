@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/vecta-taxonomy",
+    "apps/client/src-tauri",
+]
+
+[profile.release]
+opt-level = "z"
+lto = "thin"
+codegen-units = 1
+strip = true

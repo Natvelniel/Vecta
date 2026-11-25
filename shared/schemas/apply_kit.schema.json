@@ -1,0 +1,20 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "language": {
+      "type": "STRING",
+      "enum": ["id", "en"]
+    },
+    "tailored_headline": { "type": "STRING" },
+    "cv_bullets": {
+      "type": "ARRAY",
+      "items": { "type": "STRING" }
+    },
+    "cover_note": { "type": "STRING" },
+    "interview_angles": {
+      "type": "ARRAY",
+      "items": { "type": "STRING" }
+    }
+  },
+  "required": ["language", "tailored_headline", "cv_bullets", "cover_note", "interview_angles"]
+}

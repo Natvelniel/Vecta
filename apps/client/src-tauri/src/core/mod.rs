@@ -1,6 +1,12 @@
 pub mod config;
+pub mod cv_export;
+pub mod cv_import;
 pub mod db;
 pub mod gemini;
 pub mod keychain;
+pub mod local_embedder;
+pub mod local_matcher;
 pub mod matching;
+pub mod native_scraper;
+pub mod rate_limiter;
 pub mod worker;

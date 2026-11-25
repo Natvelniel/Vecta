@@ -1,0 +1,116 @@
+/* ============================================================================
+   VECTA DESIGN SYSTEM TOKENS (Authoritative Source: VECTA_DESIGN_SYSTEM.md)
+   Theme: Obsidian Navy x Cobalt Blue (Dark-First)
+   ============================================================================ */
+
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/satoshi-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/satoshi-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/satoshi-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Satoshi";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/satoshi-700.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: dark;
+
+  /* BRAND */
+  --brand-primary: #4169E1;
+  --brand-hover: #6F8FFF;
+  --brand-active: #3154C5;
+  --brand-soft: #243B75;
+
+  /* BACKGROUNDS */
+  --bg-primary: #111827;
+  --bg-secondary: #172235;
+  --bg-elevated: #1A2333;
+  --bg-hover: #243249;
+
+  /* BORDERS */
+  --border-default: #2C3A50;
+  --border-divider: #263449;
+  --border-input: #5D708E;
+
+  /* TEXT */
+  --text-primary: #E8EDF5;
+  --text-secondary: #98A6BA;
+  --text-muted: #68788F;
+
+  /* SEMANTIC */
+  --status-success: #34C38F;
+  --status-warning: #F0B85A;
+  --status-error: #F07178;
+  --status-info: #55A6E8;
+
+  /* AI (strictly reserved for AI-specific interactions) */
+  --ai-accent: #9B8CFA;
+
+  /* DERIVED TRANSLUCENT TINTS */
+  --ai-soft: rgba(155, 140, 250, 0.12);
+  --ai-border: rgba(155, 140, 250, 0.28);
+  --success-soft: rgba(52, 195, 143, 0.12);
+  --warning-soft: rgba(240, 184, 90, 0.12);
+  --warning-border: rgba(240, 184, 90, 0.28);
+  --error-soft: rgba(240, 113, 120, 0.12);
+  --error-border: rgba(240, 113, 120, 0.30);
+  --info-soft: rgba(85, 166, 232, 0.12);
+  --brand-border: rgba(111, 143, 255, 0.32);
+
+  /* TYPOGRAPHY */
+  --font-primary: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* SPACING (4px scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* RADIUS (6 / 10 / 15 / 20 / 9999) */
+  --radius-sm: 6px;
+  --radius-control: 10px;
+  --radius-card: 15px;
+  --radius-dialog: 20px;
+  --radius-full: 9999px;
+
+  /* MOTION TIMINGS (Section 10.1) */
+  --dur-press: 100ms;
+  --dur-hover: 150ms;
+  --dur-dropdown: 180ms;
+  --dur-dialog: 220ms;
+  --dur-page: 220ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-state: ease-in-out;
+
+  /* SELECTIVE OVERLAY SHADOW */
+  --shadow-overlay: 0 20px 48px rgba(4, 8, 18, 0.58);
+}

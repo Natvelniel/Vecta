@@ -4,7 +4,11 @@ from typing import Any
 import httpx
 
 from app.config import WorkerSettings
-from app.pipeline.cleaner import clean_html_description, make_deterministic_external_id
+from app.pipeline.cleaner import (
+    clean_html_description,
+    make_deterministic_external_id,
+    sanitize_external_url,
+)
 from app.pipeline.schemas import ScrapedJob, SourceName
 from app.scrapers.base import BaseScraper, ScraperError
 
@@ -70,7 +74,17 @@ class GlintsApiScraper(BaseScraper):
     def __init__(self, settings: WorkerSettings) -> None:
         self._settings = settings
 
-    async def scrape(self, query: str, location: str, limit: int) -> list[ScrapedJob]:
+    async def scrape(
+        self,
+        query: str,
+        location: str,
+        limit: int,
+        *,
+        max_pages: int = 1,
+        posted_within_days: int | None = None,
+        work_mode: str = "any",
+    ) -> list[ScrapedJob]:
+        _ = (max_pages, posted_within_days, work_mode)
         headers = {
             "User-Agent": self._settings.user_agent,
             "Accept": "application/json",
@@ -162,7 +176,9 @@ class GlintsApiScraper(BaseScraper):
                 if raw_id
                 else make_deterministic_external_id(self.source_name, company, title, job_location)
             )
-            url = f"https://glints.com/id/opportunities/jobs/{raw_id}" if raw_id else None
+            url = sanitize_external_url(
+                f"https://glints.com/id/opportunities/jobs/{raw_id}" if raw_id else None
+            )
 
             jobs.append(
                 ScrapedJob(

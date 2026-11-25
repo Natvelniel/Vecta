@@ -60,7 +60,7 @@ pub async fn generate_learning_roadmap_impl(
 
     if missing_skill_names.is_empty() {
         let msg = if clean_source_job_id.is_some() {
-            "Tidak ada skill gap untuk lowongan ini — Anda sudah menguasai seluruh skill yang terdeteksi.".to_string()
+            "Tidak ada skill gap untuk lowongan ini: Anda sudah menguasai seluruh skill yang terdeteksi.".to_string()
         } else {
             format!(
                 "Tidak ada skill gap untuk peran '{role}'. Pastikan sudah ada lowongan untuk peran tersebut atau Anda sudah menguasai seluruh skill utamanya."

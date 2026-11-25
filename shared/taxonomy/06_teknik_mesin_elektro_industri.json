@@ -1,0 +1,11 @@
+[
+  {"id":"eng.solidworks","canonical_name":"SolidWorks & Mechanical CAD","domain":"teknik_mesin_elektro_industri","category":"tools_tech","aliases":["SolidWorks","Autodesk Inventor","CATIA","Fusion 360","ANSYS","CAD/CAM"]},
+  {"id":"eng.plc_scada","canonical_name":"PLC & Otomasi Industri","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["PLC","SCADA","HMI","Siemens PLC","Omron","Mitsubishi PLC","Otomasi Industri","Instrumentasi","Mikrokontroler","Arduino","ESP32"]},
+  {"id":"eng.elektrikal","canonical_name":"Teknik Elektro & Arus Kuat","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["Electrical Engineering","Panel Listrik","Wiring Diagram","Instalasi Listrik","MEP","HVAC","Chiller","Genset","Inverter"]},
+  {"id":"eng.maintenance","canonical_name":"Maintenance & Reliability","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["Preventive Maintenance","Corrective Maintenance","Troubleshooting Mesin","TPM","Total Productive Maintenance","Perawatan Mesin","Hydraulics","Pneumatics"]},
+  {"id":"eng.k3_hse","canonical_name":"K3 / HSE","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["AK3U","Ahli K3 Umum","K3 Umum","K3 Kemnaker","HSE","OHS","SMK3","HIRADC","JSA","Safety Officer","Keselamatan Kerja"]},
+  {"id":"eng.iso_qms","canonical_name":"ISO 9001 / 14001 / 45001","domain":"teknik_mesin_elektro_industri","category":"domain","aliases":["ISO 9001","ISO 14001","ISO 45001","IATF 16949","Quality Management System","QMS","Audit Internal ISO"]},
+  {"id":"eng.lean_six_sigma","canonical_name":"Lean Manufacturing & Six Sigma","domain":"teknik_mesin_elektro_industri","category":"domain","aliases":["Lean Manufacturing","Six Sigma","Kaizen","5S","5R","Continuous Improvement","Root Cause Analysis","FMEA","Time Motion Study"]},
+  {"id":"eng.qc_qa_mfg","canonical_name":"Quality Control & Assurance (Manufaktur)","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["Quality Control","In-Process QC","Incoming QC","Kalibrasi Alat Ukur","Vernier Caliper","Mikrometer","SPC","Statistical Process Control"]},
+  {"id":"eng.welding_cnc","canonical_name":"CNC, Fabrikasi & Pengelasan","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["CNC","Mesin Bubut","Welding","Pengelasan","NDT","Piping","Proses Manufaktur"]}
+]

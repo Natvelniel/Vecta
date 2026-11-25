@@ -4,11 +4,13 @@ pub mod error;
 pub mod models;
 pub mod state;
 
+use std::path::PathBuf;
+
 use specta_typescript::Typescript;
 use tauri::Manager;
 use tauri_specta::{collect_commands, Builder, ErrorHandlingMode};
 
-use crate::commands::{competency, jobs, profile, roadmap, settings};
+use crate::commands::{competency, cv, jobs, profile, roadmap, settings};
 use crate::core::db::Database;
 use crate::state::AppState;
 
@@ -17,24 +19,40 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         .error_handling(ErrorHandlingMode::Result)
         .dangerously_cast_bigints_to_number()
         .commands(collect_commands![
-        // Settings (4)
+        // Settings & Offline AI (9)
         settings::get_api_key_status,
         settings::save_and_test_api_key,
         settings::delete_api_key,
         settings::check_worker_health,
+        settings::get_search_preferences,
+        settings::save_search_preferences,
+        settings::get_local_ai_status,
+        settings::get_scraper_mode,
+        settings::set_scraper_mode,
         // Profile & Keywords (5)
         profile::parse_user_story,
         profile::save_confirmed_profile,
         profile::get_active_profile,
         profile::toggle_scrape_keyword,
         profile::add_custom_keyword,
-        // Jobs & Gap Analysis (6)
+        // CV Import, Master CV & ATS PDF Export (5)
+        cv::import_cv_pdf,
+        cv::parse_story_local,
+        cv::get_master_cv,
+        cv::save_master_cv,
+        cv::export_tailored_ats_pdf,
+        // Jobs, Decoupled AI Queue, Tracker & Apply Copilot (11)
         jobs::ingest_manual_job,
         jobs::run_scrape_for_active_keywords,
+        jobs::scrape_and_store_jobs,
+        jobs::run_ai_matching_queue,
+        jobs::enrich_job_with_ai,
         jobs::list_ranked_jobs,
         jobs::get_job_detail,
         jobs::toggle_save_job,
+        jobs::update_job_application,
         jobs::generate_gap_analysis,
+        jobs::generate_apply_kit,
         // Competency Map (2)
         competency::list_available_roles,
         competency::get_competency_map,
@@ -61,6 +79,7 @@ pub fn run() {
         .expect("Failed to export TypeScript bindings");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
@@ -70,7 +89,27 @@ pub fn run() {
                 .expect("failed to resolve Tauri app_data_dir");
             let db_path = data_dir.join("vecta.db");
             let db = Database::open(&db_path).expect("failed to initialize Vecta SQLite database");
-            let state = AppState::production(db).expect("failed to initialize Vecta AppState");
+
+            let mut resource_dirs: Vec<PathBuf> = Vec::new();
+            if let Ok(res_dir) = app.path().resource_dir() {
+                resource_dirs.push(res_dir.join("resources"));
+                resource_dirs.push(res_dir);
+            }
+            if let Ok(exe) = std::env::current_exe() {
+                if let Some(parent) = exe.parent() {
+                    resource_dirs.push(parent.join("resources"));
+                }
+            }
+            resource_dirs.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources"));
+
+            let export_dir = app
+                .path()
+                .document_dir()
+                .unwrap_or_else(|_| data_dir.clone())
+                .join("Vecta_CVs");
+
+            let state = AppState::production(db, resource_dirs, export_dir)
+                .expect("failed to initialize Vecta AppState");
             app.manage(state);
             Ok(())
         })
@@ -85,7 +124,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn export_typescript_bindings_contains_all_22_commands() {
+    fn export_typescript_bindings_contains_all_v3_commands() {
         let bindings_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("../src/lib/bindings.ts");
 
@@ -101,17 +140,32 @@ mod tests {
             "save_and_test_api_key",
             "delete_api_key",
             "check_worker_health",
+            "get_search_preferences",
+            "save_search_preferences",
+            "get_local_ai_status",
+            "get_scraper_mode",
+            "set_scraper_mode",
             "parse_user_story",
             "save_confirmed_profile",
             "get_active_profile",
             "toggle_scrape_keyword",
             "add_custom_keyword",
+            "import_cv_pdf",
+            "parse_story_local",
+            "get_master_cv",
+            "save_master_cv",
+            "export_tailored_ats_pdf",
             "ingest_manual_job",
             "run_scrape_for_active_keywords",
+            "scrape_and_store_jobs",
+            "run_ai_matching_queue",
+            "enrich_job_with_ai",
             "list_ranked_jobs",
             "get_job_detail",
             "toggle_save_job",
+            "update_job_application",
             "generate_gap_analysis",
+            "generate_apply_kit",
             "list_available_roles",
             "get_competency_map",
             "generate_learning_roadmap",
@@ -121,7 +175,7 @@ mod tests {
             "quick_add_user_skill",
         ];
 
-        assert_eq!(expected_commands.len(), 22);
+        assert_eq!(expected_commands.len(), 37);
         for cmd in expected_commands {
             assert!(
                 content.contains(cmd),

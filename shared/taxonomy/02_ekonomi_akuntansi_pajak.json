@@ -1,0 +1,18 @@
+[
+  {"id":"fin.akuntansi","canonical_name":"Akuntansi","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Accounting","Akuntansi Keuangan","Financial Accounting","General Ledger","Jurnal Umum","Pembukuan","Bookkeeping"]},
+  {"id":"fin.psak","canonical_name":"PSAK / IFRS","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["PSAK","IFRS","SAK ETAP","SAK EMKM","Standar Akuntansi"]},
+  {"id":"fin.laporan_keuangan","canonical_name":"Laporan Keuangan","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["Financial Statement","Financial Reporting","Neraca","Laba Rugi","Arus Kas","Cash Flow"]},
+  {"id":"fin.perpajakan","canonical_name":"Perpajakan","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Taxation","Tax Compliance","PPh 21","PPh 23","PPh 25","PPh Badan","PPN","SPT Tahunan","SPT Masa","Pajak"]},
+  {"id":"fin.brevet_ab","canonical_name":"Brevet Pajak A & B","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.perpajakan","aliases":["Brevet A","Brevet B","Brevet A/B","Brevet AB","Brevet Pajak","Tax Brevet"]},
+  {"id":"fin.efaktur","canonical_name":"e-Faktur & e-Bupot","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.perpajakan","aliases":["e-Faktur","e-Bupot","e-SPT","Coretax","DJP Online"]},
+  {"id":"fin.accurate","canonical_name":"Accurate Accounting","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.akuntansi","aliases":["Accurate","Accurate Online"]},
+  {"id":"fin.zahir","canonical_name":"Zahir / Jurnal.id","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.akuntansi","aliases":["Zahir","Zahir Accounting","Jurnal.id","Mekari Jurnal","MYOB","Xero","QuickBooks"]},
+  {"id":"fin.sap_fico","canonical_name":"SAP FICO","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.akuntansi","aliases":["SAP FI","SAP CO","SAP Finance"]},
+  {"id":"fin.audit","canonical_name":"Audit Keuangan & Internal","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Internal Audit","External Audit","Audit Keuangan","Financial Audit","Auditing"],"requires_domain_context":true},
+  {"id":"fin.ap_ar","canonical_name":"Accounts Payable & Receivable","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["Accounts Payable","Accounts Receivable","Invoicing","Rekonsiliasi Bank","Bank Reconciliation","Piutang","Hutang Dagang"]},
+  {"id":"fin.budgeting","canonical_name":"Budgeting & Forecasting","domain":"ekonomi_akuntansi_pajak","category":"domain","aliases":["Budgeting","Financial Planning","FP&A","Forecasting","Penganggaran","Cost Control"]},
+  {"id":"fin.financial_analysis","canonical_name":"Analisis Keuangan","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Financial Analysis","Financial Modeling","Analisis Rasio Keuangan","Valuasi","Valuation"]},
+  {"id":"fin.credit_analysis","canonical_name":"Analisis Kredit & Risiko","domain":"ekonomi_akuntansi_pajak","category":"domain","aliases":["Credit Analysis","Analis Kredit","Risk Management","Manajemen Risiko","Underwriting","KYC","AML"]},
+  {"id":"fin.cost_accounting","canonical_name":"Akuntansi Biaya","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["Cost Accounting","HPP","COGS","Harga Pokok Produksi"]},
+  {"id":"fin.treasury","canonical_name":"Treasury & Cash Management","domain":"ekonomi_akuntansi_pajak","category":"domain","aliases":["Treasury","Cash Management","Kasir","Petty Cash","Kas Kecil"]}
+]

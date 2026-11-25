@@ -1,5 +1,6 @@
 import hashlib
 import re
+from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
@@ -7,6 +8,22 @@ from app.pipeline.schemas import ScrapedJob
 
 _HORIZONTAL_SPACES = re.compile(r"[ \t\r\f\v]+")
 _BLOCK_TAGS = ("p", "div", "section", "article", "h1", "h2", "h3", "h4", "h5", "h6", "br", "tr")
+
+
+def sanitize_external_url(raw_url: str | None) -> str | None:
+    """Allow only absolute http/https URLs with a valid network host; reject all other schemes."""
+    if not raw_url:
+        return None
+    trimmed = raw_url.strip()
+    if not trimmed:
+        return None
+    try:
+        parsed = urlparse(trimmed)
+    except ValueError:
+        return None
+    if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+        return None
+    return trimmed
 
 
 def clean_html_description(raw_html: str, max_chars: int = 12_000) -> str:

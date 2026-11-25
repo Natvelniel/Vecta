@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+use crate::core::native_scraper::quality::{JobRedFlag, PortalLinkRef};
 use crate::models::profile::{ExperienceLevel, SkillCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -9,6 +10,9 @@ pub enum JobSource {
     Linkedin,
     Glints,
     Jobstreet,
+    Indeed,
+    Kalibrr,
+    Dealls,
     Manual,
 }
 
@@ -18,6 +22,9 @@ impl JobSource {
             Self::Linkedin => "linkedin",
             Self::Glints => "glints",
             Self::Jobstreet => "jobstreet",
+            Self::Indeed => "indeed",
+            Self::Kalibrr => "kalibrr",
+            Self::Dealls => "dealls",
             Self::Manual => "manual",
         }
     }
@@ -27,7 +34,71 @@ impl JobSource {
             "linkedin" => Self::Linkedin,
             "glints" => Self::Glints,
             "jobstreet" => Self::Jobstreet,
+            "indeed" => Self::Indeed,
+            "kalibrr" => Self::Kalibrr,
+            "dealls" => Self::Dealls,
             _ => Self::Manual,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum EnrichmentStatus {
+    LocalOnly,
+    AiEnriched,
+}
+
+impl EnrichmentStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::LocalOnly => "local_only",
+            Self::AiEnriched => "ai_enriched",
+        }
+    }
+
+    pub fn from_db_str(s: &str) -> Self {
+        match s {
+            "local_only" => Self::LocalOnly,
+            _ => Self::AiEnriched,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum ApplicationStatus {
+    New,
+    Saved,
+    Applied,
+    Interview,
+    Offer,
+    Rejected,
+    Dismissed,
+}
+
+impl ApplicationStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::New => "new",
+            Self::Saved => "saved",
+            Self::Applied => "applied",
+            Self::Interview => "interview",
+            Self::Offer => "offer",
+            Self::Rejected => "rejected",
+            Self::Dismissed => "dismissed",
+        }
+    }
+
+    pub fn from_db_str(s: &str) -> Self {
+        match s {
+            "saved" => Self::Saved,
+            "applied" => Self::Applied,
+            "interview" => Self::Interview,
+            "offer" => Self::Offer,
+            "rejected" => Self::Rejected,
+            "dismissed" => Self::Dismissed,
+            _ => Self::New,
         }
     }
 }
@@ -132,6 +203,15 @@ pub struct GapAnalysis {
     pub cv_tailoring_tips: Vec<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct ApplyKitResult {
+    pub language: String,
+    pub tailored_headline: String,
+    pub cv_bullets: Vec<String>,
+    pub cover_note: String,
+    pub interview_angles: Vec<String>,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
 pub struct JobFilterInput {
     pub normalized_role: Option<String>,
@@ -140,6 +220,14 @@ pub struct JobFilterInput {
     pub saved_only: Option<bool>,
     pub min_score: Option<f64>,
     pub search_query: Option<String>,
+    #[serde(default)]
+    pub location_query: Option<String>,
+    #[serde(default)]
+    pub enrichment_status: Option<EnrichmentStatus>,
+    #[serde(default)]
+    pub application_status: Option<ApplicationStatus>,
+    #[serde(default)]
+    pub include_dismissed: Option<bool>,
     pub limit: Option<u32>,
     pub offset: Option<u32>,
 }
@@ -163,6 +251,13 @@ pub struct JobMatchSummary {
     pub location: Option<String>,
     pub work_mode: WorkMode,
     pub experience_level: ExperienceLevel,
+    pub enrichment_status: EnrichmentStatus,
+    pub posted_at: Option<String>,
+    pub salary_text: Option<String>,
+    pub domain_slug: String,
+    pub quality_score: f64,
+    pub red_flags_count: u32,
+    pub also_available_on: Vec<PortalLinkRef>,
     pub vector_score: f64,
     pub skill_overlap_score: f64,
     pub level_score: f64,
@@ -171,6 +266,8 @@ pub struct JobMatchSummary {
     pub missing_skills_count: u32,
     pub has_gap_analysis: bool,
     pub is_saved: bool,
+    pub application_status: ApplicationStatus,
+    pub applied_at: Option<String>,
     pub scraped_at: String,
 }
 
@@ -186,6 +283,13 @@ pub struct JobMatchDetail {
     pub location: Option<String>,
     pub work_mode: WorkMode,
     pub experience_level: ExperienceLevel,
+    pub enrichment_status: EnrichmentStatus,
+    pub posted_at: Option<String>,
+    pub salary_text: Option<String>,
+    pub domain_slug: String,
+    pub quality_score: f64,
+    pub red_flags: Vec<JobRedFlag>,
+    pub also_available_on: Vec<PortalLinkRef>,
     pub raw_description: String,
     pub role_summary: Option<String>,
     pub vector_score: f64,
@@ -195,7 +299,11 @@ pub struct JobMatchDetail {
     pub matched_skills: Vec<JobMatchSkillRef>,
     pub missing_skills: Vec<JobMatchSkillRef>,
     pub ai_gap_analysis: Option<GapAnalysis>,
+    pub ai_apply_kit: Option<ApplyKitResult>,
     pub is_saved: bool,
+    pub application_status: ApplicationStatus,
+    pub applied_at: Option<String>,
+    pub user_notes: Option<String>,
     pub scraped_at: String,
 }
 
@@ -212,5 +320,55 @@ pub struct ScrapeRunReport {
     pub newly_ingested: u32,
     pub skipped_duplicates: u32,
     pub failed_extractions: u32,
+    pub pending_local_count: u32,
     pub warnings: Vec<ScrapeWarningItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct AiMatchRunReport {
+    pub processed_jobs: u32,
+    pub enriched_jobs: u32,
+    pub failed_jobs: u32,
+    pub remaining_local_jobs: u32,
+    pub api_calls_used: u32,
+    pub warnings: Vec<ScrapeWarningItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct SearchPreferences {
+    pub location: String,
+    pub sources: Vec<String>,
+    pub limit_per_query: u32,
+    pub max_pages: u32,
+    pub posted_within_days: Option<u32>,
+    pub work_mode: String,
+    pub custom_queries: Vec<String>,
+    pub ai_enrich_enabled: bool,
+    pub ai_enrich_max_jobs: u32,
+    pub ai_rpm_limit: u32,
+}
+
+impl Default for SearchPreferences {
+    fn default() -> Self {
+        Self {
+            location: "Indonesia".into(),
+            sources: vec!["jobstreet".into(), "linkedin".into(), "indeed".into()],
+            limit_per_query: 25,
+            max_pages: 2,
+            posted_within_days: Some(14),
+            work_mode: "any".into(),
+            custom_queries: vec![],
+            ai_enrich_enabled: false,
+            ai_enrich_max_jobs: 15,
+            ai_rpm_limit: 10,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct ScrapeProgressEvent {
+    pub stage: String,
+    pub message: String,
+    pub current: u32,
+    pub total: u32,
 }

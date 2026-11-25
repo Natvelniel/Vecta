@@ -101,6 +101,14 @@ mod tests {
                         raw_description: "desc".into(),
                         extracted_summary_json: None,
                         embedding: None,
+                        enrichment_status: crate::models::job::EnrichmentStatus::AiEnriched,
+                        posted_at: None,
+                        salary_text: None,
+                        domain_slug: "informatika_data".into(),
+                        quality_score: 1.0,
+                        red_flags_json: "[]".into(),
+                        also_available_on_json: "[]".into(),
+                        embedding_model: None,
                     },
                     &[
                         ExtractedJobSkill {

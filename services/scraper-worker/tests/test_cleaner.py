@@ -4,6 +4,7 @@ from app.pipeline.cleaner import (
     clean_html_description,
     deduplicate_jobs,
     make_deterministic_external_id,
+    sanitize_external_url,
 )
 from app.pipeline.schemas import ScrapedJob
 
@@ -104,3 +105,14 @@ def test_deduplicate_jobs_preserves_order_and_counts_duplicates() -> None:
     assert len(unique) == 2
     assert unique[0].raw_description == "Role A"
     assert unique[1].source == "glints"
+
+
+def test_sanitize_external_url_allows_only_http_and_https() -> None:
+    assert sanitize_external_url("https://linkedin.com/jobs/1") == "https://linkedin.com/jobs/1"
+    assert sanitize_external_url("  http://glints.com/job/2  ") == "http://glints.com/job/2"
+    assert sanitize_external_url("javascript:alert(1)") is None
+    assert sanitize_external_url("file:///etc/passwd") is None
+    assert sanitize_external_url("data:text/html,hi") is None
+    assert sanitize_external_url("https://") is None
+    assert sanitize_external_url("   ") is None
+    assert sanitize_external_url(None) is None

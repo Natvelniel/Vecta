@@ -1,0 +1,6 @@
+[
+  {"id":"hos.front_office","canonical_name":"Front Office & Hotel PMS","domain":"pariwisata_perhotelan_fnb","category":"core_hard","aliases":["Front Office","Receptionist","Guest Relations","Opera PMS","VHP","Visual Hotel Program","Check-in Check-out","Reservasi Hotel"]},
+  {"id":"hos.housekeeping","canonical_name":"Housekeeping & Operasional Hotel","domain":"pariwisata_perhotelan_fnb","category":"core_hard","aliases":["Housekeeping","Room Attendant","Hotel Operations","Hospitality Management","Laundry Operations"]},
+  {"id":"hos.fnb","canonical_name":"Food & Beverage Service & Culinary","domain":"pariwisata_perhotelan_fnb","category":"core_hard","aliases":["F&B Service","F&B Management","Food & Beverage","Culinary","Pastry","Bakery","Barista","Kitchen Management","Food Cost","POS Kasir"]},
+  {"id":"hos.event","canonical_name":"Event Management & MICE","domain":"pariwisata_perhotelan_fnb","category":"domain","aliases":["Event Management","Event Organizer","MICE","Tour Leader","Ticketing","Travel Consultant","Sabre","Amadeus"]}
+]

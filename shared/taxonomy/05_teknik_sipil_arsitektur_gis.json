@@ -1,0 +1,12 @@
+[
+  {"id":"civ.autocad","canonical_name":"AutoCAD","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["AutoCAD 2D","AutoCAD 3D","Civil 3D","Drafting CAD"]},
+  {"id":"civ.revit","canonical_name":"Revit & BIM","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["Revit","Autodesk Revit","BIM","Building Information Modeling","Navisworks"]},
+  {"id":"civ.etabs","canonical_name":"ETABS","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","parent_id":"civ.analisis_struktur","aliases":[]},
+  {"id":"civ.sap2000","canonical_name":"SAP2000","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","parent_id":"civ.analisis_struktur","aliases":["Tekla","Tekla Structures","STAAD.Pro","Plaxis"]},
+  {"id":"civ.analisis_struktur","canonical_name":"Analisis Struktur Sipil","domain":"teknik_sipil_arsitektur_gis","category":"core_hard","aliases":["Structural Analysis","Structural Engineering","Perencanaan Struktur","Beton Bertulang","Struktur Baja","Geoteknik"]},
+  {"id":"civ.sketchup","canonical_name":"SketchUp & Rendering 3D","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["SketchUp","V-Ray","Lumion","Enscape","3ds Max","ArchiCAD"]},
+  {"id":"civ.rab","canonical_name":"RAB & Quantity Surveying","domain":"teknik_sipil_arsitektur_gis","category":"core_hard","aliases":["RAB","Rencana Anggaran Biaya","BoQ","Bill of Quantity","Quantity Surveyor","Estimasi Biaya Konstruksi","AHSP","Tender Konstruksi"]},
+  {"id":"civ.manajemen_konstruksi","canonical_name":"Manajemen Konstruksi","domain":"teknik_sipil_arsitektur_gis","category":"domain","aliases":["Construction Management","Site Engineering","Pengawasan Proyek","Shop Drawing","As-Built Drawing","Kurva S","MS Project","Primavera P6"]},
+  {"id":"civ.gis","canonical_name":"GIS & Pemetaan","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["ArcGIS","QGIS","Sistem Informasi Geografis","Remote Sensing","Penginderaan Jauh","Total Station","Theodolite","Surveyor Pemetaan","Topografi"]},
+  {"id":"civ.arsitektur","canonical_name":"Perancangan Arsitektur & Interior","domain":"teknik_sipil_arsitektur_gis","category":"core_hard","aliases":["Desain Arsitektur","Desain Interior","Interior Design","Gambar Kerja","DED","Detail Engineering Design","Urban Planning","PWK"]}
+]

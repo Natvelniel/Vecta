@@ -1,0 +1,12 @@
+[
+  {"id":"des.figma","canonical_name":"Figma","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Figma Prototyping","Design System"]},
+  {"id":"des.uiux","canonical_name":"UI/UX Design","domain":"komunikasi_desain_media","category":"core_hard","aliases":["UI/UX","UI Design","UX Design","UX Research","Product Design","Wireframing","Usability Testing"]},
+  {"id":"des.photoshop","canonical_name":"Adobe Photoshop","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Photoshop"]},
+  {"id":"des.illustrator","canonical_name":"Adobe Illustrator","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Illustrator","CorelDraw","CorelDRAW"]},
+  {"id":"des.premiere","canonical_name":"Adobe Premiere Pro & Video Editing","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Premiere Pro","Video Editing","CapCut","DaVinci Resolve","Final Cut Pro"]},
+  {"id":"des.after_effects","canonical_name":"After Effects & Motion Graphics","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["After Effects","Motion Graphics","Animasi 2D","Animasi 3D","Blender"]},
+  {"id":"des.canva","canonical_name":"Canva & Desain Grafis","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Canva","Desain Grafis","Graphic Design","Visual Design","Layouting","InDesign","Branding Visual"]},
+  {"id":"des.fotografi","canonical_name":"Fotografi & Videografi","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Fotografi","Photography","Videografi","Videography","Lighting","Produksi Konten"]},
+  {"id":"des.pr","canonical_name":"Public Relations & Corporate Comm","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Public Relations","Corporate Communication","Media Relations","Press Release","Siaran Pers","Crisis Communication","Hubungan Masyarakat"]},
+  {"id":"des.jurnalistik","canonical_name":"Jurnalistik & Editorial","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Jurnalistik","Journalism","Editorial","Proofreading","News Writing","Broadcasting","MC / Public Speaking"]}
+]

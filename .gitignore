@@ -1,6 +1,12 @@
 # Rust / Tauri
+/target/
 apps/client/src-tauri/target/
 **/*.rs.bk
+/*.exe
+
+# Offline AI binary weights (reproducible via `python scripts/fetch_offline_ai_model.py`, >100MB GitHub limit)
+apps/client/src-tauri/resources/models/*
+!apps/client/src-tauri/resources/models/.gitkeep
 
 # Frontend / Node
 apps/client/node_modules/
@@ -21,6 +27,12 @@ services/scraper-worker/.venv/
 .env
 .env.*
 
-# Agent & Tooling Scratch
+# Local Agent & IDE Tooling
+.agent/
+.agents/
+.claude/
+.gemini/
+.impeccable/
+.opencode/
 .superpowers/
 graphify-out/

@@ -1,0 +1,6 @@
+[
+  {"id":"sci.hplc","canonical_name":"HPLC / GC-MS & Analisis Instrumen","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["HPLC","GC-MS","GCMS","AAS","ICP-OES","FTIR","Spektrofotometri UV-Vis","Kromatografi","Titrasi"]},
+  {"id":"sci.lab_iso","canonical_name":"Pengujian Laboratorium (ISO 17025)","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["ISO 17025","ISO/IEC 17025","Good Laboratory Practice","GLP","Analis Kimia","Analis Laboratorium","Mikrobiologi Lab","Validasi Metode"]},
+  {"id":"sci.statistik","canonical_name":"Statistika & SPSS / R","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["SPSS","Minitab","Stata","RStudio","R Programming","Bahasa R","Statistika","Statistics","Ekonometrika","Analisis Regresi","Uji Hipotesis"]},
+  {"id":"sci.geologi","canonical_name":"Geologi, Pertambangan & Energi","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["Pemetaan Geologi","Geologi Eksplorasi","Mine Plan","Surpac","Minescape","Micromine","Geofisika","Reservoir Engineering","Teknik Perminyakan","Energi Terbarukan","PLTS"]}
+]

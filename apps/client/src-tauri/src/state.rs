@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock};
 
@@ -5,9 +6,15 @@ use crate::core::config::{DEFAULT_WORKER_URL, SCRAPE_GEMINI_PACING_MS};
 use crate::core::db::Database;
 use crate::core::gemini::{GeminiProvider, HttpGeminiClient};
 use crate::core::keychain::{OsKeyringStore, SecretStore};
+use crate::core::local_embedder::LocalEmbedder;
 use crate::core::matching::{compute_hybrid_matches_batch, to_match_upsert};
-use crate::core::worker::{HttpWorkerClient, WorkerClient};
+use crate::core::native_scraper::NativeScraperClient;
+use crate::core::rate_limiter::RpmRateLimiter;
+use crate::core::worker::{validate_worker_url, HttpWorkerClient, WorkerClient};
 use crate::error::AppError;
+
+const SETTING_WORKER_URL: &str = "worker_url";
+const SETTING_SCRAPER_MODE: &str = "scraper_mode";
 
 pub struct ScrapeRunGuard<'a> {
     flag: &'a AtomicBool,
@@ -24,22 +31,92 @@ pub struct AppState {
     pub secrets: Arc<dyn SecretStore>,
     pub gemini: Arc<dyn GeminiProvider>,
     pub worker: Arc<dyn WorkerClient>,
+    pub native_scraper: Arc<dyn WorkerClient>,
+    pub local_embedder: Arc<LocalEmbedder>,
+    pub rpm_limiter: Arc<RpmRateLimiter>,
+    pub font_dirs: Vec<PathBuf>,
+    pub export_dir: PathBuf,
     worker_url: RwLock<String>,
+    scraper_mode: RwLock<String>,
     pub scrape_pacing_ms: u64,
     scrape_in_progress: AtomicBool,
 }
 
 impl AppState {
-    pub fn production(db: Database) -> Result<Self, AppError> {
+    pub fn production(
+        db: Database,
+        resource_dirs: Vec<PathBuf>,
+        export_dir: PathBuf,
+    ) -> Result<Self, AppError> {
+        let initial_worker_url = db
+            .get_app_setting(SETTING_WORKER_URL)
+            .ok()
+            .flatten()
+            .and_then(|saved| validate_worker_url(&saved).ok())
+            .unwrap_or_else(|| DEFAULT_WORKER_URL.to_string());
+
+        let initial_mode = db
+            .get_app_setting(SETTING_SCRAPER_MODE)
+            .ok()
+            .flatten()
+            .filter(|m| matches!(m.as_str(), "native_rust" | "python_worker"))
+            .unwrap_or_else(|| "native_rust".to_string());
+
+        let model_dirs: Vec<PathBuf> = resource_dirs
+            .iter()
+            .map(|r| r.join("models").join("potion-m128-i8"))
+            .collect();
+        let font_dirs: Vec<PathBuf> = resource_dirs
+            .iter()
+            .map(|r| r.join("fonts"))
+            .collect();
+
+        let local_embedder = Arc::new(LocalEmbedder::discover_and_load(&model_dirs));
+
         Ok(Self {
             db,
             secrets: Arc::new(OsKeyringStore),
             gemini: Arc::new(HttpGeminiClient::new()?),
             worker: Arc::new(HttpWorkerClient::new()?),
-            worker_url: RwLock::new(DEFAULT_WORKER_URL.to_string()),
+            native_scraper: Arc::new(NativeScraperClient::new()?),
+            local_embedder,
+            rpm_limiter: Arc::new(RpmRateLimiter::default()),
+            font_dirs,
+            export_dir,
+            worker_url: RwLock::new(initial_worker_url),
+            scraper_mode: RwLock::new(initial_mode),
             scrape_pacing_ms: SCRAPE_GEMINI_PACING_MS,
             scrape_in_progress: AtomicBool::new(false),
         })
+    }
+
+    pub fn get_scraper_mode(&self) -> String {
+        self.scraper_mode
+            .read()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+    }
+
+    pub fn set_scraper_mode(&self, mode: &str) -> Result<String, AppError> {
+        let clean = match mode.trim().to_lowercase().as_str() {
+            "python_worker" => "python_worker",
+            _ => "native_rust",
+        };
+        self.db.set_app_setting(SETTING_SCRAPER_MODE, clean)?;
+        let mut guard = self
+            .scraper_mode
+            .write()
+            .unwrap_or_else(|e| e.into_inner());
+        *guard = clean.to_string();
+        Ok(clean.to_string())
+    }
+
+    pub fn active_scraper(&self) -> &Arc<dyn WorkerClient> {
+        if self.get_scraper_mode() == "python_worker" {
+            &self.worker
+        } else {
+            &self.native_scraper
+        }
     }
 
     pub fn get_worker_url(&self) -> String {
@@ -49,9 +126,12 @@ impl AppState {
             .clone()
     }
 
-    pub fn set_worker_url(&self, url: String) {
+    pub fn set_worker_url(&self, url: String) -> Result<(), AppError> {
+        let validated = validate_worker_url(&url)?;
+        self.db.set_app_setting(SETTING_WORKER_URL, &validated)?;
         let mut guard = self.worker_url.write().unwrap_or_else(|e| e.into_inner());
-        *guard = url;
+        *guard = validated;
+        Ok(())
     }
 
     pub fn try_acquire_scrape_guard(&self) -> Result<ScrapeRunGuard<'_>, AppError> {
@@ -102,16 +182,18 @@ pub mod test_support {
 
     use crate::core::db::Database;
     use crate::core::gemini::{
-        EmbeddingTaskType, GapAnalysisPromptInput, GeminiProvider, RoadmapPromptInput,
+        ApplyKitPromptInput, BatchJobExtractionItem, BatchJobInput, EmbeddingTaskType,
+        GapAnalysisPromptInput, GeminiProvider, RoadmapPromptInput,
     };
     use crate::core::keychain::InMemorySecretStore;
+    use crate::core::rate_limiter::RpmRateLimiter;
     use crate::core::worker::{
         WorkerClient, WorkerScrapeRequest, WorkerScrapeResponse, WorkerScrapeStats,
     };
     use crate::error::AppError;
     use crate::models::job::{
-        ExtractedJobSkill, GapAnalysis, GapSeverity, JobExtractionResult, PrioritizedGap,
-        RequirementType, WorkMode,
+        ApplyKitResult, ExtractedJobSkill, GapAnalysis, GapSeverity, JobExtractionResult,
+        PrioritizedGap, RequirementType, WorkMode,
     };
     use crate::models::profile::{
         ExperienceLevel, ExtractedSkillDraft, FitType, Proficiency, RecommendedKeywordDraft,
@@ -197,6 +279,29 @@ pub mod test_support {
             })
         }
 
+        async fn extract_jobs_batch(
+            &self,
+            api_key: &str,
+            jobs: &[BatchJobInput],
+            known_skills: &[String],
+        ) -> Result<Vec<BatchJobExtractionItem>, AppError> {
+            let mut out = Vec::with_capacity(jobs.len());
+            for item in jobs {
+                let one = self
+                    .extract_job(api_key, &item.raw_description, known_skills)
+                    .await?;
+                out.push(BatchJobExtractionItem {
+                    job_id: item.job_id.clone(),
+                    normalized_role: one.normalized_role,
+                    experience_level: one.experience_level,
+                    work_mode: one.work_mode,
+                    role_summary: one.role_summary,
+                    skills: one.skills,
+                });
+            }
+            Ok(out)
+        }
+
         async fn analyze_gap(
             &self,
             _api_key: &str,
@@ -212,6 +317,26 @@ pub mod test_support {
                     reason: "Dipakai untuk orkestrasi layanan".into(),
                 }],
                 cv_tailoring_tips: vec!["Sorot benchmark matching < 100ms".into()],
+            })
+        }
+
+        async fn generate_apply_kit(
+            &self,
+            _api_key: &str,
+            context: &ApplyKitPromptInput,
+        ) -> Result<ApplyKitResult, AppError> {
+            Ok(ApplyKitResult {
+                language: context.language.clone(),
+                tailored_headline: format!("Kandidat {} berfokus pada hasil nyata", context.job_role),
+                cv_bullets: vec![
+                    format!("Mengembangkan sistem backend sesuai kebutuhan {}.", context.job_company),
+                    "Menjaga kualitas kode dengan pengujian otomatis dan dokumentasi jelas.".into(),
+                ],
+                cover_note: format!(
+                    "Halo Tim Rekrutmen {}, saya tertarik melamar posisi {}.",
+                    context.job_company, context.job_title
+                ),
+                interview_angles: vec!["Arsitektur backend & optimasi query database".into()],
             })
         }
 
@@ -298,6 +423,16 @@ pub mod test_support {
             self.embed_calls.fetch_add(1, Ordering::SeqCst);
             Ok(vec![0.1f32; 768])
         }
+
+        async fn embed_texts_batch(
+            &self,
+            _api_key: &str,
+            texts: &[String],
+            _task_type: EmbeddingTaskType,
+        ) -> Result<Vec<Vec<f32>>, AppError> {
+            self.embed_calls.fetch_add(1, Ordering::SeqCst);
+            Ok(texts.iter().map(|_| vec![0.1f32; 768]).collect())
+        }
     }
 
     pub struct MockWorker {
@@ -366,12 +501,21 @@ pub mod test_support {
         gemini: Arc<MockGemini>,
         worker: Arc<MockWorker>,
     ) -> AppState {
+        let font_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("resources")
+            .join("fonts");
         AppState {
             db: Database::open_in_memory().expect("in-memory db"),
             secrets: Arc::new(InMemorySecretStore::new(initial_key.map(str::to_string))),
             gemini,
-            worker,
+            worker: Arc::clone(&worker) as Arc<dyn WorkerClient>,
+            native_scraper: worker as Arc<dyn WorkerClient>,
+            local_embedder: Arc::new(crate::core::local_embedder::LocalEmbedder::empty()),
+            rpm_limiter: Arc::new(RpmRateLimiter::new(Duration::from_millis(1))),
+            font_dirs: vec![font_dir],
+            export_dir: std::env::temp_dir().join("vecta_test_exports"),
             worker_url: std::sync::RwLock::new("http://127.0.0.1:8000".into()),
+            scraper_mode: std::sync::RwLock::new("native_rust".into()),
             scrape_pacing_ms: 0,
             scrape_in_progress: std::sync::atomic::AtomicBool::new(false),
         }

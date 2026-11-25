@@ -1,0 +1,55 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "results": {
+      "type": "ARRAY",
+      "items": {
+        "type": "OBJECT",
+        "properties": {
+          "job_id": { "type": "STRING" },
+          "normalized_role": { "type": "STRING" },
+          "experience_level": {
+            "type": "STRING",
+            "enum": ["intern", "junior", "mid", "senior", "unknown"]
+          },
+          "work_mode": {
+            "type": "STRING",
+            "enum": ["onsite", "hybrid", "remote", "unknown"]
+          },
+          "role_summary": { "type": "STRING" },
+          "skills": {
+            "type": "ARRAY",
+            "items": {
+              "type": "OBJECT",
+              "properties": {
+                "canonical_name": { "type": "STRING" },
+                "category": {
+                  "type": "STRING",
+                  "enum": ["core_hard", "tools_tech", "soft_skill", "domain"]
+                },
+                "requirement_type": {
+                  "type": "STRING",
+                  "enum": ["mandatory", "nice_to_have"]
+                },
+                "matched_aliases": {
+                  "type": "ARRAY",
+                  "items": { "type": "STRING" }
+                }
+              },
+              "required": ["canonical_name", "category", "requirement_type"]
+            }
+          }
+        },
+        "required": [
+          "job_id",
+          "normalized_role",
+          "experience_level",
+          "work_mode",
+          "role_summary",
+          "skills"
+        ]
+      }
+    }
+  },
+  "required": ["results"]
+}

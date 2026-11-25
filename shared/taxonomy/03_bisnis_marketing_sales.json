@@ -1,0 +1,16 @@
+[
+  {"id":"mkt.digital_marketing","canonical_name":"Digital Marketing","domain":"bisnis_marketing_sales","category":"domain","aliases":["Pemasaran Digital","Online Marketing","Performance Marketing","Growth Marketing"]},
+  {"id":"mkt.seo","canonical_name":"SEO","domain":"bisnis_marketing_sales","category":"core_hard","parent_id":"mkt.digital_marketing","aliases":["Search Engine Optimization","On-Page SEO","Off-Page SEO","Ahrefs","SEMrush"]},
+  {"id":"mkt.sem","canonical_name":"SEM & Google Ads","domain":"bisnis_marketing_sales","category":"tools_tech","parent_id":"mkt.digital_marketing","aliases":["SEM","Google Ads","Google AdWords","Google Analytics","GA4"]},
+  {"id":"mkt.meta_ads","canonical_name":"Meta Ads & TikTok Ads","domain":"bisnis_marketing_sales","category":"tools_tech","parent_id":"mkt.digital_marketing","aliases":["Meta Ads","Facebook Ads","FB Ads","Instagram Ads","IG Ads","TikTok Ads","TikTok Shop","Shopee Ads"]},
+  {"id":"mkt.social_media","canonical_name":"Social Media Management","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["Social Media Marketing","Social Media Specialist","Manajemen Media Sosial","Content Calendar","Community Management"]},
+  {"id":"mkt.copywriting","canonical_name":"Copywriting","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["Content Writing","Penulisan Konten","UX Writing","Scriptwriting"]},
+  {"id":"mkt.brand_management","canonical_name":"Brand Management","domain":"bisnis_marketing_sales","category":"domain","aliases":["Brand Strategy","Marketing Campaign","Campaign Management","Brand Activation"]},
+  {"id":"mkt.ecommerce","canonical_name":"E-Commerce & Marketplace","domain":"bisnis_marketing_sales","category":"domain","aliases":["Marketplace Management","Shopee","Tokopedia","Lazada","Live Streaming Commerce","E-Commerce Operations"]},
+  {"id":"mkt.market_research","canonical_name":"Riset Pasar","domain":"bisnis_marketing_sales","category":"domain","aliases":["Market Research","Consumer Insight","Competitor Analysis","Riset Pemasaran"]},
+  {"id":"mkt.b2b_sales","canonical_name":"B2B Sales & Akuisisi Klien","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["B2B Sales","Sales Executive","Account Executive","Lead Generation","Cold Calling","Canvassing","Penjualan"]},
+  {"id":"mkt.business_dev","canonical_name":"Business Development","domain":"bisnis_marketing_sales","category":"domain","aliases":["Pengembangan Bisnis","Partnership","Kemitraan Strategis","Pitching"]},
+  {"id":"mkt.account_mgmt","canonical_name":"Account Management","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["Key Account Management","Client Relationship","Customer Retention","After Sales"]},
+  {"id":"mkt.crm","canonical_name":"CRM","domain":"bisnis_marketing_sales","category":"tools_tech","aliases":["Salesforce","HubSpot","Zoho CRM","Customer Relationship Management"],"requires_domain_context":true},
+  {"id":"mkt.merchandiser","canonical_name":"Merchandising & Retail","domain":"bisnis_marketing_sales","category":"domain","aliases":["Visual Merchandising","Retail Management","Store Operations","Trade Marketing"]}
+]

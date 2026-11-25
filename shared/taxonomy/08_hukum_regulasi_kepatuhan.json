@@ -1,0 +1,9 @@
+[
+  {"id":"leg.drafting","canonical_name":"Legal Drafting & Review Kontrak","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Legal Drafting","Contract Drafting","Contract Review","Perancangan Kontrak","Perjanjian Kerja Sama","MoU","NDA","SLA"]},
+  {"id":"leg.opinion","canonical_name":"Legal Opinion & Riset Hukum","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Legal Opinion","Legal Research","Riset Hukum","Pendapat Hukum","Due Diligence","Legal Audit"]},
+  {"id":"leg.perizinan","canonical_name":"Perizinan Usaha & OSS/NIB","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["OSS","OSS RBA","NIB","Perizinan Usaha","Corporate Legal","RUPS","Akta Perusahaan","AHU Online"]},
+  {"id":"leg.litigasi","canonical_name":"Litigasi & Penyelesaian Sengketa","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Litigasi","Litigation","Advokat","PERADI","PKPA","Somasi","Mediasi","Arbitrase","Hukum Acara"]},
+  {"id":"leg.kepatuhan","canonical_name":"Kepatuhan & Regulasi (Compliance)","domain":"hukum_regulasi_kepatuhan","category":"domain","aliases":["Compliance","Regulatory Compliance","Kepatuhan OJK","Kepatuhan BI","UU PDP","Perlindungan Data Pribadi","GCG","Good Corporate Governance"]},
+  {"id":"leg.hki","canonical_name":"Hak Kekayaan Intelektual (HKI)","domain":"hukum_regulasi_kepatuhan","category":"domain","aliases":["HKI","Hak Cipta","Merek Dagang","Paten","Intellectual Property","DJKI"]},
+  {"id":"leg.notaris","canonical_name":"Kenotariatan & Pertanahan (PPAT)","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Notaris","PPAT","Hukum Agraria","Sertifikat Tanah","BPN","Akta Jual Beli","AJB","Hukum Perbankan"]}
+]

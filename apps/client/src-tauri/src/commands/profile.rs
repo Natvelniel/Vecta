@@ -38,7 +38,6 @@ pub async fn save_confirmed_profile_impl(
         ));
     }
 
-    let api_key = state.require_api_key()?;
     let skill_pairs: Vec<(String, String)> = input
         .skills
         .iter()
@@ -51,15 +50,24 @@ pub async fn save_confirmed_profile_impl(
         &skill_pairs,
     );
 
-    let embedding_vec = state
-        .gemini
-        .embed_text(&api_key, &embed_input, EmbeddingTaskType::RetrievalQuery)
-        .await?;
-    let embedding_bytes = encode_embedding(&embedding_vec);
+    // Zero-API-key ready: use Gemini embedding if BYOK key exists, otherwise compute offline multilingual embedding locally.
+    let embedding_bytes = match state.require_api_key() {
+        Ok(api_key) => {
+            let embedding_vec = state
+                .gemini
+                .embed_text(&api_key, &embed_input, EmbeddingTaskType::RetrievalQuery)
+                .await?;
+            Some(encode_embedding(&embedding_vec))
+        }
+        Err(_) => state
+            .local_embedder
+            .embed_one(&embed_input)
+            .map(|v| encode_embedding(&v)),
+    };
 
     let saved = state
         .db
-        .save_profile_atomic(&input, Some(&embedding_bytes))?;
+        .save_profile_atomic(&input, embedding_bytes.as_deref())?;
     state.recalculate_all_matches_for_user(&saved.id)?;
     Ok(saved)
 }
@@ -216,6 +224,14 @@ mod tests {
                         raw_description: "Rust SQLite API".into(),
                         extracted_summary_json: None,
                         embedding: Some(job_emb.clone()),
+                        enrichment_status: crate::models::job::EnrichmentStatus::AiEnriched,
+                        posted_at: None,
+                        salary_text: None,
+                        domain_slug: "informatika_data".into(),
+                        quality_score: 1.0,
+                        red_flags_json: "[]".into(),
+                        also_available_on_json: "[]".into(),
+                        embedding_model: None,
                     },
                     &[ExtractedJobSkill {
                         canonical_name: "Rust".into(),

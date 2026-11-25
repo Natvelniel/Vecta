@@ -1,5 +1,5 @@
 pub const GEMINI_BASE_URL: &str = "https://generativelanguage.googleapis.com/v1beta";
-pub const GEMINI_GENERATION_MODEL: &str = "gemini-2.5-flash";
+pub const GEMINI_GENERATION_MODEL: &str = "gemini-3.5-flash-lite";
 pub const GEMINI_EMBEDDING_MODEL: &str = "gemini-embedding-001";
 pub const EMBEDDING_DIMENSIONS: usize = 768;
 

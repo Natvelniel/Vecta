@@ -1,0 +1,10 @@
+[
+  {"id":"hlt.cpob","canonical_name":"CPOB / CPOTB / CDOB","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["CPOB","CPOTB","CDOB","Cara Pembuatan Obat yang Baik","GMP Farmasi","GDP Farmasi"]},
+  {"id":"hlt.bpom","canonical_name":"Registrasi BPOM & Regulatory Affairs","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Registrasi BPOM","BPOM","Regulatory Affairs","NIE","Nomor Izin Edar","Farmakovigilans","Pharmacovigilance"]},
+  {"id":"hlt.farmasi","canonical_name":"Farmasi Klinis & Apoteker","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Apoteker","STRA","SIPA","Farmasi Klinis","Pelayanan Kefarmasian","Peracikan Obat","Dispensing","Formulasi Obat","R&D Farmasi","Farmakologi"]},
+  {"id":"hlt.keperawatan","canonical_name":"Asuhan Keperawatan","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Keperawatan","STR Perawat","BTCLS","BCLS","ICU","IGD","Kamar Operasi","Tindakan Medis","Triase","Kebidanan","Asuhan Kebidanan"]},
+  {"id":"hlt.rekam_medis","canonical_name":"Rekam Medis & SIMRS","domain":"kesehatan_farmasi_keperawatan","category":"tools_tech","aliases":["Rekam Medis","SIMRS","ICD-10","ICD-9","INA-CBG","Klaim BPJS Kesehatan","Coding Medis","RME","Rekam Medis Elektronik"]},
+  {"id":"hlt.gizi","canonical_name":"Gizi Klinis & Dietetik","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Ahli Gizi","Nutrisionis","Gizi Klinis","Dietetik","NCP","Nutrition Care Process","Penyusunan Menu Rumah Sakit"]},
+  {"id":"hlt.lab_medis","canonical_name":"Analis Kesehatan & Lab Klinik","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["ATLM","Analis Kesehatan","Flebotomi","Hematologi","Mikrobiologi Klinik","Kimia Klinik","Patologi Klinik"]},
+  {"id":"hlt.kesmas","canonical_name":"Kesehatan Masyarakat & Epidemiologi","domain":"kesehatan_farmasi_keperawatan","category":"domain","aliases":["Kesehatan Masyarakat","Epidemiologi","Promosi Kesehatan","Kesehatan Lingkungan","Akreditasi Rumah Sakit","K3 Rumah Sakit","PPI"]}
+]

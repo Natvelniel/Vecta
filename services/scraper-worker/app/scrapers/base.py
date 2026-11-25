@@ -16,5 +16,14 @@ class BaseScraper(ABC):
     source_name: SourceName
 
     @abstractmethod
-    async def scrape(self, query: str, location: str, limit: int) -> list[ScrapedJob]:
+    async def scrape(
+        self,
+        query: str,
+        location: str,
+        limit: int,
+        *,
+        max_pages: int = 1,
+        posted_within_days: int | None = None,
+        work_mode: str = "any",
+    ) -> list[ScrapedJob]:
         """Collect and clean job listings for a single search query."""

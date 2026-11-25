@@ -1,0 +1,157 @@
+<script setup lang="ts">
+export type ButtonVariant = "primary" | "secondary" | "ai" | "tertiary" | "destructive";
+export type ButtonSize = "default" | "compact" | "tall";
+
+withDefaults(
+  defineProps<{
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    type?: "button" | "submit" | "reset";
+    disabled?: boolean;
+    loading?: boolean;
+    pressed?: boolean;
+  }>(),
+  {
+    variant: "secondary",
+    size: "default",
+    type: "button",
+    disabled: false,
+    loading: false,
+    pressed: undefined,
+  },
+);
+</script>
+
+<template>
+  <button
+    :type="type"
+    :disabled="disabled || loading"
+    :aria-busy="loading ? 'true' : undefined"
+    :aria-pressed="pressed"
+    class="v-btn"
+    :class="[`v-btn--${variant}`, `v-btn--${size}`]"
+  >
+    <span v-if="loading" class="v-btn__spinner" aria-hidden="true" />
+    <slot />
+  </button>
+</template>
+
+<style scoped>
+.v-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  background: transparent;
+  color: var(--text-primary);
+  transition:
+    background var(--dur-hover) var(--ease-state),
+    border-color var(--dur-hover) var(--ease-state),
+    color var(--dur-hover) var(--ease-state),
+    transform var(--dur-press) var(--ease-out);
+}
+
+.v-btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+.v-btn--default {
+  height: 40px;
+  padding: 0 var(--space-4);
+}
+.v-btn--tall {
+  height: 44px;
+  padding: 0 var(--space-4);
+}
+.v-btn--compact {
+  height: 34px;
+  padding: 0 var(--space-3);
+}
+
+.v-btn--primary {
+  background: var(--brand-primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+.v-btn--primary:hover:not(:disabled) {
+  background: var(--brand-hover);
+  color: #0b1120;
+}
+.v-btn--primary:active:not(:disabled) {
+  background: var(--brand-active);
+  color: #ffffff;
+}
+
+.v-btn--secondary {
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+.v-btn--secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+.v-btn--secondary[aria-pressed="true"] {
+  background: var(--brand-soft);
+  border-color: var(--brand-border);
+  color: var(--text-primary);
+}
+
+.v-btn--ai {
+  background: var(--ai-soft);
+  border-color: var(--ai-border);
+  color: var(--ai-accent);
+}
+.v-btn--ai:hover:not(:disabled) {
+  background: rgba(155, 140, 250, 0.2);
+  color: #beb3ff;
+}
+
+.v-btn--tertiary {
+  color: var(--text-secondary);
+  padding: 0 var(--space-3);
+}
+.v-btn--tertiary:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.v-btn--destructive {
+  background: var(--error-soft);
+  border-color: var(--error-border);
+  color: var(--status-error);
+}
+.v-btn--destructive:hover:not(:disabled) {
+  background: rgba(240, 113, 120, 0.22);
+}
+
+.v-btn__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: v-spin 0.65s linear infinite;
+}
+
+@keyframes v-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1023px) {
+  .v-btn--default,
+  .v-btn--tall {
+    min-height: 44px;
+  }
+  .v-btn--compact {
+    min-height: 40px;
+  }
+}
+</style>

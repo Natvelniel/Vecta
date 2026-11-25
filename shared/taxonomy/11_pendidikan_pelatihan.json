@@ -1,0 +1,6 @@
+[
+  {"id":"edu.kurikulum","canonical_name":"Kurikulum Merdeka & Perencanaan Ajar","domain":"pendidikan_pelatihan","category":"core_hard","aliases":["Kurikulum Merdeka","Modul Ajar","Penyusunan RPP","Silabus","Curriculum Development","Pengembangan Kurikulum","Cambridge Curriculum","IB Curriculum"]},
+  {"id":"edu.pengajaran","canonical_name":"Pengajaran & Manajemen Kelas","domain":"pendidikan_pelatihan","category":"core_hard","aliases":["Teaching","Mengajar","Classroom Management","Manajemen Kelas","Pedagogi","Asesmen Pembelajaran","Evaluasi Belajar","Dapodik"]},
+  {"id":"edu.instructional","canonical_name":"Instructional Design & E-Learning","domain":"pendidikan_pelatihan","category":"core_hard","aliases":["Instructional Design","E-Learning","LMS","Moodle","Google Classroom","SCORM","Articulate Storyline","Corporate Trainer"]},
+  {"id":"edu.bk","canonical_name":"Bimbingan Konseling & Anak Berkebutuhan Khusus","domain":"pendidikan_pelatihan","category":"domain","aliases":["Bimbingan Konseling","Konseling Pendidikan","Pendidikan Khusus","PAUD","Montessori","Psikologi Perkembangan"]}
+]

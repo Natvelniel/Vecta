@@ -12,7 +12,7 @@ class _StubScraper(BaseScraper):
         self.source_name: SourceName = source
         self._jobs_by_query = jobs_by_query
 
-    async def scrape(self, query: str, location: str, limit: int) -> list[ScrapedJob]:
+    async def scrape(self, query: str, location: str, limit: int, **kwargs: object) -> list[ScrapedJob]:
         return self._jobs_by_query.get(query, [])[:limit]
 
 
@@ -22,7 +22,7 @@ class _FailingScraper(BaseScraper):
         self._code = code
         self._message = message
 
-    async def scrape(self, query: str, location: str, limit: int) -> list[ScrapedJob]:
+    async def scrape(self, query: str, location: str, limit: int, **kwargs: object) -> list[ScrapedJob]:
         raise ScraperError(self._code, self._message)
 
 
@@ -46,7 +46,7 @@ def test_health_endpoint_returns_expected_sources() -> None:
     assert response.json() == {
         "status": "ok",
         "version": "0.1.0",
-        "available_sources": ["linkedin", "glints", "jobstreet"],
+        "available_sources": ["linkedin", "jobstreet", "indeed", "glints"],
     }
 
 
@@ -140,6 +140,57 @@ def test_scrape_endpoint_rejects_empty_queries() -> None:
         },
     )
     assert response.status_code == 422
+
+
+class _ExplodingScraper(BaseScraper):
+    def __init__(self, source: SourceName) -> None:
+        self.source_name: SourceName = source
+
+    async def scrape(self, query: str, location: str, limit: int, **kwargs: object) -> list[ScrapedJob]:
+        raise RuntimeError("/internal/secret/path/traceback-leak")
+
+
+def test_scrape_endpoint_rejects_excessive_queries_and_sanitizes_unexpected_errors() -> None:
+    app = create_app(scrapers={"linkedin": _ExplodingScraper("linkedin")})
+    client = TestClient(app)
+
+    too_many = client.post(
+        "/api/v1/scrape",
+        json={
+            "queries": [f"role-{i}" for i in range(16)],
+            "sources": ["linkedin"],
+            "location": "Indonesia",
+            "limit_per_query": 5,
+        },
+    )
+    assert too_many.status_code == 422
+
+    too_long = client.post(
+        "/api/v1/scrape",
+        json={
+            "queries": ["a" * 121],
+            "sources": ["linkedin"],
+            "location": "Indonesia",
+            "limit_per_query": 5,
+        },
+    )
+    assert too_long.status_code == 422
+
+    resp = client.post(
+        "/api/v1/scrape",
+        json={
+            "queries": ["Rust"],
+            "sources": ["linkedin"],
+            "location": "Indonesia",
+            "limit_per_query": 5,
+        },
+    )
+    assert resp.status_code == 200
+    warnings = resp.json()["warnings"]
+    assert len(warnings) == 1
+    assert warnings[0]["code"] == "UNEXPECTED_ERROR"
+    assert "/internal/secret/path" not in warnings[0]["message"]
+    assert "traceback-leak" not in warnings[0]["message"]
 
 
 def test_worker_contains_no_gemini_api_key_references() -> None:

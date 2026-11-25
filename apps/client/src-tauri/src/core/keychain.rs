@@ -1,8 +1,10 @@
 use std::fmt;
 use std::sync::Mutex;
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use keyring::Entry;
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::core::config::{KEYCHAIN_SERVICE, KEYCHAIN_USER};
 use crate::error::AppError;
 use crate::models::profile::ApiKeyStatus;
@@ -16,13 +18,19 @@ pub trait SecretStore: Send + Sync {
 #[derive(Debug, Default)]
 pub struct OsKeyringStore;
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 impl OsKeyringStore {
     fn entry() -> Result<Entry, AppError> {
-        Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_USER)
-            .map_err(|e| AppError::db_error(format!("Gagal mengakses OS Keychain: {e}")))
+        Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_USER).map_err(|e| {
+            eprintln!("[vecta::keychain] failed to open credential entry: {e}");
+            AppError::db_error(
+                "Gagal mengakses OS Credential Manager. Pastikan layanan kunci sistem tersedia.",
+            )
+        })
     }
 }
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 impl SecretStore for OsKeyringStore {
     fn get_api_key(&self) -> Result<Option<String>, AppError> {
         let entry = Self::entry()?;
@@ -36,9 +44,12 @@ impl SecretStore for OsKeyringStore {
                 }
             }
             Err(keyring::Error::NoEntry) => Ok(None),
-            Err(e) => Err(AppError::db_error(format!(
-                "Gagal membaca Gemini API Key dari OS Keychain: {e}"
-            ))),
+            Err(e) => {
+                eprintln!("[vecta::keychain] failed to read credential: {e}");
+                Err(AppError::db_error(
+                    "Gagal membaca Gemini API Key dari OS Credential Manager.",
+                ))
+            }
         }
     }
 
@@ -49,9 +60,8 @@ impl SecretStore for OsKeyringStore {
         }
         let entry = Self::entry()?;
         entry.set_password(trimmed).map_err(|e| {
-            AppError::db_error(format!(
-                "Gagal menyimpan Gemini API Key ke OS Keychain: {e}"
-            ))
+            eprintln!("[vecta::keychain] failed to store credential: {e}");
+            AppError::db_error("Gagal menyimpan Gemini API Key ke OS Credential Manager.")
         })
     }
 
@@ -59,10 +69,26 @@ impl SecretStore for OsKeyringStore {
         let entry = Self::entry()?;
         match entry.delete_credential() {
             Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
-            Err(e) => Err(AppError::db_error(format!(
-                "Gagal menghapus Gemini API Key dari OS Keychain: {e}"
-            ))),
+            Err(e) => {
+                eprintln!("[vecta::keychain] failed to delete credential: {e}");
+                Err(AppError::db_error(
+                    "Gagal menghapus Gemini API Key dari OS Credential Manager.",
+                ))
+            }
         }
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "ios"))]
+impl SecretStore for OsKeyringStore {
+    fn get_api_key(&self) -> Result<Option<String>, AppError> {
+        Ok(None)
+    }
+    fn set_api_key(&self, _key: &str) -> Result<(), AppError> {
+        Ok(())
+    }
+    fn delete_api_key(&self) -> Result<(), AppError> {
+        Ok(())
     }
 }
 

@@ -9,17 +9,32 @@ export const commands = {
 	saveAndTestApiKey: (apiKey: string, options?: InvokeOptions) => typedError<ApiKeyStatus_Serialize, AppError>(__TAURI_INVOKE("save_and_test_api_key", { apiKey }, options)),
 	deleteApiKey: (options?: InvokeOptions) => typedError<null, AppError>(__TAURI_INVOKE("delete_api_key", undefined, options)),
 	checkWorkerHealth: (workerUrl: string | null, options?: InvokeOptions) => typedError<WorkerHealth, AppError>(__TAURI_INVOKE("check_worker_health", { workerUrl }, options)),
+	getSearchPreferences: (options?: InvokeOptions) => typedError<SearchPreferences_Serialize, AppError>(__TAURI_INVOKE("get_search_preferences", undefined, options)),
+	saveSearchPreferences: (prefs: SearchPreferences_Deserialize, options?: InvokeOptions) => typedError<SearchPreferences_Serialize, AppError>(__TAURI_INVOKE("save_search_preferences", { prefs }, options)),
+	getLocalAiStatus: (options?: InvokeOptions) => typedError<LocalAiModelStatus_Serialize, AppError>(__TAURI_INVOKE("get_local_ai_status", undefined, options)),
+	getScraperMode: (options?: InvokeOptions) => typedError<string, AppError>(__TAURI_INVOKE("get_scraper_mode", undefined, options)),
+	setScraperMode: (mode: string, options?: InvokeOptions) => typedError<string, AppError>(__TAURI_INVOKE("set_scraper_mode", { mode }, options)),
 	parseUserStory: (rawStory: string, options?: InvokeOptions) => typedError<StoryProfileDraft, AppError>(__TAURI_INVOKE("parse_user_story", { rawStory }, options)),
 	saveConfirmedProfile: (input: ConfirmedProfileInput_Deserialize, options?: InvokeOptions) => typedError<UserProfileDetail_Serialize, AppError>(__TAURI_INVOKE("save_confirmed_profile", { input }, options)),
 	getActiveProfile: (options?: InvokeOptions) => typedError<UserProfileDetail_Serialize | null, AppError>(__TAURI_INVOKE("get_active_profile", undefined, options)),
 	toggleScrapeKeyword: (keywordId: number, isActive: boolean, options?: InvokeOptions) => typedError<null, AppError>(__TAURI_INVOKE("toggle_scrape_keyword", { keywordId, isActive }, options)),
 	addCustomKeyword: (userId: string, roleLabel: string, queries: string[], options?: InvokeOptions) => typedError<ScrapeKeywordItem_Serialize, AppError>(__TAURI_INVOKE("add_custom_keyword", { userId, roleLabel, queries }, options)),
+	importCvPdf: (pdfBase64: string, options?: InvokeOptions) => typedError<ImportedCvDraft, AppError>(__TAURI_INVOKE("import_cv_pdf", { pdfBase64 }, options)),
+	parseStoryLocal: (rawStory: string, options?: InvokeOptions) => typedError<ImportedCvDraft, AppError>(__TAURI_INVOKE("parse_story_local", { rawStory }, options)),
+	getMasterCv: (userId: string, options?: InvokeOptions) => typedError<MasterCvProfile, AppError>(__TAURI_INVOKE("get_master_cv", { userId }, options)),
+	saveMasterCv: (cv: MasterCvProfile, options?: InvokeOptions) => typedError<MasterCvProfile, AppError>(__TAURI_INVOKE("save_master_cv", { cv }, options)),
+	exportTailoredAtsPdf: (userId: string, jobId: string | null, language: string, options?: InvokeOptions) => typedError<AtsExportResult, AppError>(__TAURI_INVOKE("export_tailored_ats_pdf", { userId, jobId, language }, options)),
 	ingestManualJob: (userId: string, titleHint: string | null, url: string | null, rawText: string, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("ingest_manual_job", { userId, titleHint, url, rawText }, options)),
 	runScrapeForActiveKeywords: (userId: string, sources: string[], limitPerQuery: number, options?: InvokeOptions) => typedError<ScrapeRunReport, AppError>(__TAURI_INVOKE("run_scrape_for_active_keywords", { userId, sources, limitPerQuery }, options)),
+	scrapeAndStoreJobs: (userId: string, prefs: SearchPreferences_Deserialize, options?: InvokeOptions) => typedError<ScrapeRunReport, AppError>(__TAURI_INVOKE("scrape_and_store_jobs", { userId, prefs }, options)),
+	runAiMatchingQueue: (userId: string, maxJobs: number, rpmLimit: number, options?: InvokeOptions) => typedError<AiMatchRunReport, AppError>(__TAURI_INVOKE("run_ai_matching_queue", { userId, maxJobs, rpmLimit }, options)),
+	enrichJobWithAi: (userId: string, jobId: string, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("enrich_job_with_ai", { userId, jobId }, options)),
 	listRankedJobs: (userId: string, filter: JobFilterInput_Deserialize, options?: InvokeOptions) => typedError<JobMatchSummary_Serialize[], AppError>(__TAURI_INVOKE("list_ranked_jobs", { userId, filter }, options)),
 	getJobDetail: (userId: string, jobId: string, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("get_job_detail", { userId, jobId }, options)),
 	toggleSaveJob: (userId: string, jobId: string, options?: InvokeOptions) => typedError<boolean, AppError>(__TAURI_INVOKE("toggle_save_job", { userId, jobId }, options)),
+	updateJobApplication: (userId: string, jobId: string, status: ApplicationStatus, notes: string | null, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("update_job_application", { userId, jobId, status, notes }, options)),
 	generateGapAnalysis: (userId: string, jobId: string, forceRefresh: boolean, options?: InvokeOptions) => typedError<GapAnalysis, AppError>(__TAURI_INVOKE("generate_gap_analysis", { userId, jobId, forceRefresh }, options)),
+	generateApplyKit: (userId: string, jobId: string, language: string, forceRefresh: boolean, options?: InvokeOptions) => typedError<ApplyKitResult, AppError>(__TAURI_INVOKE("generate_apply_kit", { userId, jobId, language, forceRefresh }, options)),
 	listAvailableRoles: (options?: InvokeOptions) => typedError<RoleJobCount[], AppError>(__TAURI_INVOKE("list_available_roles", undefined, options)),
 	getCompetencyMap: (userId: string, targetRole: string, options?: InvokeOptions) => typedError<CompetencyMapResponse_Serialize, AppError>(__TAURI_INVOKE("get_competency_map", { userId, targetRole }, options)),
 	generateLearningRoadmap: (userId: string, targetRole: string, sourceJobId: string | null, hoursPerWeek: number, options?: InvokeOptions) => typedError<RoadmapDetail_Serialize, AppError>(__TAURI_INVOKE("generate_learning_roadmap", { userId, targetRole, sourceJobId, hoursPerWeek }, options)),
@@ -30,6 +45,15 @@ export const commands = {
 };
 
 /* Types */
+export type AiMatchRunReport = {
+	processed_jobs: number,
+	enriched_jobs: number,
+	failed_jobs: number,
+	remaining_local_jobs: number,
+	api_calls_used: number,
+	warnings: ScrapeWarningItem[],
+};
+
 export type ApiKeyStatus = ApiKeyStatus_Serialize | ApiKeyStatus_Deserialize;
 
 export type ApiKeyStatus_Deserialize = {
@@ -46,6 +70,24 @@ export type AppError = {
 	code: ErrorCode,
 	message: string,
 	retryable: boolean,
+};
+
+export type ApplicationStatus = "new" | "saved" | "applied" | "interview" | "offer" | "rejected" | "dismissed";
+
+export type ApplyKitResult = {
+	language: string,
+	tailored_headline: string,
+	cv_bullets: string[],
+	cover_note: string,
+	interview_angles: string[],
+};
+
+export type AtsExportResult = {
+	file_path: string,
+	ats_keyword_score: number | null,
+	matched_keywords: string[],
+	missing_keywords: string[],
+	pdf_size_bytes: number,
 };
 
 export type CompetencyMapResponse = CompetencyMapResponse_Serialize | CompetencyMapResponse_Deserialize;
@@ -144,6 +186,29 @@ export type ConfirmedSkillInput_Serialize = {
 	evidence: string | null,
 };
 
+export type CvEducationItem = {
+	institution: string,
+	degree: string,
+	period: string,
+	notes: string,
+};
+
+export type CvExperienceItem = {
+	role: string,
+	company: string,
+	location: string,
+	period: string,
+	bullets: string[],
+};
+
+export type CvProjectItem = {
+	name: string,
+	period: string,
+	description: string,
+};
+
+export type EnrichmentStatus = "local_only" | "ai_enriched";
+
 export type ErrorCode = "API_KEY_MISSING" | "API_KEY_INVALID" | "GEMINI_RATE_LIMITED" | "GEMINI_PARSE_FAILED" | "SCRAPER_UNREACHABLE" | "DB_ERROR" | "VALIDATION_ERROR";
 
 export type ExperienceLevel = "intern" | "junior" | "mid" | "senior" | "unknown";
@@ -166,6 +231,16 @@ export type GapAnalysis = {
 
 export type GapSeverity = "high" | "medium" | "low";
 
+export type ImportedCvDraft = {
+	extracted_text: string,
+	dominant_domain: string,
+	estimated_experience_level: ExperienceLevel,
+	professional_summary: string,
+	extracted_skills: ExtractedSkillDraft[],
+	recommended_keywords: RecommendedKeywordDraft[],
+	master_cv: MasterCvProfile,
+};
+
 export type JobFilterInput = JobFilterInput_Serialize | JobFilterInput_Deserialize;
 
 export type JobFilterInput_Deserialize = {
@@ -175,6 +250,10 @@ export type JobFilterInput_Deserialize = {
 	saved_only?: boolean | null,
 	min_score?: number | null,
 	search_query?: string | null,
+	location_query?: string | null,
+	enrichment_status?: EnrichmentStatus | null,
+	application_status?: ApplicationStatus | null,
+	include_dismissed?: boolean | null,
 	limit?: number | null,
 	offset?: number | null,
 };
@@ -186,6 +265,10 @@ export type JobFilterInput_Serialize = {
 	saved_only: boolean | null,
 	min_score: number | null,
 	search_query: string | null,
+	location_query: string | null,
+	enrichment_status: EnrichmentStatus | null,
+	application_status: ApplicationStatus | null,
+	include_dismissed: boolean | null,
 	limit: number | null,
 	offset: number | null,
 };
@@ -203,6 +286,13 @@ export type JobMatchDetail_Deserialize = {
 	location?: string | null,
 	work_mode: WorkMode,
 	experience_level: ExperienceLevel,
+	enrichment_status: EnrichmentStatus,
+	posted_at?: string | null,
+	salary_text?: string | null,
+	domain_slug: string,
+	quality_score: number | null,
+	red_flags: JobRedFlag[],
+	also_available_on: PortalLinkRef_Deserialize[],
 	raw_description: string,
 	role_summary?: string | null,
 	vector_score: number | null,
@@ -212,7 +302,11 @@ export type JobMatchDetail_Deserialize = {
 	matched_skills: JobMatchSkillRef[],
 	missing_skills: JobMatchSkillRef[],
 	ai_gap_analysis?: GapAnalysis | null,
+	ai_apply_kit?: ApplyKitResult | null,
 	is_saved: boolean,
+	application_status: ApplicationStatus,
+	applied_at?: string | null,
+	user_notes?: string | null,
 	scraped_at: string,
 };
 
@@ -227,6 +321,13 @@ export type JobMatchDetail_Serialize = {
 	location: string | null,
 	work_mode: WorkMode,
 	experience_level: ExperienceLevel,
+	enrichment_status: EnrichmentStatus,
+	posted_at: string | null,
+	salary_text: string | null,
+	domain_slug: string,
+	quality_score: number | null,
+	red_flags: JobRedFlag[],
+	also_available_on: PortalLinkRef_Serialize[],
 	raw_description: string,
 	role_summary: string | null,
 	vector_score: number | null,
@@ -236,7 +337,11 @@ export type JobMatchDetail_Serialize = {
 	matched_skills: JobMatchSkillRef[],
 	missing_skills: JobMatchSkillRef[],
 	ai_gap_analysis: GapAnalysis | null,
+	ai_apply_kit: ApplyKitResult | null,
 	is_saved: boolean,
+	application_status: ApplicationStatus,
+	applied_at: string | null,
+	user_notes: string | null,
 	scraped_at: string,
 };
 
@@ -259,6 +364,13 @@ export type JobMatchSummary_Deserialize = {
 	location?: string | null,
 	work_mode: WorkMode,
 	experience_level: ExperienceLevel,
+	enrichment_status: EnrichmentStatus,
+	posted_at?: string | null,
+	salary_text?: string | null,
+	domain_slug: string,
+	quality_score: number | null,
+	red_flags_count: number,
+	also_available_on: PortalLinkRef_Deserialize[],
 	vector_score: number | null,
 	skill_overlap_score: number | null,
 	level_score: number | null,
@@ -267,6 +379,8 @@ export type JobMatchSummary_Deserialize = {
 	missing_skills_count: number,
 	has_gap_analysis: boolean,
 	is_saved: boolean,
+	application_status: ApplicationStatus,
+	applied_at?: string | null,
 	scraped_at: string,
 };
 
@@ -280,6 +394,13 @@ export type JobMatchSummary_Serialize = {
 	location: string | null,
 	work_mode: WorkMode,
 	experience_level: ExperienceLevel,
+	enrichment_status: EnrichmentStatus,
+	posted_at: string | null,
+	salary_text: string | null,
+	domain_slug: string,
+	quality_score: number | null,
+	red_flags_count: number,
+	also_available_on: PortalLinkRef_Serialize[],
 	vector_score: number | null,
 	skill_overlap_score: number | null,
 	level_score: number | null,
@@ -288,10 +409,68 @@ export type JobMatchSummary_Serialize = {
 	missing_skills_count: number,
 	has_gap_analysis: boolean,
 	is_saved: boolean,
+	application_status: ApplicationStatus,
+	applied_at: string | null,
 	scraped_at: string,
 };
 
-export type JobSource = "linkedin" | "glints" | "jobstreet" | "manual";
+export type JobRedFlag = {
+	code: string,
+	severity: string,
+	message: string,
+};
+
+export type JobSource = "linkedin" | "glints" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "manual";
+
+export type LocalAiModelStatus = LocalAiModelStatus_Serialize | LocalAiModelStatus_Deserialize;
+
+export type LocalAiModelStatus_Deserialize = {
+	model_id: string,
+	is_ready: boolean,
+	dimensions: number,
+	vocab_size: number,
+	size_mb: number | null,
+	source_path?: string | null,
+};
+
+export type LocalAiModelStatus_Serialize = {
+	model_id: string,
+	is_ready: boolean,
+	dimensions: number,
+	vocab_size: number,
+	size_mb: number | null,
+	source_path: string | null,
+};
+
+export type MasterCvProfile = {
+	user_id: string,
+	full_name: string,
+	headline: string,
+	email: string,
+	phone: string,
+	location: string,
+	linkedin_url: string,
+	portfolio_url: string,
+	summary: string,
+	experiences: CvExperienceItem[],
+	education: CvEducationItem[],
+	projects: CvProjectItem[],
+	certifications: string[],
+	languages: string[],
+	updated_at: string,
+};
+
+export type PortalLinkRef = PortalLinkRef_Serialize | PortalLinkRef_Deserialize;
+
+export type PortalLinkRef_Deserialize = {
+	source: string,
+	url?: string | null,
+};
+
+export type PortalLinkRef_Serialize = {
+	source: string,
+	url: string | null,
+};
 
 export type PrioritizedGap = {
 	skill: string,
@@ -428,6 +607,7 @@ export type ScrapeRunReport = {
 	newly_ingested: number,
 	skipped_duplicates: number,
 	failed_extractions: number,
+	pending_local_count: number,
 	warnings: ScrapeWarningItem[],
 };
 
@@ -435,6 +615,34 @@ export type ScrapeWarningItem = {
 	source: string,
 	code: string,
 	message: string,
+};
+
+export type SearchPreferences = SearchPreferences_Serialize | SearchPreferences_Deserialize;
+
+export type SearchPreferences_Deserialize = {
+	location: string,
+	sources: string[],
+	limit_per_query: number,
+	max_pages: number,
+	posted_within_days?: number | null,
+	work_mode: string,
+	custom_queries: string[],
+	ai_enrich_enabled: boolean,
+	ai_enrich_max_jobs: number,
+	ai_rpm_limit: number,
+};
+
+export type SearchPreferences_Serialize = {
+	location: string,
+	sources: string[],
+	limit_per_query: number,
+	max_pages: number,
+	posted_within_days: number | null,
+	work_mode: string,
+	custom_queries: string[],
+	ai_enrich_enabled: boolean,
+	ai_enrich_max_jobs: number,
+	ai_rpm_limit: number,
 };
 
 export type SkillCategory = "core_hard" | "tools_tech" | "soft_skill" | "domain";

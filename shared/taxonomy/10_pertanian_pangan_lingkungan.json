@@ -1,0 +1,7 @@
+[
+  {"id":"agr.haccp","canonical_name":"HACCP & Keamanan Pangan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["HACCP","Food Safety","Keamanan Pangan","ISO 22000","FSSC 22000","SJPH","Sertifikasi Halal","GMP Pangan","SSOP"]},
+  {"id":"agr.tekpang","canonical_name":"Teknologi Pangan & R&D Produk","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["Teknologi Pangan","Food Technology","Formulasi Pangan","Pengujian Organoleptik","Shelf Life","Umur Simpan","QC Pangan"]},
+  {"id":"agr.agronomi","canonical_name":"Agronomi & Perkebunan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["Agronomi","Agronomist","Perkebunan","Kelapa Sawit","ISPO","RSPO","Hama Penyakit Tanaman","Budidaya Tanaman","Pemupukan","Kultur Jaringan"]},
+  {"id":"agr.peternakan","canonical_name":"Peternakan & Budidaya Perikanan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["Peternakan","Pakan Ternak","Akuakultur","Budidaya Perikanan","Tambak Udang","Kualitas Air","Kesehatan Hewan"]},
+  {"id":"agr.amdal","canonical_name":"AMDAL & Pengelolaan Lingkungan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["AMDAL","UKL-UPL","Environmental Management","PROPER","IPAL","Pengolahan Limbah","Limbah B3","Sustainability","ESG","Emisi Karbon"]}
+]

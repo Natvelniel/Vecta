@@ -156,7 +156,49 @@ pub fn compute_hybrid_match(user: &ProfileMatchRecord, job: &JobMatchRecord) -> 
         .embedding
         .as_deref()
         .and_then(PrecomputedUserEmbedding::from_bytes);
-    compute_hybrid_match_with_precomputed(user, precomputed.as_ref(), job)
+    let parent_credits = if user.skill_names_lower.is_empty() {
+        None
+    } else {
+        Some(
+            vecta_taxonomy::TaxonomyEngine::global()
+                .parent_names_lower_for_owned(&user.skill_names_lower),
+        )
+    };
+    compute_hybrid_match_with_precomputed(
+        user,
+        precomputed.as_ref(),
+        parent_credits.as_ref(),
+        job,
+        None,
+    )
+}
+
+/// Compute a 0-token local match score using a deterministic keyword/location relevance signal
+/// when vector embeddings are not yet populated (`local_only` jobs).
+pub fn compute_local_hybrid_match(
+    user: &ProfileMatchRecord,
+    job: &JobMatchRecord,
+    local_keyword_score: f64,
+) -> ComputedMatch {
+    let precomputed = user
+        .embedding
+        .as_deref()
+        .and_then(PrecomputedUserEmbedding::from_bytes);
+    let parent_credits = if user.skill_names_lower.is_empty() {
+        None
+    } else {
+        Some(
+            vecta_taxonomy::TaxonomyEngine::global()
+                .parent_names_lower_for_owned(&user.skill_names_lower),
+        )
+    };
+    compute_hybrid_match_with_precomputed(
+        user,
+        precomputed.as_ref(),
+        parent_credits.as_ref(),
+        job,
+        Some(local_keyword_score.clamp(0.0, 1.0)),
+    )
 }
 
 pub fn compute_hybrid_matches_batch(
@@ -167,15 +209,33 @@ pub fn compute_hybrid_matches_batch(
         .embedding
         .as_deref()
         .and_then(PrecomputedUserEmbedding::from_bytes);
+    let parent_credits = if user.skill_names_lower.is_empty() {
+        None
+    } else {
+        Some(
+            vecta_taxonomy::TaxonomyEngine::global()
+                .parent_names_lower_for_owned(&user.skill_names_lower),
+        )
+    };
     jobs.iter()
-        .map(|job| compute_hybrid_match_with_precomputed(user, precomputed.as_ref(), job))
+        .map(|job| {
+            compute_hybrid_match_with_precomputed(
+                user,
+                precomputed.as_ref(),
+                parent_credits.as_ref(),
+                job,
+                None,
+            )
+        })
         .collect()
 }
 
 fn compute_hybrid_match_with_precomputed(
     user: &ProfileMatchRecord,
     user_emb: Option<&PrecomputedUserEmbedding>,
+    parent_credits: Option<&std::collections::HashSet<String>>,
     job: &JobMatchRecord,
+    local_context_fallback: Option<f64>,
 ) -> ComputedMatch {
     let valid_vector = match (user_emb, job.embedding.as_deref()) {
         (Some(u_emb), Some(j_bytes)) => u_emb.cosine_with_bytes(j_bytes),
@@ -184,7 +244,10 @@ fn compute_hybrid_match_with_precomputed(
 
     let (has_valid_vector, vector_score) = match valid_vector {
         Some(v) => (true, v),
-        None => (false, 0.0),
+        None => match local_context_fallback {
+            Some(local_ctx) => (true, local_ctx),
+            None => (false, 0.0),
+        },
     };
 
     let mut matched_skills = Vec::new();
@@ -211,6 +274,14 @@ fn compute_hybrid_match_with_precomputed(
             matched_weight += w;
             matched_skills.push(skill_ref);
         } else {
+            // Parent-Child Partial Credit (0.45x): if the job asks for a parent skill (e.g. Perpajakan or PHP)
+            // and the candidate owns a direct child specialization (e.g. Brevet Pajak A & B or Laravel),
+            // grant fair partial weight while still showing the parent skill in missing_skills for awareness.
+            if let Some(parents) = parent_credits {
+                if !parents.is_empty() && parents.contains(&row.canonical_name.to_lowercase()) {
+                    matched_weight += w * 0.45;
+                }
+            }
             missing_skills.push(skill_ref);
         }
     }
@@ -310,6 +381,7 @@ mod tests {
             experience_level: ExperienceLevel::Junior,
             embedding: Some(user_vec),
             skill_ids: HashSet::from([1, 3]),
+            skill_names_lower: HashSet::new(),
         };
         let job = JobMatchRecord {
             job_id: "j1".into(),
@@ -338,6 +410,7 @@ mod tests {
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
             skill_ids: HashSet::from([1]),
+            skill_names_lower: HashSet::new(),
         };
         let job = JobMatchRecord {
             job_id: "j1".into(),
@@ -359,6 +432,7 @@ mod tests {
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
             skill_ids: HashSet::new(),
+            skill_names_lower: HashSet::new(),
         };
         let job = JobMatchRecord {
             job_id: "j1".into(),
@@ -401,6 +475,7 @@ mod tests {
                 experience_level: ExperienceLevel::Junior,
                 embedding: u_emb,
                 skill_ids: HashSet::from([1]),
+                skill_names_lower: HashSet::new(),
             };
             let job = JobMatchRecord {
                 job_id: "j1".into(),
@@ -443,6 +518,7 @@ mod tests {
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
             skill_ids: HashSet::from([42]),
+            skill_names_lower: HashSet::new(),
         };
         let job = JobMatchRecord {
             job_id: "j1".into(),
@@ -465,6 +541,7 @@ mod tests {
             experience_level: ExperienceLevel::Mid,
             embedding: Some(encode_embedding(&vec_u)),
             skill_ids: (1..=10).collect(),
+            skill_names_lower: HashSet::new(),
         };
         let jobs: Vec<JobMatchRecord> = (0..1000)
             .map(|idx| JobMatchRecord {
@@ -478,9 +555,9 @@ mod tests {
             .collect();
 
         let started = Instant::now();
-        let scores: Vec<f64> = jobs
-            .iter()
-            .map(|j| compute_hybrid_match(&user, j).final_score)
+        let scores: Vec<f64> = compute_hybrid_matches_batch(&user, &jobs)
+            .into_iter()
+            .map(|m| m.final_score)
             .collect();
         let elapsed = started.elapsed();
 

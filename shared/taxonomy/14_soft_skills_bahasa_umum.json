@@ -1,0 +1,10 @@
+[
+  {"id":"gen.excel","canonical_name":"Microsoft Excel","domain":"umum_lintas_bidang","category":"tools_tech","aliases":["Excel","MS Excel","VLOOKUP","XLOOKUP","Pivot Table","Macro VBA","Spreadsheet","Google Sheets"]},
+  {"id":"gen.ms_office","canonical_name":"Microsoft Office","domain":"umum_lintas_bidang","category":"tools_tech","aliases":["MS Office","Microsoft Word","Microsoft PowerPoint","Google Workspace"]},
+  {"id":"gen.project_mgmt","canonical_name":"Project Management","domain":"umum_lintas_bidang","category":"domain","aliases":["Manajemen Proyek","Agile","Scrum","Kanban","Jira","Trello","Asana","Notion","PMP"]},
+  {"id":"gen.english","canonical_name":"Bahasa Inggris","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["English","Fluent in English","English Proficiency","TOEFL","IELTS","TOEIC","Business English"]},
+  {"id":"gen.mandarin","canonical_name":"Bahasa Mandarin / Jepang","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Bahasa Mandarin","Mandarin","HSK","Bahasa Jepang","JLPT","Bahasa Korea"]},
+  {"id":"gen.communication","canonical_name":"Komunikasi & Presentasi","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Communication","Komunikasi","Public Speaking","Presentasi","Teamwork","Kolaborasi","Interpersonal"]},
+  {"id":"gen.negotiation","canonical_name":"Negosiasi & Kepemimpinan","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Negosiasi","Negotiation","Leadership","Kepemimpinan","People Management","Stakeholder Management"]},
+  {"id":"gen.problem_solving","canonical_name":"Problem Solving & Analisis","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Problem Solving","Analytical Thinking","Critical Thinking","Berpikir Analitis","Detail Oriented"]}
+]

@@ -1,24 +1,73 @@
+use std::collections::HashMap;
 use std::time::Duration;
 
 use sha2::{Digest, Sha256};
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
+use url::Url;
 use uuid::Uuid;
+
+pub(crate) fn sanitize_external_url(raw: Option<&str>) -> Option<String> {
+    let trimmed = raw?.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let parsed = Url::parse(trimmed).ok()?;
+    if !matches!(parsed.scheme(), "http" | "https") {
+        return None;
+    }
+    if parsed.host_str().map(|h| h.trim().is_empty()).unwrap_or(true) {
+        return None;
+    }
+    Some(parsed.into())
+}
 
 use crate::core::config::{
     MAX_KNOWN_SKILLS_CONTEXT, MAX_MANUAL_JOB_CHARS, MIN_MANUAL_JOB_CHARS,
 };
 use crate::core::db::NewJobRecord;
-use crate::core::gemini::{EmbeddingTaskType, GapAnalysisPromptInput};
-use crate::core::matching::{
-    compute_hybrid_match, encode_embedding, format_job_embedding_text, to_match_upsert,
+use crate::core::gemini::{
+    ApplyKitPromptInput, BatchJobInput, EmbeddingTaskType, GapAnalysisPromptInput,
 };
+use crate::core::local_embedder::LOCAL_EMBEDDING_MODEL_ID;
+use crate::core::local_matcher::{
+    compute_local_keyword_relevance, extract_universal_job_metadata, infer_experience_level,
+    infer_work_mode,
+};
+use crate::core::matching::{
+    compute_hybrid_match, compute_local_hybrid_match, cosine_similarity, encode_embedding,
+    format_job_embedding_text, to_match_upsert,
+};
+use crate::core::native_scraper::quality::{assess_job_quality, deduplicate_cross_portal};
 use crate::core::worker::WorkerScrapeRequest;
 use crate::error::{AppError, ErrorCode};
 use crate::models::job::{
-    GapAnalysis, JobFilterInput, JobMatchDetail, JobMatchSummary, JobSource, RequirementType,
-    ScrapeRunReport, ScrapeWarningItem,
+    AiMatchRunReport, ApplicationStatus, ApplyKitResult, EnrichmentStatus, GapAnalysis,
+    JobExtractionResult, JobFilterInput, JobMatchDetail, JobMatchSummary, JobSource,
+    RequirementType, ScrapeProgressEvent, ScrapeRunReport, ScrapeWarningItem, SearchPreferences,
 };
 use crate::state::AppState;
+
+const AI_EXTRACT_BATCH_SIZE: usize = 5;
+
+fn emit_progress(
+    app: Option<&AppHandle>,
+    stage: &str,
+    message: impl Into<String>,
+    current: u32,
+    total: u32,
+) {
+    if let Some(handle) = app {
+        let _ = handle.emit(
+            "scrape-progress",
+            ScrapeProgressEvent {
+                stage: stage.to_string(),
+                message: message.into(),
+                current,
+                total,
+            },
+        );
+    }
+}
 
 fn compute_manual_external_id(url: Option<&str>, raw_text: &str) -> String {
     let mut hasher = Sha256::new();
@@ -54,11 +103,7 @@ pub async fn ingest_manual_job_impl(
             AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
         })?;
 
-    let clean_url = url
-        .as_deref()
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .map(str::to_string);
+    let clean_url = sanitize_external_url(url.as_deref());
     let external_id = compute_manual_external_id(clean_url.as_deref(), &capped_text);
 
     // Reuse existing manual job if identical text/URL was already ingested
@@ -119,6 +164,9 @@ pub async fn ingest_manual_job_impl(
         .map_err(|e| AppError::db_error(format!("Gagal serialisasi hasil ekstraksi: {e}")))?;
 
     let job_id = Uuid::new_v4().to_string();
+    let quality = assess_job_quality(&title, "Manual Input", &capped_text, None, clean_url.as_deref());
+    let red_flags_json = serde_json::to_string(&quality.red_flags).unwrap_or_else(|_| "[]".into());
+    let tax_probe = vecta_taxonomy::TaxonomyEngine::global().extract_job(&title, &capped_text, None);
     let new_job = NewJobRecord {
         id: job_id.clone(),
         source: JobSource::Manual,
@@ -133,6 +181,14 @@ pub async fn ingest_manual_job_impl(
         raw_description: capped_text,
         extracted_summary_json: Some(extracted_json),
         embedding: Some(embedding_bytes),
+        enrichment_status: EnrichmentStatus::AiEnriched,
+        posted_at: None,
+        salary_text: None,
+        domain_slug: tax_probe.dominant_domain,
+        quality_score: quality.quality_score,
+        red_flags_json,
+        also_available_on_json: "[]".into(),
+        embedding_model: Some("gemini:embedding-001".into()),
     };
 
     let job_match_rec = state.db.insert_job_with_skills(&new_job, &extracted.skills)?;
@@ -175,9 +231,9 @@ pub async fn run_scrape_for_active_keywords_impl(
         ));
     }
     for src in &clean_sources {
-        if !matches!(src.as_str(), "linkedin" | "glints" | "jobstreet") {
+        if !matches!(src.as_str(), "linkedin" | "glints" | "jobstreet" | "indeed") {
             return Err(AppError::validation_error(format!(
-                "Sumber portal '{src}' tidak didukung. Gunakan: linkedin, glints, atau jobstreet."
+                "Sumber portal '{src}' tidak didukung. Gunakan: jobstreet, linkedin, indeed, atau glints."
             )));
         }
     }
@@ -190,6 +246,9 @@ pub async fn run_scrape_for_active_keywords_impl(
         sources: clean_sources,
         location: "Indonesia".to_string(),
         limit_per_query: limit_per_query.clamp(1, 50),
+        max_pages: 1,
+        posted_within_days: None,
+        work_mode: "any".to_string(),
     };
     let worker_resp = state.worker.scrape(&worker_url, &worker_req).await?;
 
@@ -286,11 +345,24 @@ pub async fn run_scrape_for_active_keywords_impl(
             .map_err(|e| AppError::db_error(format!("Gagal serialisasi hasil ekstraksi: {e}")))?;
 
         let job_id = Uuid::new_v4().to_string();
+        let quality = assess_job_quality(
+            &scraped_job.title,
+            &scraped_job.company,
+            &scraped_job.raw_description,
+            scraped_job.salary_text.as_deref(),
+            scraped_job.url.as_deref(),
+        );
+        let red_flags_json = serde_json::to_string(&quality.red_flags).unwrap_or_else(|_| "[]".into());
+        let tax_probe = vecta_taxonomy::TaxonomyEngine::global().extract_job(
+            &scraped_job.title,
+            &scraped_job.raw_description,
+            None,
+        );
         let new_job = NewJobRecord {
             id: job_id.clone(),
             source,
             external_id: scraped_job.external_id,
-            url: scraped_job.url,
+            url: sanitize_external_url(scraped_job.url.as_deref()),
             title: scraped_job.title,
             normalized_role: extracted.normalized_role.clone(),
             company: scraped_job.company,
@@ -300,6 +372,14 @@ pub async fn run_scrape_for_active_keywords_impl(
             raw_description: scraped_job.raw_description,
             extracted_summary_json: Some(extracted_json),
             embedding: embedding_bytes,
+            enrichment_status: EnrichmentStatus::AiEnriched,
+            posted_at: scraped_job.posted_at,
+            salary_text: scraped_job.salary_text,
+            domain_slug: tax_probe.dominant_domain,
+            quality_score: quality.quality_score,
+            red_flags_json,
+            also_available_on_json: "[]".into(),
+            embedding_model: Some("gemini:embedding-001".into()),
         };
 
         let job_match_rec = state.db.insert_job_with_skills(&new_job, &extracted.skills)?;
@@ -310,14 +390,706 @@ pub async fn run_scrape_for_active_keywords_impl(
     }
 
     state.db.touch_active_keywords_scraped(&user_id)?;
+    let pending_local_count = state.db.count_pending_local_jobs(&user_id).unwrap_or(0);
 
     Ok(ScrapeRunReport {
         total_fetched,
         newly_ingested,
         skipped_duplicates,
         failed_extractions,
+        pending_local_count,
         warnings,
     })
+}
+
+/// Stage 1 (Decoupled, 0 Gemini tokens):
+/// Scrape multi-page jobs from Python Worker using full user preferences, store them cleanly
+/// into SQLite as `local_only`, extract skills from the local dictionary, and compute instant
+/// local match rankings in < 30ms.
+pub async fn scrape_and_store_jobs_impl(
+    state: &AppState,
+    app: Option<&AppHandle>,
+    user_id: String,
+    prefs: SearchPreferences,
+) -> Result<ScrapeRunReport, AppError> {
+    let profile_match = state
+        .db
+        .get_profile_for_matching(&user_id)?
+        .ok_or_else(|| {
+            AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
+        })?;
+    let profile_detail = state
+        .db
+        .get_profile_by_id(&user_id)?
+        .ok_or_else(|| {
+            AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
+        })?;
+
+    // Combine custom queries from SearchPreferences with active profile keywords
+    let mut queries: Vec<String> = prefs
+        .custom_queries
+        .iter()
+        .map(|q| q.trim().to_string())
+        .filter(|q| !q.is_empty())
+        .collect();
+    if queries.is_empty() {
+        queries = state.db.list_active_scrape_queries(&user_id)?;
+    }
+    if queries.is_empty() {
+        return Err(AppError::validation_error(
+            "Tambahkan minimal satu kata kunci pencarian atau aktifkan peran di Profil Cerita.",
+        ));
+    }
+    queries.truncate(15);
+
+    let clean_sources: Vec<String> = prefs
+        .sources
+        .iter()
+        .map(|s| s.trim().to_lowercase())
+        .filter(|s| {
+            matches!(
+                s.as_str(),
+                "linkedin" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "glints"
+            )
+        })
+        .collect();
+    if clean_sources.is_empty() {
+        return Err(AppError::validation_error(
+            "Pilih minimal satu portal lowongan (JobStreet, LinkedIn, Kalibrr, Dealls, Indeed, atau Glints).",
+        ));
+    }
+
+    let location = if prefs.location.trim().is_empty() {
+        "Indonesia".to_string()
+    } else {
+        prefs.location.trim().chars().take(80).collect()
+    };
+
+    let _scrape_guard = state.try_acquire_scrape_guard()?;
+    let worker_url = state.get_worker_url();
+
+    emit_progress(
+        app,
+        "scraping",
+        format!(
+            "Menarik lowongan dari {} ({}, {} halaman/query)...",
+            clean_sources.join(", "),
+            location,
+            prefs.max_pages.clamp(1, 5)
+        ),
+        0,
+        queries.len() as u32,
+    );
+
+    let worker_req = WorkerScrapeRequest {
+        queries: queries.clone(),
+        sources: clean_sources,
+        location: location.clone(),
+        limit_per_query: prefs.limit_per_query.clamp(5, 50),
+        max_pages: prefs.max_pages.clamp(1, 5),
+        posted_within_days: prefs.posted_within_days.map(|d| d.clamp(1, 90)),
+        work_mode: prefs.work_mode.clone(),
+    };
+
+    let worker_resp = state.active_scraper().scrape(&worker_url, &worker_req).await?;
+
+    // Cross-portal deduplication (e.g. same PT + title on JobStreet & LinkedIn -> merged card with alternate links)
+    let raw_fetched = worker_resp.jobs.len() as u32;
+    let merged_jobs = deduplicate_cross_portal(worker_resp.jobs, |j| {
+        (
+            j.company.clone(),
+            j.title.clone(),
+            j.location.clone().unwrap_or_default(),
+            j.source.clone(),
+            j.url.clone(),
+            j.raw_description.clone(),
+        )
+    });
+    let cross_portal_dupes = raw_fetched.saturating_sub(merged_jobs.len() as u32);
+
+    // Ensure 14-domain Indonesian skill taxonomy exists in SQLite for 0-token local extraction
+    state.db.ensure_seed_skills()?;
+    let skill_catalog = state.db.list_all_skills_for_local_matching()?;
+    let user_skill_names: Vec<String> = profile_detail
+        .skills
+        .iter()
+        .map(|s| s.canonical_name.clone())
+        .collect();
+    let user_summary = profile_detail.summary.unwrap_or_default();
+    let fallback_query = queries.first().map(String::as_str);
+
+    // Compute offline multilingual user embedding once (< 0.3ms) when local AI pack is bundled
+    let local_profile_vec = if state.local_embedder.is_ready() {
+        let profile_text = format!(
+            "{} {} {}",
+            profile_detail.target_roles.join(" "),
+            user_summary,
+            user_skill_names.join(" ")
+        );
+        state.local_embedder.embed_one(&profile_text)
+    } else {
+        None
+    };
+
+    let total_fetched = raw_fetched;
+    let mut newly_ingested = 0u32;
+    let mut skipped_duplicates = cross_portal_dupes;
+    let mut upserts = Vec::new();
+
+    emit_progress(
+        app,
+        "local_matching",
+        if local_profile_vec.is_some() {
+            format!(
+                "Menyimpan & menilai {} lowongan dengan AI Semantik Offline + Taksonomi 14 Prodi (0 token)...",
+                merged_jobs.len()
+            )
+        } else {
+            format!(
+                "Menyimpan & menilai {} lowongan dengan Taksonomi 14 Prodi lokal (0 token)...",
+                merged_jobs.len()
+            )
+        },
+        0,
+        merged_jobs.len() as u32,
+    );
+
+    for (idx, (scraped_job, alternate_portals)) in merged_jobs.into_iter().enumerate() {
+        let source = JobSource::from_db_str(&scraped_job.source);
+        if let Some(existing_job_id) = state
+            .db
+            .job_exists_by_source_external_id(source, &scraped_job.external_id)?
+        {
+            skipped_duplicates += 1;
+            if let Some(job_rec) = state.db.load_job_for_matching(&existing_job_id)? {
+                let computed = if job_rec.embedding.is_some() {
+                    compute_hybrid_match(&profile_match, &job_rec)
+                } else {
+                    let local_ctx = compute_local_keyword_relevance(
+                        &user_summary,
+                        &profile_detail.target_roles,
+                        &user_skill_names,
+                        &scraped_job.title,
+                        &scraped_job.raw_description,
+                        Some(&location),
+                        scraped_job.location.as_deref(),
+                    );
+                    compute_local_hybrid_match(&profile_match, &job_rec, local_ctx)
+                };
+                upserts.push(to_match_upsert(&user_id, &existing_job_id, &computed)?);
+            }
+            continue;
+        }
+
+        let work_mode = infer_work_mode(
+            &scraped_job.title,
+            scraped_job.location.as_deref(),
+            &scraped_job.raw_description,
+        );
+        let experience_level =
+            infer_experience_level(&scraped_job.title, &scraped_job.raw_description);
+        let universal = extract_universal_job_metadata(
+            &scraped_job.title,
+            &scraped_job.raw_description,
+            fallback_query,
+            &skill_catalog,
+        );
+        let clean_url = sanitize_external_url(scraped_job.url.as_deref());
+        let quality = assess_job_quality(
+            &scraped_job.title,
+            &scraped_job.company,
+            &scraped_job.raw_description,
+            scraped_job.salary_text.as_deref(),
+            clean_url.as_deref(),
+        );
+        let red_flags_json =
+            serde_json::to_string(&quality.red_flags).unwrap_or_else(|_| "[]".into());
+        let also_available_on_json =
+            serde_json::to_string(&alternate_portals).unwrap_or_else(|_| "[]".into());
+
+        // Pure-Rust offline multilingual semantic vector (< 0.3ms, 0 API key, 101 languages)
+        let (local_job_vec, embedding_bytes, embedding_model) = if local_profile_vec.is_some() {
+            let job_text = format!("{} {}", scraped_job.title, scraped_job.raw_description);
+            match state.local_embedder.embed_one(&job_text) {
+                Some(v) => {
+                    let bytes = encode_embedding(&v);
+                    (Some(v), Some(bytes), Some(LOCAL_EMBEDDING_MODEL_ID.to_string()))
+                }
+                None => (None, None, None),
+            }
+        } else {
+            (None, None, None)
+        };
+
+        let job_id = Uuid::new_v4().to_string();
+        let new_job = NewJobRecord {
+            id: job_id.clone(),
+            source,
+            external_id: scraped_job.external_id,
+            url: clean_url,
+            title: scraped_job.title.clone(),
+            normalized_role: universal.normalized_role,
+            company: scraped_job.company,
+            location: scraped_job.location.clone(),
+            work_mode,
+            experience_level,
+            raw_description: scraped_job.raw_description.clone(),
+            extracted_summary_json: None,
+            embedding: embedding_bytes,
+            enrichment_status: EnrichmentStatus::LocalOnly,
+            posted_at: scraped_job.posted_at,
+            salary_text: scraped_job.salary_text,
+            domain_slug: universal.dominant_domain,
+            quality_score: quality.quality_score,
+            red_flags_json,
+            also_available_on_json,
+            embedding_model,
+        };
+
+        let job_match_rec = state
+            .db
+            .insert_job_with_skill_ids(&new_job, &universal.skill_ids)?;
+        let kw_ctx = compute_local_keyword_relevance(
+            &user_summary,
+            &profile_detail.target_roles,
+            &user_skill_names,
+            &scraped_job.title,
+            &scraped_job.raw_description,
+            Some(&location),
+            scraped_job.location.as_deref(),
+        );
+        let semantic_ctx = match (&local_profile_vec, &local_job_vec) {
+            (Some(u), Some(j)) => cosine_similarity(u, j)
+                .map(|sim| (0.70 * (sim as f64) + 0.30 * kw_ctx).clamp(0.0, 1.0))
+                .unwrap_or(kw_ctx),
+            _ => kw_ctx,
+        };
+        let computed = compute_local_hybrid_match(&profile_match, &job_match_rec, semantic_ctx);
+        upserts.push(to_match_upsert(&user_id, &job_id, &computed)?);
+        newly_ingested += 1;
+
+        if (idx + 1) % 20 == 0 || idx + 1 == total_fetched as usize {
+            emit_progress(
+                app,
+                "local_matching",
+                format!("Menyimpan & menilai lokal {}/{}...", idx + 1, total_fetched),
+                (idx + 1) as u32,
+                total_fetched,
+            );
+        }
+    }
+
+    if !upserts.is_empty() {
+        state.db.upsert_job_matches(&upserts)?;
+    }
+    state.db.touch_active_keywords_scraped(&user_id)?;
+    let pending_local_count = state.db.count_pending_local_jobs(&user_id)?;
+
+    emit_progress(
+        app,
+        "done",
+        format!("Selesai: {newly_ingested} lowongan baru tersimpan rapi (0 token Gemini)."),
+        total_fetched,
+        total_fetched,
+    );
+
+    Ok(ScrapeRunReport {
+        total_fetched,
+        newly_ingested,
+        skipped_duplicates,
+        failed_extractions: 0,
+        pending_local_count,
+        warnings: worker_resp.warnings,
+    })
+}
+
+/// Stage 2 (Decoupled, Resumable, Batched + RPM Limited):
+/// Reads pending `local_only` jobs (excluding dismissed ones) from SQLite, extracts 5 jobs/call
+/// via `extract_jobs_batch` + embeds via `batchEmbedContents`, enforces the user's RPM cap,
+/// and upgrades them to `ai_enriched`.
+pub async fn run_ai_matching_queue_impl(
+    state: &AppState,
+    app: Option<&AppHandle>,
+    user_id: String,
+    max_jobs: u32,
+    rpm_limit: u32,
+) -> Result<AiMatchRunReport, AppError> {
+    let api_key = state.require_api_key()?;
+    let profile = state
+        .db
+        .get_profile_for_matching(&user_id)?
+        .ok_or_else(|| {
+            AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
+        })?;
+
+    let _guard = state.try_acquire_scrape_guard()?;
+    let limit = max_jobs.clamp(1, 100) as usize;
+    let safe_rpm = rpm_limit.clamp(1, 60);
+
+    let pending = state.db.list_pending_local_jobs_for_ai(&user_id, limit)?;
+    let total = pending.len() as u32;
+    if pending.is_empty() {
+        return Ok(AiMatchRunReport {
+            processed_jobs: 0,
+            enriched_jobs: 0,
+            failed_jobs: 0,
+            remaining_local_jobs: 0,
+            api_calls_used: 0,
+            warnings: vec![],
+        });
+    }
+
+    let mut enriched_jobs = 0u32;
+    let mut failed_jobs = 0u32;
+    let mut api_calls_used = 0u32;
+    let mut warnings = Vec::new();
+    let mut processed = 0u32;
+
+    for chunk in pending.chunks(AI_EXTRACT_BATCH_SIZE) {
+        let wait_before = state.rpm_limiter.pending_wait(safe_rpm).await;
+        if !wait_before.is_zero() {
+            emit_progress(
+                app,
+                "rate_limit_wait",
+                format!(
+                    "Menunggu jeda aman kuota RPM ({} detik) agar tidak terkena limit 429...",
+                    wait_before.as_secs().max(1)
+                ),
+                processed,
+                total,
+            );
+        }
+        state.rpm_limiter.acquire(safe_rpm).await;
+
+        emit_progress(
+            app,
+            "ai_batch_extract",
+            format!(
+                "AI Matching batch {}/{} lowongan (hemat kuota: {} lowongan/request)...",
+                (processed + chunk.len() as u32).min(total),
+                total,
+                chunk.len()
+            ),
+            processed,
+            total,
+        );
+
+        let known_skills = state.db.get_top_canonical_skills(MAX_KNOWN_SKILLS_CONTEXT)?;
+        let batch_inputs: Vec<BatchJobInput> = chunk
+            .iter()
+            .map(|row| BatchJobInput {
+                job_id: row.job_id.clone(),
+                title: row.title.clone(),
+                raw_description: row.raw_description.clone(),
+            })
+            .collect();
+
+        api_calls_used += 1;
+        let extracted_items = match state
+            .gemini
+            .extract_jobs_batch(&api_key, &batch_inputs, &known_skills)
+            .await
+        {
+            Ok(items) => items,
+            Err(err) if err.code == ErrorCode::ApiKeyInvalid => return Err(err),
+            Err(err) => {
+                failed_jobs += chunk.len() as u32;
+                processed += chunk.len() as u32;
+                warnings.push(ScrapeWarningItem {
+                    source: "gemini".into(),
+                    code: err.code.as_str().to_string(),
+                    message: format!("Batch ekstraksi gagal ({} lowongan): {}", chunk.len(), err.message),
+                });
+                if err.code == ErrorCode::GeminiRateLimited {
+                    break;
+                }
+                continue;
+            }
+        };
+
+        let mut extracted_by_id: HashMap<String, JobExtractionResult> = HashMap::new();
+        for item in extracted_items {
+            extracted_by_id.insert(
+                item.job_id,
+                JobExtractionResult {
+                    normalized_role: item.normalized_role,
+                    experience_level: item.experience_level,
+                    work_mode: item.work_mode,
+                    role_summary: item.role_summary,
+                    skills: item.skills,
+                },
+            );
+        }
+
+        // Prepare batch embedding texts for all successfully extracted jobs in this chunk
+        let mut ready_rows = Vec::new();
+        let mut embed_texts = Vec::new();
+        for row in chunk {
+            let Some(ext) = extracted_by_id.remove(&row.job_id) else {
+                failed_jobs += 1;
+                warnings.push(ScrapeWarningItem {
+                    source: row.source.clone(),
+                    code: "GEMINI_PARSE_FAILED".into(),
+                    message: format!("Model melewatkan '{}' pada batch ekstraksi.", row.title),
+                });
+                continue;
+            };
+            let mandatory_names: Vec<String> = ext
+                .skills
+                .iter()
+                .filter(|s| s.requirement_type == RequirementType::Mandatory)
+                .map(|s| s.canonical_name.clone())
+                .collect();
+            let nice_names: Vec<String> = ext
+                .skills
+                .iter()
+                .filter(|s| s.requirement_type == RequirementType::NiceToHave)
+                .map(|s| s.canonical_name.clone())
+                .collect();
+            let embed_text = format_job_embedding_text(
+                &ext.normalized_role,
+                ext.experience_level,
+                &row.title,
+                &ext.role_summary,
+                &mandatory_names,
+                &nice_names,
+            );
+            embed_texts.push(embed_text);
+            ready_rows.push((row, ext));
+        }
+
+        if !ready_rows.is_empty() {
+            let wait_emb = state.rpm_limiter.pending_wait(safe_rpm).await;
+            if !wait_emb.is_zero() {
+                emit_progress(
+                    app,
+                    "rate_limit_wait",
+                    format!(
+                        "Menunggu jeda aman RPM sebelum batch embedding ({} detik)...",
+                        wait_emb.as_secs().max(1)
+                    ),
+                    processed,
+                    total,
+                );
+            }
+            state.rpm_limiter.acquire(safe_rpm).await;
+            api_calls_used += 1;
+
+            let embeddings_opt: Option<Vec<Vec<f32>>> = match state
+                .gemini
+                .embed_texts_batch(&api_key, &embed_texts, EmbeddingTaskType::RetrievalDocument)
+                .await
+            {
+                Ok(vecs) => Some(vecs),
+                Err(err) if err.code == ErrorCode::ApiKeyInvalid => return Err(err),
+                Err(err) => {
+                    warnings.push(ScrapeWarningItem {
+                        source: "gemini".into(),
+                        code: err.code.as_str().to_string(),
+                        message: format!(
+                            "Batch embedding gagal, skor sementara memakai skill+level: {}",
+                            err.message
+                        ),
+                    });
+                    None
+                }
+            };
+
+            let mut upserts = Vec::with_capacity(ready_rows.len());
+            for (idx, (row, ext)) in ready_rows.into_iter().enumerate() {
+                let emb_bytes = embeddings_opt
+                    .as_ref()
+                    .and_then(|v| v.get(idx))
+                    .map(|vec| encode_embedding(vec));
+                let extracted_json = serde_json::to_string(&ext)
+                    .map_err(|_| AppError::db_error("Gagal serialisasi ekstraksi AI."))?;
+                let job_match_rec = state.db.apply_ai_enrichment_to_job(
+                    &row.job_id,
+                    &ext,
+                    &extracted_json,
+                    emb_bytes.as_deref(),
+                )?;
+                let computed = compute_hybrid_match(&profile, &job_match_rec);
+                upserts.push(to_match_upsert(&user_id, &row.job_id, &computed)?);
+                enriched_jobs += 1;
+            }
+            if !upserts.is_empty() {
+                state.db.upsert_job_matches(&upserts)?;
+            }
+        }
+
+        processed += chunk.len() as u32;
+        emit_progress(
+            app,
+            "ai_batch_extract",
+            format!("Selesai memperkaya {enriched_jobs}/{total} lowongan dengan AI..."),
+            processed,
+            total,
+        );
+    }
+
+    let remaining_local_jobs = state.db.count_pending_local_jobs(&user_id)?;
+    emit_progress(
+        app,
+        "done",
+        format!(
+            "AI Matching selesai: {enriched_jobs} lowongan diperkaya ({api_calls_used} panggilan API)."
+        ),
+        total,
+        total,
+    );
+
+    Ok(AiMatchRunReport {
+        processed_jobs: processed,
+        enriched_jobs,
+        failed_jobs,
+        remaining_local_jobs,
+        api_calls_used,
+        warnings,
+    })
+}
+
+/// On-demand AI enrichment for a single `local_only` job.
+pub async fn enrich_job_with_ai_impl(
+    state: &AppState,
+    user_id: String,
+    job_id: String,
+) -> Result<JobMatchDetail, AppError> {
+    let api_key = state.require_api_key()?;
+    let profile = state
+        .db
+        .get_profile_for_matching(&user_id)?
+        .ok_or_else(|| {
+            AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
+        })?;
+    let row = state
+        .db
+        .load_job_for_ai_enrichment(&job_id)?
+        .ok_or_else(|| AppError::validation_error(format!("Lowongan '{job_id}' tidak ditemukan.")))?;
+
+    let known_skills = state.db.get_top_canonical_skills(MAX_KNOWN_SKILLS_CONTEXT)?;
+    state.rpm_limiter.acquire(15).await;
+    let extracted = state
+        .gemini
+        .extract_job(&api_key, &row.raw_description, &known_skills)
+        .await?;
+
+    let mandatory_names: Vec<String> = extracted
+        .skills
+        .iter()
+        .filter(|s| s.requirement_type == RequirementType::Mandatory)
+        .map(|s| s.canonical_name.clone())
+        .collect();
+    let nice_names: Vec<String> = extracted
+        .skills
+        .iter()
+        .filter(|s| s.requirement_type == RequirementType::NiceToHave)
+        .map(|s| s.canonical_name.clone())
+        .collect();
+    let embed_text = format_job_embedding_text(
+        &extracted.normalized_role,
+        extracted.experience_level,
+        &row.title,
+        &extracted.role_summary,
+        &mandatory_names,
+        &nice_names,
+    );
+
+    state.rpm_limiter.acquire(15).await;
+    let emb_vec = state
+        .gemini
+        .embed_text(&api_key, &embed_text, EmbeddingTaskType::RetrievalDocument)
+        .await?;
+    let emb_bytes = encode_embedding(&emb_vec);
+
+    let extracted_json = serde_json::to_string(&extracted)
+        .map_err(|_| AppError::db_error("Gagal serialisasi ekstraksi AI."))?;
+    let job_match_rec = state.db.apply_ai_enrichment_to_job(
+        &job_id,
+        &extracted,
+        &extracted_json,
+        Some(&emb_bytes),
+    )?;
+    let computed = compute_hybrid_match(&profile, &job_match_rec);
+    let upsert = to_match_upsert(&user_id, &job_id, &computed)?;
+    state.db.upsert_job_matches(&[upsert])?;
+
+    state.db.get_job_detail(&user_id, &job_id)
+}
+
+pub fn update_job_application_impl(
+    state: &AppState,
+    user_id: String,
+    job_id: String,
+    status: ApplicationStatus,
+    notes: Option<String>,
+) -> Result<JobMatchDetail, AppError> {
+    state
+        .db
+        .update_job_application(&user_id, &job_id, status, notes.as_deref())
+}
+
+pub async fn generate_apply_kit_impl(
+    state: &AppState,
+    user_id: String,
+    job_id: String,
+    language: String,
+    force_refresh: bool,
+) -> Result<ApplyKitResult, AppError> {
+    let clean_lang = if language.trim().eq_ignore_ascii_case("en") {
+        "en".to_string()
+    } else {
+        "id".to_string()
+    };
+
+    if !force_refresh {
+        if let Some(cached) = state.db.get_cached_apply_kit(&user_id, &job_id)? {
+            if cached.language == clean_lang {
+                return Ok(cached);
+            }
+        }
+    }
+
+    let api_key = state.require_api_key()?;
+    let profile = state
+        .db
+        .get_profile_by_id(&user_id)?
+        .ok_or_else(|| {
+            AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
+        })?;
+    let detail = state.db.get_job_detail(&user_id, &job_id)?;
+
+    let prompt_input = ApplyKitPromptInput {
+        language: clean_lang,
+        user_summary: profile.summary.unwrap_or_default(),
+        user_level: profile.experience_level.as_str().to_string(),
+        user_skills: profile
+            .skills
+            .iter()
+            .map(|s| format!("{} ({})", s.canonical_name, s.proficiency.as_str()))
+            .collect(),
+        job_title: detail.title,
+        job_company: detail.company,
+        job_role: detail.normalized_role,
+        job_description: detail.raw_description,
+        matched_skills: detail
+            .matched_skills
+            .iter()
+            .map(|s| s.canonical_name.clone())
+            .collect(),
+        missing_skills: detail
+            .missing_skills
+            .iter()
+            .map(|s| s.canonical_name.clone())
+            .collect(),
+    };
+
+    let kit = state
+        .gemini
+        .generate_apply_kit(&api_key, &prompt_input)
+        .await?;
+    state.db.save_apply_kit(&user_id, &job_id, &kit)?;
+    Ok(kit)
 }
 
 pub fn list_ranked_jobs_impl(
@@ -458,6 +1230,63 @@ pub async fn generate_gap_analysis(
     generate_gap_analysis_impl(&state, user_id, job_id, force_refresh).await
 }
 
+#[tauri::command]
+#[specta::specta]
+pub async fn scrape_and_store_jobs(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    user_id: String,
+    prefs: SearchPreferences,
+) -> Result<ScrapeRunReport, AppError> {
+    scrape_and_store_jobs_impl(&state, Some(&app), user_id, prefs).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn run_ai_matching_queue(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    user_id: String,
+    max_jobs: u32,
+    rpm_limit: u32,
+) -> Result<AiMatchRunReport, AppError> {
+    run_ai_matching_queue_impl(&state, Some(&app), user_id, max_jobs, rpm_limit).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn enrich_job_with_ai(
+    state: State<'_, AppState>,
+    user_id: String,
+    job_id: String,
+) -> Result<JobMatchDetail, AppError> {
+    enrich_job_with_ai_impl(&state, user_id, job_id).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn update_job_application(
+    state: State<'_, AppState>,
+    user_id: String,
+    job_id: String,
+    status: ApplicationStatus,
+    notes: Option<String>,
+) -> Result<JobMatchDetail, AppError> {
+    update_job_application_impl(&state, user_id, job_id, status, notes)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn generate_apply_kit(
+    state: State<'_, AppState>,
+    user_id: String,
+    job_id: String,
+    language: String,
+    force_refresh: bool,
+) -> Result<ApplyKitResult, AppError> {
+    generate_apply_kit_impl(&state, user_id, job_id, language, force_refresh).await
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::atomic::Ordering;
@@ -548,6 +1377,8 @@ mod tests {
                     location: Some("Jakarta".into()),
                     raw_description: "Mencari backend engineer dengan kemampuan Rust dan SQLite."
                         .into(),
+                    posted_at: None,
+                    salary_text: None,
                 },
                 WorkerScrapedJob {
                     source: "glints".into(),
@@ -557,6 +1388,8 @@ mod tests {
                     company: "PT Beta".into(),
                     location: Some("Bandung".into()),
                     raw_description: "Membangun desktop engine lokal dengan Rust dan Docker.".into(),
+                    posted_at: None,
+                    salary_text: None,
                 },
             ],
             stats: WorkerScrapeStats {
@@ -613,6 +1446,8 @@ mod tests {
                 location: Some("Jakarta".into()),
                 raw_description: "Membangun layanan API dengan Rust dan SQLite secara lokal."
                     .into(),
+                posted_at: None,
+                salary_text: None,
             }],
             stats: WorkerScrapeStats {
                 total_fetched: 1,
@@ -777,6 +1612,8 @@ mod tests {
                 company: "PT Warn".into(),
                 location: Some("Jakarta".into()),
                 raw_description: "Membangun layanan API menggunakan Rust dan SQLite lokal.".into(),
+                posted_at: None,
+                salary_text: None,
             }],
             stats: WorkerScrapeStats {
                 total_fetched: 1,
@@ -797,7 +1634,7 @@ mod tests {
         let bad_src_err = run_scrape_for_active_keywords_impl(
             &state,
             user_id.clone(),
-            vec!["indeed".into()],
+            vec!["unknown_portal".into()],
             5,
         )
         .await
@@ -834,5 +1671,148 @@ mod tests {
         assert_eq!(concurrent_err.code, ErrorCode::ValidationError);
         let first_res = handle.await.expect("join").expect("first scrape succeeds");
         assert_eq!(first_res.newly_ingested, 1);
+    }
+
+    #[test]
+    fn sanitize_external_url_allows_http_https_and_drops_dangerous_schemes() {
+        assert_eq!(
+            sanitize_external_url(Some("https://linkedin.com/jobs/view/123")),
+            Some("https://linkedin.com/jobs/view/123".into())
+        );
+        assert_eq!(
+            sanitize_external_url(Some("  http://example.com/job  ")),
+            Some("http://example.com/job".into())
+        );
+        assert_eq!(sanitize_external_url(Some("javascript:alert(1)")), None);
+        assert_eq!(sanitize_external_url(Some("file:///etc/passwd")), None);
+        assert_eq!(sanitize_external_url(Some("data:text/html,<h1>x</h1>")), None);
+        assert_eq!(sanitize_external_url(Some("   ")), None);
+        assert_eq!(sanitize_external_url(None), None);
+    }
+
+    #[tokio::test]
+    async fn decoupled_stage1_stores_jobs_with_zero_gemini_calls_and_stage2_enriches_resumably() {
+        let gemini = Arc::new(MockGemini::default());
+        let worker = Arc::new(MockWorker::default());
+        *worker.response.lock().unwrap() = Ok(WorkerScrapeResponse {
+            jobs: vec![
+                WorkerScrapedJob {
+                    source: "jobstreet".into(),
+                    external_id: "js-dec-1".into(),
+                    url: Some("https://id.jobstreet.com/id/job/1".into()),
+                    title: "Junior Backend Rust Engineer".into(),
+                    company: "PT Lokal Satu".into(),
+                    location: Some("Bandung".into()),
+                    raw_description: "Dicari backend engineer Rust, SQLite, dan Docker secara remote."
+                        .into(),
+                    posted_at: Some("2026-11-24".into()),
+                    salary_text: Some("Rp 10jt - 15jt".into()),
+                },
+                WorkerScrapedJob {
+                    source: "indeed".into(),
+                    external_id: "in-dec-2".into(),
+                    url: Some("https://id.indeed.com/viewjob?jk=2".into()),
+                    title: "Systems Engineer".into(),
+                    company: "PT Lokal Dua".into(),
+                    location: Some("Jakarta".into()),
+                    raw_description: "Membangun CLI Rust dengan SQLite.".into(),
+                    posted_at: None,
+                    salary_text: None,
+                },
+            ],
+            stats: WorkerScrapeStats {
+                total_fetched: 2,
+                deduplicated_in_batch: 0,
+                duration_ms: 15,
+            },
+            warnings: vec![],
+        });
+
+        let state = build_test_state(None, Arc::clone(&gemini), Arc::clone(&worker));
+        // Seed user WITH temporary key, then delete key to prove Stage 1 works with 0 key & 0 tokens!
+        state.secrets.set_api_key("AIzaSySEED1234").expect("set");
+        let user_id = seed_user(&state).await;
+        let calls_after_seed = gemini.extract_calls.load(Ordering::SeqCst);
+        let embeds_after_seed = gemini.embed_calls.load(Ordering::SeqCst);
+        state.secrets.delete_api_key().expect("clear key");
+
+        let prefs = SearchPreferences {
+            location: "Bandung".into(),
+            sources: vec!["jobstreet".into(), "indeed".into()],
+            limit_per_query: 20,
+            max_pages: 2,
+            posted_within_days: Some(7),
+            work_mode: "any".into(),
+            custom_queries: vec!["Rust Engineer".into()],
+            ai_enrich_enabled: false,
+            ai_enrich_max_jobs: 10,
+            ai_rpm_limit: 10,
+        };
+
+        // Stage 1: MUST succeed WITHOUT an API key and with 0 Gemini calls
+        let report = scrape_and_store_jobs_impl(&state, None, user_id.clone(), prefs)
+            .await
+            .expect("stage 1 must succeed with 0 API key");
+        assert_eq!(report.newly_ingested, 2);
+        assert_eq!(report.pending_local_count, 2);
+        assert_eq!(gemini.extract_calls.load(Ordering::SeqCst), calls_after_seed);
+        assert_eq!(gemini.embed_calls.load(Ordering::SeqCst), embeds_after_seed);
+
+        let listed = list_ranked_jobs_impl(&state, user_id.clone(), JobFilterInput::default())
+            .expect("list local jobs");
+        assert_eq!(listed.len(), 2);
+        assert!(listed.iter().all(|j| j.enrichment_status == EnrichmentStatus::LocalOnly));
+        assert!(listed[0].final_score > 0.0);
+
+        // Dismiss second job BEFORE running AI -> Stage 2 must NOT waste tokens on dismissed jobs
+        let dismissed = update_job_application_impl(
+            &state,
+            user_id.clone(),
+            listed[1].job_id.clone(),
+            ApplicationStatus::Dismissed,
+            Some("Lokasi kurang cocok".into()),
+        )
+        .expect("dismiss");
+        assert_eq!(dismissed.application_status, ApplicationStatus::Dismissed);
+
+        let visible_after_dismiss =
+            list_ranked_jobs_impl(&state, user_id.clone(), JobFilterInput::default())
+                .expect("visible list");
+        assert_eq!(visible_after_dismiss.len(), 1);
+
+        // Stage 2: Restore API key and enrich remaining active queue (only 1 non-dismissed job!)
+        state.secrets.set_api_key("AIzaSyTESTKEY1234").expect("restore key");
+        let ai_report = run_ai_matching_queue_impl(&state, None, user_id.clone(), 10, 10)
+            .await
+            .expect("stage 2 ok");
+        assert_eq!(ai_report.enriched_jobs, 1);
+        assert_eq!(ai_report.remaining_local_jobs, 0);
+        assert_eq!(ai_report.api_calls_used, 2); // 1 batch extract + 1 batch embed
+
+        // Phase 3 & 4: Track Applied + Generate cached Apply Copilot kit
+        let applied = update_job_application_impl(
+            &state,
+            user_id.clone(),
+            visible_after_dismiss[0].job_id.clone(),
+            ApplicationStatus::Applied,
+            Some("Kirim CV via JobStreet".into()),
+        )
+        .expect("applied");
+        assert_eq!(applied.application_status, ApplicationStatus::Applied);
+        assert!(applied.applied_at.is_some());
+        assert_eq!(applied.user_notes.as_deref(), Some("Kirim CV via JobStreet"));
+
+        let kit = generate_apply_kit_impl(
+            &state,
+            user_id.clone(),
+            visible_after_dismiss[0].job_id.clone(),
+            "id".into(),
+            false,
+        )
+        .await
+        .expect("apply kit");
+        assert_eq!(kit.language, "id");
+        assert!(!kit.cv_bullets.is_empty());
+        assert!(!kit.cover_note.is_empty());
     }
 }

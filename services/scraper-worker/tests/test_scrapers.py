@@ -7,6 +7,7 @@ import pytest
 from app.config import WorkerSettings
 from app.scrapers.base import ScraperError
 from app.scrapers.glints_api import GlintsApiScraper
+from app.scrapers.indeed_scraper import IndeedScraper
 from app.scrapers.jobstreet_api import JobStreetApiScraper
 from app.scrapers.linkedin_guest import LinkedInGuestScraper
 
@@ -223,3 +224,111 @@ async def test_linkedin_guest_parses_dataframe_skips_empty_desc_and_maps_429(
     with pytest.raises(ScraperError) as exc_429:
         await scraper.scrape("Backend Rust", "Indonesia", 5)
     assert exc_429.value.code == "RATE_LIMITED"
+
+
+@pytest.mark.asyncio
+async def test_jobstreet_supports_multipage_and_extracts_salary_and_date(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen_pages: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        page = request.url.params.get("page", "1")
+        seen_pages.append(page)
+        if page == "1":
+            return httpx.Response(
+                200,
+                json={
+                    "data": [
+                        {
+                            "id": "p1-1",
+                            "title": "Laravel Developer",
+                            "advertiser": {"description": "PT Satu"},
+                            "locations": [{"label": "Bandung"}],
+                            "teaser": "Build Laravel APIs",
+                            "bulletPoints": ["PHP 8", "MySQL"],
+                            "salaryLabel": "Rp 10.000.000 - Rp 15.000.000",
+                            "listingDate": "2026-11-24T05:00:00Z",
+                        },
+                        {
+                            "id": "p1-2",
+                            "title": "PHP Engineer",
+                            "advertiser": {"description": "PT Dua"},
+                            "locations": [{"label": "Bandung"}],
+                            "teaser": "Maintain backend systems",
+                            "bulletPoints": ["Laravel"],
+                        },
+                    ]
+                },
+            )
+        return httpx.Response(
+            200,
+            json={
+                "data": [
+                    {
+                        "id": "p2-1",
+                        "title": "Backend Engineer",
+                        "advertiser": {"description": "PT Tiga"},
+                        "locations": [{"label": "Bandung"}],
+                        "teaser": "Scale REST APIs",
+                        "bulletPoints": ["PostgreSQL"],
+                    }
+                ]
+            },
+        )
+
+    _patch_async_client(monkeypatch, handler)
+    scraper = JobStreetApiScraper(WorkerSettings())
+    jobs = await scraper.scrape(
+        "Laravel", "Bandung", 2, max_pages=3, posted_within_days=7, work_mode="remote"
+    )
+
+    assert seen_pages == ["1", "2"]
+    assert len(jobs) == 3
+    assert jobs[0].salary_text == "Rp 10.000.000 - Rp 15.000.000"
+    assert jobs[0].posted_at == "2026-11-24T05:00:00Z"
+
+
+@pytest.mark.asyncio
+async def test_indeed_scraper_parses_records_and_sanitizes_urls(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _FakeDF:
+        empty = False
+
+        def to_dict(self, orient: str = "records") -> list[dict[str, Any]]:
+            return [
+                {
+                    "id": "abc999",
+                    "title": "Backend PHP Developer",
+                    "company": "PT Indeed Demo",
+                    "location": "Bandung, Jawa Barat",
+                    "job_url": "https://id.indeed.com/viewjob?jk=abc999",
+                    "description": "<p>Membutuhkan developer PHP Laravel dan MySQL.</p>",
+                    "date_posted": "2026-11-23",
+                    "min_amount": 8000000,
+                    "max_amount": 12000000,
+                    "currency": "IDR",
+                    "interval": "monthly",
+                },
+                {
+                    "id": "badurl",
+                    "title": "Suspicious URL Job",
+                    "company": "PT Unsafe",
+                    "location": "Jakarta",
+                    "job_url": "javascript:alert(1)",
+                    "description": "<p>Valid description text here</p>",
+                },
+            ]
+
+    monkeypatch.setattr("app.scrapers.indeed_scraper.scrape_jobs", lambda **kwargs: _FakeDF())
+    scraper = IndeedScraper(WorkerSettings())
+    jobs = await scraper.scrape("PHP Developer", "Bandung", 10, max_pages=2)
+
+    assert len(jobs) == 2
+    assert jobs[0].source == "indeed"
+    assert jobs[0].external_id == "in-abc999"
+    assert jobs[0].url == "https://id.indeed.com/viewjob?jk=abc999"
+    assert jobs[0].salary_text == "IDR 8000000 - 12000000/monthly"
+    assert jobs[0].posted_at == "2026-11-23"
+    assert jobs[1].url is None
