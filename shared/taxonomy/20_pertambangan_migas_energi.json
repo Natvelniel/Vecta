@@ -1,0 +1,296 @@
+[
+  {
+    "id": "mng.mine_plan",
+    "canonical_name": "Perencanaan Tambang (Surpac / Minescape / Vulcan)",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "GEOVIA Surpac",
+      "Minescape",
+      "Datamine",
+      "Pit Design",
+      "Mine Scheduling"
+    ]
+  },
+  {
+    "id": "mng.pop_pom",
+    "canonical_name": "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "POP Minerba",
+      "POM Minerba",
+      "POU",
+      "Juru Ledak Kelas II",
+      "KTT Pertambangan"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "mng.blasting",
+    "canonical_name": "Operasi Peledakan & Pemboran (Drilling & Blasting)",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Drill & Blast",
+      "Fragmentation Analysis",
+      "Loading & Hauling",
+      "Dispatch Fleet"
+    ]
+  },
+  {
+    "id": "mng.geologi_eksplorasi",
+    "canonical_name": "Geologi Eksplorasi & Core Logging",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Core Logging",
+      "Geochemical Sampling",
+      "Stratigrafi",
+      "Estimasi Sumberdaya JORC / KCMI"
+    ]
+  },
+  {
+    "id": "mng.migas_petrel",
+    "canonical_name": "Teknik Perminyakan & Reservoir (Petrel / Eclipse)",
+    "domain": "pertambangan_migas_energi",
+    "category": "tools_tech",
+    "aliases": [
+      "Schlumberger Petrel",
+      "Well Logging",
+      "Drilling Mud",
+      "Production Optimization",
+      "SKK Migas PTK 007"
+    ]
+  },
+  {
+    "id": "mng.solar_ebt",
+    "canonical_name": "Energi Terbarukan & PLTS (PVsyst / Solar PV)",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "PVsyst",
+      "PLTS Rooftop",
+      "Geothermal Ops",
+      "Energy Audit",
+      "BESS Battery"
+    ]
+  },
+  {
+    "id": "mng.coal_processing",
+    "canonical_name": "Pengolahan Mineral & Metalurgi (CPP / Smelter)",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Hydrometallurgy",
+      "Pyrometallurgy",
+      "Smelter Nikel",
+      "Coal Washing"
+    ]
+  },
+  {
+    "id": "mng.reklamasi",
+    "canonical_name": "Reklamasi Pascatambang & Lingkungan Tambang",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "Revegetasi Lahan Tambang",
+      "Air Asam Tambang",
+      "Settling Pond"
+    ]
+  },
+  {
+    "id": "mng.geotech_mine",
+    "canonical_name": "Geoteknik Tambang & Slope Stability (Rocscience)",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Rocscience Slide2",
+      "Slope Monitoring Radar",
+      "Dewatering Tambang"
+    ],
+    "parent_id": "mng.mine_plan"
+  },
+  {
+    "id": "mng.hauling_disp",
+    "canonical_name": "Dispatch Tambang & Optimasi Fleet Hauling",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "Fleet Management Tambang",
+      "Cycle Time Hauling",
+      "Road Grade Maintenance"
+    ],
+    "parent_id": "mng.blasting"
+  },
+  {
+    "id": "mng.offshore_hse",
+    "canonical_name": "Keselamatan Migas & BOSIET / HUET",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "BOSIET",
+      "HUET",
+      "H2S Safety",
+      "PTW Oil & Gas"
+    ]
+  },
+  {
+    "id": "mng.piping_process",
+    "canonical_name": "Process Simulation (Aspen HYSYS / Flarenet)",
+    "domain": "pertambangan_migas_energi",
+    "category": "tools_tech",
+    "aliases": [
+      "Aspen HYSYS",
+      "Aspen Plus",
+      "Process Flow Diagram",
+      "HAZOP Study"
+    ]
+  },
+  {
+    "id": "mng.carbon_ccs",
+    "canonical_name": "CCS/CCUS & Transisi Energi Bersih",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "Carbon Capture",
+      "Green Hydrogen",
+      "PPA Listrik EBT"
+    ],
+    "parent_id": "mng.solar_ebt"
+  },
+  {
+    "id": "mng.mine_survey",
+    "canonical_name": "Mine Survey, Volume Stockpile & Bathimetri Tambang",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Stockpile Volume",
+      "Pit Progress Survey",
+      "Echosounder"
+    ],
+    "parent_id": "mng.mine_plan"
+  },
+  {
+    "id": "mng.coal_qc",
+    "canonical_name": "Coal Quality, Blending & Sampling ASTM",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Gross Calorific Value",
+      "Ash & Moisture",
+      "Coal Blending",
+      "ASTM Sampling"
+    ]
+  },
+  {
+    "id": "mng.geothermal",
+    "canonical_name": "Operasi Panas Bumi (Geothermal Reservoir / Power Plant)",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "Steamfield Operations",
+      "Well Testing Geothermal",
+      "Brine Reinjection"
+    ],
+    "parent_id": "mng.solar_ebt"
+  },
+  {
+    "id": "mng.lng_terminal",
+    "canonical_name": "Operasi Terminal LNG, CNG & Pipa Gas",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "Cryogenic LNG",
+      "Gas Metering",
+      "Pigging Pipeline"
+    ],
+    "parent_id": "mng.piping_process"
+  },
+  {
+    "id": "mng.mine_closure",
+    "canonical_name": "Estimasi Cadangan Batubara / Nikel (KCMI / JORC)",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Block Modeling",
+      "Grade Control",
+      "Reconciliation Tonnage"
+    ],
+    "parent_id": "mng.geologi_eksplorasi"
+  },
+  {
+    "id": "mng.pipeline_integrity",
+    "canonical_name": "Pipeline Integrity Management & Cathodic Protection",
+    "domain": "pertambangan_migas_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Cathodic Protection",
+      "Inline Inspection ILI",
+      "Corrosion Monitoring"
+    ],
+    "parent_id": "mng.lng_terminal"
+  },
+  {
+    "id": "mine.mine_plan",
+    "canonical_name": "Mine Planning (Minescape, Surpac, Vulcan)",
+    "domain": "pertambangan_migas_energi",
+    "category": "tool",
+    "aliases": [
+      "minescape",
+      "surpac",
+      "datamine",
+      "micromine",
+      "vulcan",
+      "mine plan"
+    ],
+    "base_weight": 1.25,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "mine.k3_tambang",
+    "canonical_name": "K3 Pertambangan (POP, POM, POU, SMKP)",
+    "domain": "pertambangan_migas_energi",
+    "category": "compliance",
+    "aliases": [
+      "pop",
+      "pom",
+      "pou",
+      "k3 pertambangan",
+      "kepmen esdm 1827",
+      "smkp"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "mine.oilfield_eng",
+    "canonical_name": "Drilling, Completion & Reservoir Engineering",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "drilling engineer",
+      "reservoir engineer",
+      "petrel",
+      "well intervention",
+      "skk migas"
+    ],
+    "base_weight": 1.25,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "mine.nickel_hpal",
+    "canonical_name": "Pengolahan Nikel, HPAL & Smelter",
+    "domain": "pertambangan_migas_energi",
+    "category": "domain",
+    "aliases": [
+      "smelter",
+      "hpal",
+      "rkef",
+      "laterit nikel",
+      "hidrometalurgi"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced"
+  }
+]

@@ -1,18 +1,1102 @@
 [
-  {"id":"fin.akuntansi","canonical_name":"Akuntansi","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Accounting","Akuntansi Keuangan","Financial Accounting","General Ledger","Jurnal Umum","Pembukuan","Bookkeeping"]},
-  {"id":"fin.psak","canonical_name":"PSAK / IFRS","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["PSAK","IFRS","SAK ETAP","SAK EMKM","Standar Akuntansi"]},
-  {"id":"fin.laporan_keuangan","canonical_name":"Laporan Keuangan","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["Financial Statement","Financial Reporting","Neraca","Laba Rugi","Arus Kas","Cash Flow"]},
-  {"id":"fin.perpajakan","canonical_name":"Perpajakan","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Taxation","Tax Compliance","PPh 21","PPh 23","PPh 25","PPh Badan","PPN","SPT Tahunan","SPT Masa","Pajak"]},
-  {"id":"fin.brevet_ab","canonical_name":"Brevet Pajak A & B","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.perpajakan","aliases":["Brevet A","Brevet B","Brevet A/B","Brevet AB","Brevet Pajak","Tax Brevet"]},
-  {"id":"fin.efaktur","canonical_name":"e-Faktur & e-Bupot","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.perpajakan","aliases":["e-Faktur","e-Bupot","e-SPT","Coretax","DJP Online"]},
-  {"id":"fin.accurate","canonical_name":"Accurate Accounting","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.akuntansi","aliases":["Accurate","Accurate Online"]},
-  {"id":"fin.zahir","canonical_name":"Zahir / Jurnal.id","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.akuntansi","aliases":["Zahir","Zahir Accounting","Jurnal.id","Mekari Jurnal","MYOB","Xero","QuickBooks"]},
-  {"id":"fin.sap_fico","canonical_name":"SAP FICO","domain":"ekonomi_akuntansi_pajak","category":"tools_tech","parent_id":"fin.akuntansi","aliases":["SAP FI","SAP CO","SAP Finance"]},
-  {"id":"fin.audit","canonical_name":"Audit Keuangan & Internal","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Internal Audit","External Audit","Audit Keuangan","Financial Audit","Auditing"],"requires_domain_context":true},
-  {"id":"fin.ap_ar","canonical_name":"Accounts Payable & Receivable","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["Accounts Payable","Accounts Receivable","Invoicing","Rekonsiliasi Bank","Bank Reconciliation","Piutang","Hutang Dagang"]},
-  {"id":"fin.budgeting","canonical_name":"Budgeting & Forecasting","domain":"ekonomi_akuntansi_pajak","category":"domain","aliases":["Budgeting","Financial Planning","FP&A","Forecasting","Penganggaran","Cost Control"]},
-  {"id":"fin.financial_analysis","canonical_name":"Analisis Keuangan","domain":"ekonomi_akuntansi_pajak","category":"core_hard","aliases":["Financial Analysis","Financial Modeling","Analisis Rasio Keuangan","Valuasi","Valuation"]},
-  {"id":"fin.credit_analysis","canonical_name":"Analisis Kredit & Risiko","domain":"ekonomi_akuntansi_pajak","category":"domain","aliases":["Credit Analysis","Analis Kredit","Risk Management","Manajemen Risiko","Underwriting","KYC","AML"]},
-  {"id":"fin.cost_accounting","canonical_name":"Akuntansi Biaya","domain":"ekonomi_akuntansi_pajak","category":"core_hard","parent_id":"fin.akuntansi","aliases":["Cost Accounting","HPP","COGS","Harga Pokok Produksi"]},
-  {"id":"fin.treasury","canonical_name":"Treasury & Cash Management","domain":"ekonomi_akuntansi_pajak","category":"domain","aliases":["Treasury","Cash Management","Kasir","Petty Cash","Kas Kecil"]}
+  {
+    "id": "fin.akuntansi",
+    "canonical_name": "Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Accounting",
+      "Akuntansi Keuangan",
+      "Financial Accounting",
+      "General Ledger",
+      "Jurnal Umum",
+      "Pembukuan",
+      "Bookkeeping"
+    ]
+  },
+  {
+    "id": "fin.psak",
+    "canonical_name": "PSAK / IFRS",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "PSAK",
+      "IFRS",
+      "SAK ETAP",
+      "SAK EMKM",
+      "Standar Akuntansi"
+    ]
+  },
+  {
+    "id": "fin.laporan_keuangan",
+    "canonical_name": "Laporan Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Financial Statement",
+      "Financial Reporting",
+      "Neraca",
+      "Laba Rugi",
+      "Arus Kas",
+      "Cash Flow"
+    ]
+  },
+  {
+    "id": "fin.perpajakan",
+    "canonical_name": "Perpajakan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Taxation",
+      "Tax Compliance",
+      "PPh 21",
+      "PPh 23",
+      "PPh 25",
+      "PPh Badan",
+      "PPN",
+      "SPT Tahunan",
+      "SPT Masa",
+      "Pajak"
+    ]
+  },
+  {
+    "id": "fin.brevet_ab",
+    "canonical_name": "Brevet Pajak A & B",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "Brevet A",
+      "Brevet B",
+      "Brevet A/B",
+      "Brevet AB",
+      "Brevet Pajak",
+      "Tax Brevet"
+    ]
+  },
+  {
+    "id": "fin.efaktur",
+    "canonical_name": "e-Faktur & e-Bupot",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "e-Faktur",
+      "e-Bupot",
+      "e-SPT",
+      "Coretax",
+      "DJP Online"
+    ]
+  },
+  {
+    "id": "fin.accurate",
+    "canonical_name": "Accurate Accounting",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Accurate",
+      "Accurate Online"
+    ]
+  },
+  {
+    "id": "fin.zahir",
+    "canonical_name": "Zahir / Jurnal.id",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Zahir",
+      "Zahir Accounting",
+      "Jurnal.id",
+      "Mekari Jurnal",
+      "MYOB",
+      "Xero",
+      "QuickBooks"
+    ]
+  },
+  {
+    "id": "fin.sap_fico",
+    "canonical_name": "SAP FICO",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "SAP FI",
+      "SAP CO",
+      "SAP Finance"
+    ]
+  },
+  {
+    "id": "fin.audit",
+    "canonical_name": "Audit Keuangan & Internal",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Internal Audit",
+      "External Audit",
+      "Audit Keuangan",
+      "Financial Audit",
+      "Auditing"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.ap_ar",
+    "canonical_name": "Accounts Payable & Receivable",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Accounts Payable",
+      "Accounts Receivable",
+      "Invoicing",
+      "Rekonsiliasi Bank",
+      "Bank Reconciliation",
+      "Piutang",
+      "Hutang Dagang"
+    ]
+  },
+  {
+    "id": "fin.budgeting",
+    "canonical_name": "Budgeting & Forecasting",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Budgeting",
+      "Financial Planning",
+      "FP&A",
+      "Forecasting",
+      "Penganggaran",
+      "Cost Control"
+    ]
+  },
+  {
+    "id": "fin.financial_analysis",
+    "canonical_name": "Analisis Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Financial Analysis",
+      "Financial Modeling",
+      "Analisis Rasio Keuangan",
+      "Valuasi",
+      "Valuation"
+    ]
+  },
+  {
+    "id": "fin.credit_analysis",
+    "canonical_name": "Analisis Kredit & Risiko",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Credit Analysis",
+      "Analis Kredit",
+      "Risk Management",
+      "Manajemen Risiko",
+      "Underwriting",
+      "KYC",
+      "AML"
+    ]
+  },
+  {
+    "id": "fin.cost_accounting",
+    "canonical_name": "Akuntansi Biaya",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Cost Accounting",
+      "HPP",
+      "COGS",
+      "Harga Pokok Produksi"
+    ]
+  },
+  {
+    "id": "fin.treasury",
+    "canonical_name": "Treasury & Cash Management",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Treasury",
+      "Cash Management",
+      "Kasir",
+      "Petty Cash",
+      "Kas Kecil"
+    ]
+  },
+  {
+    "id": "fin.coretax",
+    "canonical_name": "Coretax DJP",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "Coretax Administration System",
+      "CTAS DJP",
+      "e-Billing Pajak"
+    ]
+  },
+  {
+    "id": "fin.transfer_pricing",
+    "canonical_name": "Transfer Pricing & Tax Planning",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "TP Doc",
+      "Transfer Pricing Documentation",
+      "Tax Planning",
+      "Tax Review"
+    ]
+  },
+  {
+    "id": "fin.spt_badan",
+    "canonical_name": "Penyusunan SPT Badan & PPh 29",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "SPT PPh Badan",
+      "Koreksi Fiskal",
+      "Ekualisasi Pajak"
+    ]
+  },
+  {
+    "id": "fin.rekonsiliasi_fiskal",
+    "canonical_name": "Rekonsiliasi Fiskal",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "Fiscal Reconciliation",
+      "Rekonsiliasi Pajak"
+    ]
+  },
+  {
+    "id": "fin.bea_cukai_pajak",
+    "canonical_name": "Pajak Pertambahan Nilai (PPN & PPnBM)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "Faktur Pajak",
+      "Restitusi PPN",
+      "Kredit Pajak"
+    ]
+  },
+  {
+    "id": "fin.cpa_ca",
+    "canonical_name": "Sertifikasi CA / CPA / CMA",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Chartered Accountant",
+      "CPA Indonesia",
+      "Certified Public Accountant",
+      "BKP Brevet C"
+    ]
+  },
+  {
+    "id": "fin.foraudit",
+    "canonical_name": "Audit Forensik & Investigasi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "parent_id": "fin.audit",
+    "aliases": [
+      "Forensic Audit",
+      "Fraud Examination",
+      "ACFE",
+      "CFE"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.kertas_kerja",
+    "canonical_name": "Kertas Kerja Audit (ATLAS)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.audit",
+    "aliases": [
+      "Working Paper Audit",
+      "Aplikasi ATLAS",
+      "Vouching & Sampling"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.sox_coso",
+    "canonical_name": "Pengendalian Internal (COSO / SOX)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "parent_id": "fin.audit",
+    "aliases": [
+      "Internal Control",
+      "SOX Compliance",
+      "COSO Framework",
+      "Risk Control Matrix"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.oracle_ebs_fin",
+    "canonical_name": "Oracle Financials / NetSuite",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Oracle NetSuite",
+      "Oracle Fusion Finance",
+      "Odoo Accounting"
+    ]
+  },
+  {
+    "id": "fin.consolidation",
+    "canonical_name": "Konsolidasi Laporan Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.laporan_keuangan",
+    "aliases": [
+      "Financial Consolidation",
+      "Eliminasi Intercompany",
+      "PSAK 65"
+    ]
+  },
+  {
+    "id": "fin.fixed_assets",
+    "canonical_name": "Manajemen Aset Tetap",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Fixed Asset Accounting",
+      "Depresiasi Aset",
+      "Stock Opname Aset"
+    ]
+  },
+  {
+    "id": "fin.fpa",
+    "canonical_name": "FP&A & Financial Modeling",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.budgeting",
+    "aliases": [
+      "Financial Planning & Analysis",
+      "3-Statement Model",
+      "DCF Valuation",
+      "Unit Economics"
+    ]
+  },
+  {
+    "id": "fin.ar_collection",
+    "canonical_name": "Collection & Credit Control",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "parent_id": "fin.ap_ar",
+    "aliases": [
+      "Aging AR",
+      "Penagihan Piutang",
+      "Credit Limit Monitoring"
+    ]
+  },
+  {
+    "id": "fin.payroll_tax",
+    "canonical_name": "Akuntansi Payroll & PPh 21 TER",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "PPh 21 TER",
+      "Tarif Efektif Rata-Rata",
+      "Jurnal Gaji"
+    ]
+  },
+  {
+    "id": "fin.erp_finance",
+    "canonical_name": "Sistem ERP Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "SAP S/4HANA Finance",
+      "Microsoft Dynamics 365 Finance",
+      "Workday Finance"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.syariah_acc",
+    "canonical_name": "Akuntansi Syariah (PSAK 101-112)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "parent_id": "fin.psak",
+    "aliases": [
+      "Akuntansi Syariah",
+      "SAS IAI",
+      "Akad Murabahah"
+    ]
+  },
+  {
+    "id": "fin.esg_reporting",
+    "canonical_name": "Pelaporan Keberlanjutan (ESG / GRI)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Sustainability Reporting",
+      "GRI Standards",
+      "POJK 51"
+    ]
+  },
+  {
+    "id": "fin.espt_pph",
+    "canonical_name": "e-Bupot Unifikasi & PPh Pasal 4(2)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.perpajakan",
+    "aliases": [
+      "e-Bupot Unifikasi",
+      "PPh 4 ayat 2",
+      "PPh Final"
+    ]
+  },
+  {
+    "id": "fin.closing_bulanan",
+    "canonical_name": "Monthly & Annual Closing",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.akuntansi",
+    "aliases": [
+      "Month-End Closing",
+      "Year-End Closing",
+      "Accrual & Prepayment"
+    ]
+  },
+  {
+    "id": "fin.petty_bank",
+    "canonical_name": "Rekonsiliasi Bank & Kas",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.ap_ar",
+    "aliases": [
+      "Mutasi Rekening",
+      "Rekonsiliasi Kas",
+      "Settlement EDC"
+    ]
+  },
+  {
+    "id": "fin.bea_materai",
+    "canonical_name": "e-Meterai & Kepatuhan Faktur",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "parent_id": "fin.efaktur",
+    "aliases": [
+      "e-Meterai",
+      "Validasi Faktur Pajak"
+    ]
+  },
+  {
+    "id": "fin.capex_opex",
+    "canonical_name": "Analisis CAPEX & OPEX",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "parent_id": "fin.budgeting",
+    "aliases": [
+      "CAPEX Evaluation",
+      "OPEX Variance Analysis",
+      "ROI & Payback Period"
+    ]
+  },
+  {
+    "id": "fin.ifrs16",
+    "canonical_name": "Akuntansi Sewa (PSAK 73 / IFRS 16)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "parent_id": "fin.psak",
+    "aliases": [
+      "PSAK 73",
+      "IFRS 16",
+      "PSAK 71",
+      "PSAK 72"
+    ]
+  },
+  {
+    "id": "fin.coa_mapping",
+    "canonical_name": "Chart of Accounts & Jurnal Penyesuaian",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Chart of Accounts",
+      "COA",
+      "Adjusting Entries",
+      "Trial Balance"
+    ],
+    "parent_id": "fin.akuntansi",
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.inventory_acc",
+    "canonical_name": "Akuntansi Persediaan & HPP (FIFO / Average)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Inventory Valuation",
+      "Stock Reconciliation",
+      "Cost Variance"
+    ],
+    "parent_id": "fin.cost_accounting"
+  },
+  {
+    "id": "fin.standard_costing",
+    "canonical_name": "Standard Costing & Overhead Allocation",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Absorption Costing",
+      "Activity Based Costing",
+      "WIP Valuation"
+    ],
+    "parent_id": "fin.cost_accounting"
+  },
+  {
+    "id": "fin.intercompany",
+    "canonical_name": "Rekonsiliasi Intercompany & Eliminasi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Intercompany Billing",
+      "Consolidation Adjustment"
+    ],
+    "parent_id": "fin.consolidation"
+  },
+  {
+    "id": "fin.tax_audit",
+    "canonical_name": "Pemeriksaan Pajak & Sengketa (Keberatan / Banding)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Tax Dispute",
+      "SP2DK",
+      "Pemeriksaan DJP",
+      "Pengadilan Pajak"
+    ],
+    "parent_id": "fin.perpajakan"
+  },
+  {
+    "id": "fin.international_tax",
+    "canonical_name": "Pajak Internasional & P3B (Tax Treaty / DGT)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Tax Treaty",
+      "SKD DGT",
+      "PPh Pasal 26",
+      "Permanent Establishment"
+    ],
+    "parent_id": "fin.perpajakan"
+  },
+  {
+    "id": "fin.pph_konstruksi",
+    "canonical_name": "PPh Final Jasa Konstruksi & Properti",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "PPh Pasal 4 ayat 2 Konstruksi",
+      "BPHTB",
+      "PBB P2"
+    ],
+    "parent_id": "fin.perpajakan"
+  },
+  {
+    "id": "fin.customs_excise",
+    "canonical_name": "Cukai & Pajak Dalam Rangka Impor (PDRI)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "PPh Pasal 22 Impor",
+      "Bea Masuk"
+    ],
+    "parent_id": "fin.perpajakan"
+  },
+  {
+    "id": "fin.working_cap",
+    "canonical_name": "Working Capital & Cash Conversion Cycle",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "DSO",
+      "DPO",
+      "DIO",
+      "Cash Forecasting"
+    ],
+    "parent_id": "fin.treasury",
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.virtual_account",
+    "canonical_name": "Rekonsiliasi Marketplace & Payment Gateway",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Rekonsiliasi Settlement",
+      "MDR Fee Check",
+      "COD Reconciliation"
+    ],
+    "parent_id": "fin.ap_ar"
+  },
+  {
+    "id": "fin.audit_it",
+    "canonical_name": "IT Audit & COBIT Governance",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "COBIT 2019",
+      "ITGC",
+      "CISA",
+      "ACL Analytics",
+      "IDEA Audit"
+    ],
+    "parent_id": "fin.audit",
+    "requires_domain_context": true
+  },
+  {
+    "id": "fin.risk_erm",
+    "canonical_name": "Enterprise Risk Management (ISO 31000)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "ISO 31000",
+      "Risk Register",
+      "KRI Key Risk Indicator"
+    ]
+  },
+  {
+    "id": "fin.investor_rel",
+    "canonical_name": "Investor Relations & Board Reporting",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Quarterly Earnings Deck",
+      "Cap Table",
+      "Fundraising Data Room"
+    ],
+    "parent_id": "fin.fpa"
+  },
+  {
+    "id": "fin.xero_quickbooks",
+    "canonical_name": "Cloud Bookkeeping (Xero / QuickBooks)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "aliases": [
+      "Xero Certified",
+      "QuickBooks Online",
+      "FreshBooks"
+    ],
+    "parent_id": "fin.akuntansi"
+  },
+  {
+    "id": "fin.grant_acc",
+    "canonical_name": "Akuntansi Yayasan & Dana Hibah (ISAK 35)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "ISAK 35",
+      "Akuntansi Nirlaba",
+      "Fund Accounting"
+    ],
+    "parent_id": "fin.psak"
+  },
+  {
+    "id": "fin.deferred_tax",
+    "canonical_name": "Pajak Tangguhan (PSAK 46 / IAS 12)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "PSAK 46",
+      "Deferred Tax Asset",
+      "Deferred Tax Liability"
+    ],
+    "parent_id": "fin.psak"
+  },
+  {
+    "id": "fin.tax_treaty_with",
+    "canonical_name": "PPh Pasal 26 & SKD WPLN",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Withholding Tax Cross-Border",
+      "COR Tax",
+      "Form DGT"
+    ],
+    "parent_id": "fin.international_tax"
+  },
+  {
+    "id": "fin.bm_accounting",
+    "canonical_name": "Akuntansi Sektor Tambang & Migas (PSAK 64)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "PSAK 64",
+      "Deplesi & Amortisasi Tambang",
+      "Cost Recovery Migas"
+    ],
+    "parent_id": "fin.psak"
+  },
+  {
+    "id": "fin.const_acc",
+    "canonical_name": "Akuntansi Kontraktor & Properti (PSAK 72)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Percentage of Completion",
+      "Retensi Proyek",
+      "Termin Konstruksi"
+    ],
+    "parent_id": "fin.psak"
+  },
+  {
+    "id": "fin.hospital_acc",
+    "canonical_name": "Akuntansi Rumah Sakit & BLU/BLUD",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "BLUD Keuangan",
+      "SIPD Keuangan Daerah",
+      "SAK Pemerintah (SAP)"
+    ],
+    "parent_id": "fin.akuntansi"
+  },
+  {
+    "id": "fin.ap_3way",
+    "canonical_name": "Three-Way Matching & Verifikasi PO/GR/Invoice",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "3-Way Matching",
+      "Good Receipt Verification",
+      "Invoice Processing"
+    ],
+    "parent_id": "fin.ap_ar"
+  },
+  {
+    "id": "fin.forex_gain",
+    "canonical_name": "Selisih Kurs & Multi-Currency Revaluation",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "FX Revaluation",
+      "Realized Unrealized Gain Loss",
+      "Hedging Accounting"
+    ],
+    "parent_id": "fin.akuntansi"
+  },
+  {
+    "id": "fin.working_paper_audit",
+    "canonical_name": "Pengujian Substantif & Analitis Audit",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Substantive Testing",
+      "Cut-Off Testing",
+      "Cash Opname",
+      "Confirmasi Piutang"
+    ],
+    "parent_id": "fin.audit"
+  },
+  {
+    "id": "fin.esg_carbon_fin",
+    "canonical_name": "Green Finance & Akuntansi Karbon",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Green Bond",
+      "Sustainability Linked Loan",
+      "Carbon Credit Accounting"
+    ],
+    "parent_id": "fin.esg_reporting"
+  },
+  {
+    "id": "fin.accurate_pos",
+    "canonical_name": "Integrasi POS Retail ke Pembukuan Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "tools_tech",
+    "aliases": [
+      "Jurnal POS",
+      "Majoo / Moka Sync",
+      "Rekonsiliasi Kasir"
+    ],
+    "parent_id": "fin.accurate"
+  },
+  {
+    "id": "fin.acc_receivable_col",
+    "canonical_name": "Credit Verification & Customer Aging",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Customer Aging",
+      "AR Aging",
+      "Nota Debet Kredit"
+    ],
+    "parent_id": "fin.ap_ar"
+  },
+  {
+    "id": "fin.bank_garansi_fin",
+    "canonical_name": "Administrasi Giro, Cek & Pembayaran Vendor",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Bilyet Giro",
+      "RTGS / SKNBI",
+      "Vendor Payment Batch"
+    ],
+    "parent_id": "fin.treasury"
+  },
+  {
+    "id": "fin.audit_stock",
+    "canonical_name": "Stock Opname & Rekonsiliasi Selisih Gudang",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Cycle Count Audit",
+      "Stock Variance Analysis",
+      "Berita Acara Opname"
+    ],
+    "parent_id": "fin.inventory_acc"
+  },
+  {
+    "id": "fin.tax_21_ter",
+    "canonical_name": "Perhitungan PPh 21 Karyawan, Bukan Pegawai & Pesangon",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Bukti Potong 1721-A1",
+      "PPh 21 Final",
+      "e-Bupot 21/26"
+    ],
+    "parent_id": "fin.payroll_tax"
+  },
+  {
+    "id": "fin.sap_bw_acc",
+    "canonical_name": "Pelaporan Manajemen Bulanan (P&L per Unit / Cabang)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Cost Center Reporting",
+      "Profit Center Analysis",
+      "Branch P&L"
+    ],
+    "parent_id": "fin.laporan_keuangan"
+  },
+  {
+    "id": "fin.e_faktur_4",
+    "canonical_name": "Administrasi PPN Keluaran & Masukan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Faktur Pajak Keluaran",
+      "Faktur Masukan",
+      "Retur Pajak"
+    ],
+    "parent_id": "fin.efaktur"
+  },
+  {
+    "id": "fin.tax_incentive",
+    "canonical_name": "Fasilitas Perpajakan (Tax Holiday / Super Tax Deduction)",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Tax Allowance",
+      "PPh Ditanggung Pemerintah",
+      "PPN Dibebaskan"
+    ],
+    "parent_id": "fin.perpajakan"
+  },
+  {
+    "id": "fin.variance_cost",
+    "canonical_name": "Budget vs Actual Variance Analysis",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Variance Analysis",
+      "Department Budgeting",
+      "Zero-Based Budgeting"
+    ],
+    "parent_id": "fin.budgeting"
+  },
+  {
+    "id": "fin.petty_vouch",
+    "canonical_name": "Verifikasi Reimburse, Kas Bon & Petty Cash",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Cash Advance Settlement",
+      "Expense Claim Audit",
+      "Voucher Jurnal"
+    ],
+    "parent_id": "fin.treasury"
+  },
+  {
+    "id": "fin.ipo_prep",
+    "canonical_name": "Kesiapan Audit IPO & Pelaporan OJK Emiten",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "Laporan Tahunan Emiten",
+      "BAPEPAM / OJK Disclosure",
+      "Keterbukaan Informasi"
+    ],
+    "parent_id": "fin.consolidation"
+  },
+  {
+    "id": "fin.inventory_cogs",
+    "canonical_name": "Stock Aging & Penyisihan Persediaan Usang",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core_hard",
+    "aliases": [
+      "Slow Moving Inventory Provision",
+      "NRV Inventory"
+    ],
+    "parent_id": "fin.inventory_acc"
+  },
+  {
+    "id": "fin.forensic_acct",
+    "canonical_name": "Audit Forensik & Anti-Fraud",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core",
+    "aliases": [
+      "audit forensik",
+      "forensic accounting",
+      "cfe",
+      "anti fraud",
+      "whistleblowing"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "advanced",
+    "parent_id": "fin.audit"
+  },
+  {
+    "id": "fin.fintech_payment",
+    "canonical_name": "Payment Gateway & Settlement",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "reconciliasi payment",
+      "qris settlement",
+      "bi-fast",
+      "switching payment",
+      "xendit",
+      "midtrans ops"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "fin.reins_actuary",
+    "canonical_name": "Reasuransi & Valuasi Aktuaria",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "reasuransi",
+      "reinsurance",
+      "psak 74",
+      "ifrs 17",
+      "cadangan teknis"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "fin.wealth_mgmt",
+    "canonical_name": "Wealth Management & Private Banking",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "wealth management",
+      "priority banking",
+      "asset allocation",
+      "waperd",
+      "wmi"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "fin.trade_finance",
+    "canonical_name": "Trade Finance & L/C",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "domain",
+    "aliases": [
+      "trade finance",
+      "letter of credit",
+      "l/c",
+      "bank garansi",
+      "skbdn"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "fin.coretax_djp",
+    "canonical_name": "Coretax DJP, e-Faktur & e-Bupot",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "compliance",
+    "aliases": [
+      "coretax",
+      "e-faktur",
+      "e-bupot",
+      "spt masa",
+      "spt tahunan",
+      "brevet a b"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "fin.psak_ifrs",
+    "canonical_name": "PSAK & IFRS Financial Reporting",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "compliance",
+    "aliases": [
+      "psak",
+      "sak ep",
+      "ifrs",
+      "sak etap",
+      "laporan keuangan komersial"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "fin.fpna_budget",
+    "canonical_name": "FP&A, Budgeting & Financial Modeling",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core",
+    "aliases": [
+      "fp&a",
+      "financial modeling",
+      "budgeting",
+      "forecasting",
+      "dcf",
+      "cash flow projection"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "fin.treasury_fx",
+    "canonical_name": "Treasury, Cash Management & FX Hedging",
+    "domain": "ekonomi_akuntansi_pajak",
+    "category": "core",
+    "aliases": [
+      "treasury",
+      "cash management",
+      "fx hedging",
+      "rekonsiliasi bank",
+      "working capital"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  }
 ]

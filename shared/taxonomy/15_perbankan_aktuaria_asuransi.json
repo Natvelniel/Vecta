@@ -1,0 +1,374 @@
+[
+  {
+    "id": "bnk.kredit_komersial",
+    "canonical_name": "Analisis Kredit Korporasi & UMKM",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Commercial Credit",
+      "5C Credit Analysis",
+      "Kredit Modal Kerja",
+      "KUR",
+      "Restrukturisasi Kredit"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "bnk.aktuaria",
+    "canonical_name": "Ilmu Aktuaria & Valuasi Liabilitas",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Actuarial Science",
+      "PSAK 74 / IFRS 17",
+      "Reserving",
+      "Pricing Asuransi",
+      "PAI / ASAI / FSAI"
+    ]
+  },
+  {
+    "id": "bnk.treasury_fx",
+    "canonical_name": "Treasury, Pasar Uang & Devisa",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "FX Trading",
+      "Money Market",
+      "ALM Asset Liability Management",
+      "Yield Curve",
+      "WPPE / WMI"
+    ]
+  },
+  {
+    "id": "bnk.capital_market",
+    "canonical_name": "Pasar Modal & Equity Research",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Investment Banking",
+      "Equity Research",
+      "Portofolio Efek",
+      "CFA",
+      "Bloomberg Terminal"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "bnk.underwriting",
+    "canonical_name": "Underwriting & Aktuaria Klaim Asuransi",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Life Underwriting",
+      "General Insurance",
+      "Reasuransi",
+      "AAAIJ / AAIK",
+      "Loss Ratio"
+    ]
+  },
+  {
+    "id": "bnk.rm_funding",
+    "canonical_name": "Relationship Manager Funding & Wealth",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Priority Banking",
+      "Wealth Management",
+      "Bancassurance",
+      "WAPERD"
+    ]
+  },
+  {
+    "id": "bnk.ojk_bi_reg",
+    "canonical_name": "Pelaporan Regulator (SLIK OJK / ANTASENA BI)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "tools_tech",
+    "aliases": [
+      "SLIK OJK",
+      "APOLO OJK",
+      "ANTASENA",
+      "LBU Bank Indonesia",
+      "Basle III",
+      "CAR / NPL"
+    ]
+  },
+  {
+    "id": "bnk.teller_cs",
+    "canonical_name": "Frontliner Perbankan (Teller & CS Bank)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Teller Bank",
+      "Kliring & RTGS",
+      "BI-FAST",
+      "Setoran & Valas"
+    ]
+  },
+  {
+    "id": "bnk.fintech_payment",
+    "canonical_name": "Payment Gateway & Settlement Keuangan",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "QRIS Settlement",
+      "Virtual Account Reconciliation",
+      "Fraud Monitoring"
+    ]
+  },
+  {
+    "id": "bnk.syariah_bank",
+    "canonical_name": "Perbankan Syariah & Pembiayaan Akad",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Murabahah",
+      "Musyarakah",
+      "Mudharabah",
+      "Dewan Pengawas Syariah"
+    ]
+  },
+  {
+    "id": "bnk.operational_risk",
+    "canonical_name": "Manajemen Risiko Perbankan (SMR)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Sertifikasi Manajemen Risiko",
+      "BSMR",
+      "Operational Risk",
+      "Market Risk",
+      "Liquidity Risk"
+    ]
+  },
+  {
+    "id": "bnk.stochastic_r",
+    "canonical_name": "Pemodelan Statistika Aktuaria (Prophet / R)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "tools_tech",
+    "aliases": [
+      "FIS Prophet",
+      "Actuarial Modeling",
+      "Monte Carlo Simulation"
+    ]
+  },
+  {
+    "id": "bnk.leas_multifinance",
+    "canonical_name": "Pembiayaan Multifinance & Leasing",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Kredit Kendaraan",
+      "Surveyor Kredit",
+      "Fidusia",
+      "Collection NPL"
+    ],
+    "parent_id": "bnk.kredit_komersial"
+  },
+  {
+    "id": "bnk.kpr_mortgage",
+    "canonical_name": "Analis & Proses Kredit Pemilikan Rumah (KPR)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Appraisal Agunan",
+      "BI Checking / SLIK",
+      "Akad Notaris Bank"
+    ],
+    "parent_id": "bnk.kredit_komersial"
+  },
+  {
+    "id": "bnk.trade_finance",
+    "canonical_name": "Trade Finance & Bank Garansi (SBLC)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "SKBDN",
+      "Bank Guarantee",
+      "Standby LC",
+      "Export Bills"
+    ],
+    "parent_id": "bnk.treasury_fx"
+  },
+  {
+    "id": "bnk.custodian_fund",
+    "canonical_name": "Akuntansi Dana & Bank Kustodian (NAB / NAV)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Fund Accounting",
+      "NAV Calculation",
+      "Reksa Dana",
+      "SINVEST KSEI"
+    ],
+    "parent_id": "bnk.capital_market"
+  },
+  {
+    "id": "bnk.claims_adj",
+    "canonical_name": "Loss Adjusting & Klaim Asuransi Kesehatan/Umum",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Health Claim Analyst",
+      "Motor & Marine Claim",
+      "TPA Management"
+    ],
+    "parent_id": "bnk.underwriting"
+  },
+  {
+    "id": "bnk.mikro_umkm",
+    "canonical_name": "Mikro Banking & Pemberdayaan UMKM",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Account Officer Mikro",
+      "Analisa Usaha UMKM",
+      "Financial Inclusion"
+    ],
+    "parent_id": "bnk.kredit_komersial"
+  },
+  {
+    "id": "bnk.corp_banking",
+    "canonical_name": "Corporate & Syndicated Lending",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Syndicated Loan",
+      "Project Finance",
+      "Cashflow Lending",
+      "Financial Covenant"
+    ],
+    "parent_id": "bnk.kredit_komersial"
+  },
+  {
+    "id": "bnk.collections",
+    "canonical_name": "Collection Strategy, Desk Call & Restrukturisasi",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Bucket Delinquency",
+      "Restructuring Agreement",
+      "Write-Off Recovery"
+    ],
+    "parent_id": "bnk.leas_multifinance"
+  },
+  {
+    "id": "bnk.reinsurance",
+    "canonical_name": "Reasuransi Treaty & Facultative",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Treaty Reinsurance",
+      "Facultative Placement",
+      "Bordereaux"
+    ],
+    "parent_id": "bnk.underwriting"
+  },
+  {
+    "id": "bnk.insurtech_ops",
+    "canonical_name": "Operasional Polis Digital & Broker Asuransi",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "APAI / AAMAI",
+      "Policy Issuance",
+      "Brokerage Placement"
+    ],
+    "parent_id": "bnk.underwriting"
+  },
+  {
+    "id": "bnk.investment_ops",
+    "canonical_name": "Manajemen Investasi & Fixed Income / Obligasi",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "Bond Valuation",
+      "SBN / SUN",
+      "Duration Matching",
+      "Credit Spread"
+    ],
+    "parent_id": "bnk.capital_market"
+  },
+  {
+    "id": "bnk.digital_bank",
+    "canonical_name": "Operasional Bank Digital & Onboarding e-KYC",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "domain",
+    "aliases": [
+      "Liveness e-KYC",
+      "AML Transaction Alert",
+      "Open API SNAP"
+    ],
+    "parent_id": "bnk.fintech_payment"
+  },
+  {
+    "id": "bnk.pension_fund",
+    "canonical_name": "Aktuaria Dana Pensiun & Imbalan Kerja (PSAK 24 / 219)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core_hard",
+    "aliases": [
+      "PSAK 24 / PSAK 219",
+      "Actuarial Valuation Employee Benefits"
+    ],
+    "parent_id": "bnk.aktuaria"
+  },
+  {
+    "id": "bank.core_banking",
+    "canonical_name": "Core Banking Operations (T24 / Mambu)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "tool",
+    "aliases": [
+      "core banking",
+      "temenos t24",
+      "mambu",
+      "brinets",
+      "eod banking"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "bank.credit_scoring",
+    "canonical_name": "Credit Underwriting, SLIK OJK & Analisa 5C",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "core",
+    "aliases": [
+      "slik ojk",
+      "analisa kredit",
+      "5c credit",
+      "underwriting",
+      "collector"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "bank.reg_ojk_bi",
+    "canonical_name": "Pelaporan Regulator OJK (SLIK, APOLO, ANTASENA)",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "compliance",
+    "aliases": [
+      "apolo ojk",
+      "antasena",
+      "lbuk",
+      "kepatuhan bank",
+      "basel iii"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "bank.syariah_akad",
+    "canonical_name": "Perbankan Syariah & Kepatuhan DPS",
+    "domain": "perbankan_aktuaria_asuransi",
+    "category": "compliance",
+    "aliases": [
+      "perbankan syariah",
+      "murabahah",
+      "mudharabah",
+      "musyarakah",
+      "dps ojk"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  }
+]

@@ -1,0 +1,323 @@
+[
+  {
+    "id": "scm.ppic",
+    "canonical_name": "PPIC & Perencanaan Produksi",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "Production Planning",
+      "Inventory Control",
+      "MRP",
+      "MPS Master Production Schedule",
+      "Forecasting Demand"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "scm.procurement",
+    "canonical_name": "Strategic Sourcing & Procurement",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "Purchasing",
+      "Vendor Selection",
+      "RFQ / RFP",
+      "Purchase Order",
+      "Cost Reduction Sourcing"
+    ]
+  },
+  {
+    "id": "scm.sap_mm",
+    "canonical_name": "SAP MM / SD / Ariba",
+    "domain": "supply_chain_logistik_exim",
+    "category": "tools_tech",
+    "aliases": [
+      "SAP Material Management",
+      "SAP Sales Distribution",
+      "SAP Ariba",
+      "Oracle SCM"
+    ]
+  },
+  {
+    "id": "scm.wms_inventory",
+    "canonical_name": "Warehouse Management System (WMS)",
+    "domain": "supply_chain_logistik_exim",
+    "category": "tools_tech",
+    "aliases": [
+      "WMS",
+      "FIFO FEFO",
+      "Cycle Count",
+      "Stock Opname Gudang",
+      "Forklift & Material Handling"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "scm.ceisa_ppjk",
+    "canonical_name": "Kepabeanan PPJK & Sistem CEISA 4.0",
+    "domain": "supply_chain_logistik_exim",
+    "category": "tools_tech",
+    "aliases": [
+      "CEISA Bea Cukai",
+      "PIB / PEB",
+      "HS Code",
+      "Lartas",
+      "SKPD / COO",
+      "Ahli Kepabeanan"
+    ]
+  },
+  {
+    "id": "scm.incoterms_lc",
+    "canonical_name": "Incoterms 2020 & Letter of Credit (L/C)",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "Incoterms 2020",
+      "FOB CIF CNF",
+      "Bill of Lading",
+      "AWB",
+      "Letter of Credit"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "scm.freight_fleet",
+    "canonical_name": "Freight Forwarding & Transport Management",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "Sea Freight",
+      "Air Freight",
+      "Fleet Routing",
+      "Last Mile Delivery",
+      "TMS",
+      "3PL Management"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "scm.cold_chain",
+    "canonical_name": "Cold Chain Logistics",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "Reefer Container",
+      "Temperature Controlled Logistics"
+    ]
+  },
+  {
+    "id": "scm.s_and_op",
+    "canonical_name": "Sales & Operations Planning (S&OP)",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "S&OP",
+      "Safety Stock Optimization",
+      "OTIF Performance"
+    ]
+  },
+  {
+    "id": "scm.e_proc",
+    "canonical_name": "E-Procurement & Manajemen Kontrak Vendor",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "E-Procurement",
+      "Vendor SLA Audit",
+      "Tender Vendor"
+    ]
+  },
+  {
+    "id": "scm.demand_plan",
+    "canonical_name": "Demand Planning & Statistical Forecasting",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "Demand Forecasting",
+      "SKU Rationalization",
+      "MAPE Accuracy"
+    ],
+    "parent_id": "scm.ppic"
+  },
+  {
+    "id": "scm.capex_proc",
+    "canonical_name": "Pengadaan CAPEX, Jasa & Kontrak EPC",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "Tender Kontraktor",
+      "Evaluasi Teknis Komersial",
+      "TCO Total Cost of Ownership"
+    ],
+    "parent_id": "scm.procurement"
+  },
+  {
+    "id": "scm.bonded_zone",
+    "canonical_name": "Operasional Kawasan Berikat (TPB / KITE)",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "IT Inventory Kawasan Berikat",
+      "BC 2.3 / BC 4.0 / BC 2.7",
+      "Fasilitas KITE"
+    ],
+    "parent_id": "scm.ceisa_ppjk"
+  },
+  {
+    "id": "scm.port_stevedore",
+    "canonical_name": "Operasional Pelabuhan, Kontainer & Depot",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "CY Container Yard",
+      "Stevedoring",
+      "Manifest Pelayaran",
+      "Demurrage & Detention"
+    ],
+    "parent_id": "scm.freight_fleet"
+  },
+  {
+    "id": "scm.reverse_log",
+    "canonical_name": "Reverse Logistics & Return Merchandise (RMA)",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "Return Handling",
+      "Defect Sorting",
+      "Salvage Disposal"
+    ],
+    "parent_id": "scm.wms_inventory"
+  },
+  {
+    "id": "scm.customs_broker",
+    "canonical_name": "Kliring Pelabuhan, NPE / SPPB & Bea Cukai",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "SPPB",
+      "NPE Ekspor",
+      "COO SKA Form D/E",
+      "Manifest Inward"
+    ],
+    "parent_id": "scm.ceisa_ppjk"
+  },
+  {
+    "id": "scm.3pl_ecom",
+    "canonical_name": "Fulfillment E-Commerce & Sortation Hub Operations",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "Same-Day Fulfillment",
+      "Hub & Spoke Routing",
+      "COD Cash Recon"
+    ],
+    "parent_id": "scm.freight_fleet"
+  },
+  {
+    "id": "scm.material_ctrl",
+    "canonical_name": "Material Control & Pengelolaan Sparepart Pabrik",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "Min-Max Stock",
+      "Slow-Moving Inventory",
+      "BOM Explosion"
+    ],
+    "parent_id": "scm.ppic"
+  },
+  {
+    "id": "scm.iso_28000",
+    "canonical_name": "Supply Chain Security (ISO 28000 / C-TPAT)",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "C-TPAT Audit",
+      "Cargo Security",
+      "Seal Verification"
+    ]
+  },
+  {
+    "id": "scm.supplier_qa",
+    "canonical_name": "Supplier Quality Audit & Corrective Action",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "Supplier Audit",
+      "SCAR Corrective Action",
+      "Vendor Performance Rating"
+    ],
+    "parent_id": "scm.procurement"
+  },
+  {
+    "id": "scm.warehouse_kpis",
+    "canonical_name": "Optimasi Slotting Gudang & Picking Productivity",
+    "domain": "supply_chain_logistik_exim",
+    "category": "core_hard",
+    "aliases": [
+      "RF Barcode Scanner",
+      "Wave Picking",
+      "Cross-Docking"
+    ],
+    "parent_id": "scm.wms_inventory"
+  },
+  {
+    "id": "log.import_export",
+    "canonical_name": "Kepabeanan, HS Code & Kepmen Lartas",
+    "domain": "supply_chain_logistik_exim",
+    "category": "compliance",
+    "aliases": [
+      "hs code",
+      "insw",
+      "lartas",
+      "beacukai",
+      "incoterms",
+      "coo ska"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "log.inventory_sap",
+    "canonical_name": "SAP MM / WM & Inventory Control",
+    "domain": "supply_chain_logistik_exim",
+    "category": "tool",
+    "aliases": [
+      "sap mm",
+      "sap wm",
+      "mrp",
+      "safety stock",
+      "demand supply balancing"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "log.cold_chain",
+    "canonical_name": "Cold Chain & Reefer Logistics",
+    "domain": "supply_chain_logistik_exim",
+    "category": "domain",
+    "aliases": [
+      "cold chain",
+      "reefer container",
+      "suhu terkontrol",
+      "gdp logistik"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "log.fleet_routing",
+    "canonical_name": "Fleet Management & TMS Optimization",
+    "domain": "supply_chain_logistik_exim",
+    "category": "tool",
+    "aliases": [
+      "tms",
+      "fleet management",
+      "route optimization",
+      "last mile",
+      "gps tracking"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate"
+  }
+]

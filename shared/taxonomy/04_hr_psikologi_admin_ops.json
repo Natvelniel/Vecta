@@ -1,16 +1,870 @@
 [
-  {"id":"hr.recruitment","canonical_name":"Rekrutmen & Seleksi","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Recruitment","Talent Acquisition","End-to-End Recruitment","Headhunting","Sourcing Kandidat","Screening CV","Interviewing"]},
-  {"id":"hr.payroll","canonical_name":"Payroll & Kompensasi","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Payroll","Penggajian","Compensation & Benefit","Comp & Ben","C&B","Remunerasi"]},
-  {"id":"hr.hris","canonical_name":"HRIS","domain":"hr_psikologi_admin_ops","category":"tools_tech","aliases":["Talenta","Mekari Talenta","GreatDay HR","Workday","SAP SuccessFactors","Sistem HRIS"]},
-  {"id":"hr.bpjs","canonical_name":"BPJS & Ketenagakerjaan","domain":"hr_psikologi_admin_ops","category":"domain","aliases":["BPJS Kesehatan","BPJS Ketenagakerjaan","UU Ketenagakerjaan","UU Cipta Kerja","PKWT","PKWTT","Hubungan Industrial","Industrial Relations"]},
-  {"id":"hr.psikotes","canonical_name":"Asesmen Psikologi & Psikotes","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Psikotes","Alat Tes Psikologi","Assessment Center","PAPI Kostick","DISC","MBTI","Kraepelin","Wartegg","Psikologi Industri"]},
-  {"id":"hr.training_od","canonical_name":"Training & Organization Development","domain":"hr_psikologi_admin_ops","category":"domain","aliases":["Learning & Development","L&D","Training Needs Analysis","TNA","KPI Management","Performance Appraisal","Organization Development"]},
-  {"id":"hr.general_affairs","canonical_name":"General Affairs (GA)","domain":"hr_psikologi_admin_ops","category":"domain","aliases":["General Affairs","HRGA","Manajemen Aset","Asset Management","Facility Management","Pengelolaan Kantor"]},
-  {"id":"ops.administrasi","canonical_name":"Administrasi Perkantoran","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Office Administration","Data Entry","Pengarsipan","Filing","Korespondensi","Document Control","Kesekretariatan"]},
-  {"id":"ops.supply_chain","canonical_name":"Supply Chain Management","domain":"hr_psikologi_admin_ops","category":"domain","aliases":["Supply Chain","SCM","Rantai Pasok","Demand Planning","Distribusi"]},
-  {"id":"ops.procurement","canonical_name":"Procurement & Purchasing","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Procurement","Purchasing","Pengadaan Barang","Vendor Management","Negosiasi Supplier","Purchase Order"]},
-  {"id":"ops.logistik","canonical_name":"Logistik & Warehouse","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Logistik","Logistics","Warehouse Management","WMS","Manajemen Gudang","Stock Opname","FIFO","FEFO","Inventory Management","Pengelolaan Stok"]},
-  {"id":"ops.ppic","canonical_name":"PPIC","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Production Planning","Inventory Control","Perencanaan Produksi","MRP"]},
-  {"id":"ops.exim","canonical_name":"Ekspor-Impor & Kepabeanan","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Export Import","Exim","PIB","PEB","HS Code","Bill of Lading","Incoterms","Custom Clearance","Freight Forwarding","PPJK"]},
-  {"id":"ops.customer_service","canonical_name":"Customer Service & Support","domain":"hr_psikologi_admin_ops","category":"core_hard","aliases":["Customer Service","Customer Support","Call Center","Handling Complaint","Penanganan Keluhan","Helpdesk","Front Desk"]}
+  {
+    "id": "hr.recruitment",
+    "canonical_name": "Rekrutmen & Seleksi",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Recruitment",
+      "Talent Acquisition",
+      "End-to-End Recruitment",
+      "Headhunting",
+      "Sourcing Kandidat",
+      "Screening CV",
+      "Interviewing"
+    ]
+  },
+  {
+    "id": "hr.payroll",
+    "canonical_name": "Payroll & Kompensasi",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Payroll",
+      "Penggajian",
+      "Compensation & Benefit",
+      "Comp & Ben",
+      "C&B",
+      "Remunerasi"
+    ]
+  },
+  {
+    "id": "hr.hris",
+    "canonical_name": "HRIS",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "tools_tech",
+    "aliases": [
+      "Talenta",
+      "Mekari Talenta",
+      "GreatDay HR",
+      "Workday",
+      "SAP SuccessFactors",
+      "Sistem HRIS"
+    ]
+  },
+  {
+    "id": "hr.bpjs",
+    "canonical_name": "BPJS & Ketenagakerjaan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "BPJS Kesehatan",
+      "BPJS Ketenagakerjaan",
+      "UU Ketenagakerjaan",
+      "UU Cipta Kerja",
+      "PKWT",
+      "PKWTT",
+      "Hubungan Industrial",
+      "Industrial Relations"
+    ]
+  },
+  {
+    "id": "hr.psikotes",
+    "canonical_name": "Asesmen Psikologi & Psikotes",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Psikotes",
+      "Alat Tes Psikologi",
+      "Assessment Center",
+      "PAPI Kostick",
+      "DISC",
+      "MBTI",
+      "Kraepelin",
+      "Wartegg",
+      "Psikologi Industri"
+    ]
+  },
+  {
+    "id": "hr.training_od",
+    "canonical_name": "Training & Organization Development",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Learning & Development",
+      "L&D",
+      "Training Needs Analysis",
+      "TNA",
+      "KPI Management",
+      "Performance Appraisal",
+      "Organization Development"
+    ]
+  },
+  {
+    "id": "hr.general_affairs",
+    "canonical_name": "General Affairs (GA)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "General Affairs",
+      "HRGA",
+      "Manajemen Aset",
+      "Asset Management",
+      "Facility Management",
+      "Pengelolaan Kantor"
+    ]
+  },
+  {
+    "id": "ops.administrasi",
+    "canonical_name": "Administrasi Perkantoran",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Office Administration",
+      "Data Entry",
+      "Pengarsipan",
+      "Filing",
+      "Korespondensi",
+      "Document Control",
+      "Kesekretariatan"
+    ]
+  },
+  {
+    "id": "ops.supply_chain",
+    "canonical_name": "Supply Chain Management",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Supply Chain",
+      "SCM",
+      "Rantai Pasok",
+      "Demand Planning",
+      "Distribusi"
+    ]
+  },
+  {
+    "id": "ops.procurement",
+    "canonical_name": "Procurement & Purchasing",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Procurement",
+      "Purchasing",
+      "Pengadaan Barang",
+      "Vendor Management",
+      "Negosiasi Supplier",
+      "Purchase Order"
+    ]
+  },
+  {
+    "id": "ops.logistik",
+    "canonical_name": "Logistik & Warehouse",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Logistik",
+      "Logistics",
+      "Warehouse Management",
+      "WMS",
+      "Manajemen Gudang",
+      "Stock Opname",
+      "FIFO",
+      "FEFO",
+      "Inventory Management",
+      "Pengelolaan Stok"
+    ]
+  },
+  {
+    "id": "ops.ppic",
+    "canonical_name": "PPIC",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Production Planning",
+      "Inventory Control",
+      "Perencanaan Produksi",
+      "MRP"
+    ]
+  },
+  {
+    "id": "ops.exim",
+    "canonical_name": "Ekspor-Impor & Kepabeanan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Export Import",
+      "Exim",
+      "PIB",
+      "PEB",
+      "HS Code",
+      "Bill of Lading",
+      "Incoterms",
+      "Custom Clearance",
+      "Freight Forwarding",
+      "PPJK"
+    ]
+  },
+  {
+    "id": "ops.customer_service",
+    "canonical_name": "Customer Service & Support",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Customer Service",
+      "Customer Support",
+      "Call Center",
+      "Handling Complaint",
+      "Penanganan Keluhan",
+      "Helpdesk",
+      "Front Desk",
+      "CSAT",
+      "NPS",
+      "Complaint Handling",
+      "Omnichannel CRM",
+      "Zendesk"
+    ]
+  },
+  {
+    "id": "hr.comp_ben",
+    "canonical_name": "Compensation & Benefits (CompBen)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "parent_id": "hr.payroll",
+    "aliases": [
+      "Salary Grading",
+      "Job Evaluation",
+      "Hay Method",
+      "Struktur Skala Upah",
+      "Compensation Survey"
+    ]
+  },
+  {
+    "id": "hr.ir_phil",
+    "canonical_name": "Industrial Relations & UU Ketenagakerjaan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Hubungan Industrial",
+      "PKWT / PKWTT",
+      "PP & PKB",
+      "Disnaker",
+      "Mediasi Perselisihan",
+      "UU Cipta Kerja"
+    ]
+  },
+  {
+    "id": "hr.hrbp",
+    "canonical_name": "HR Business Partner (HRBP)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "People Partnering",
+      "Workforce Planning",
+      "Succession Planning",
+      "Talent Mapping"
+    ]
+  },
+  {
+    "id": "hr.od_change",
+    "canonical_name": "Organization Development (OD)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Organisational Development",
+      "KPI & OKR Design",
+      "Performance Appraisal",
+      "Competency Framework"
+    ]
+  },
+  {
+    "id": "hr.lnd",
+    "canonical_name": "Learning & Development (Training)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Training Needs Analysis",
+      "TNA",
+      "Training Delivery",
+      "Onboarding Program",
+      "Corporate University"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "hr.employer_branding",
+    "canonical_name": "Employer Branding & Campus Hiring",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Campus Recruitment",
+      "Job Fair",
+      "LinkedIn Recruiter"
+    ]
+  },
+  {
+    "id": "hr.psychometrics",
+    "canonical_name": "Alat Tes Psikologi (DISC / MBTI / WARTegg)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "parent_id": "hr.psikotes",
+    "aliases": [
+      "DISC",
+      "PAPI Kostick",
+      "EPPS",
+      "Kraepelin",
+      "Pauli",
+      "IST Test",
+      "BEI Interview"
+    ]
+  },
+  {
+    "id": "hr.talenta_hris",
+    "canonical_name": "Mekari Talenta / SunFish HRIS",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "tools_tech",
+    "parent_id": "hr.hris",
+    "aliases": [
+      "Mekari Talenta",
+      "SunFish HRIS",
+      "GreatDay HR",
+      "SAP SuccessFactors",
+      "OrangeHRM"
+    ]
+  },
+  {
+    "id": "hr.ga_asset",
+    "canonical_name": "General Affairs & Asset Facility",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "General Affairs",
+      "Building Management",
+      "Fleet Management",
+      "Vendor Maintenance",
+      "Perizinan Gedung"
+    ]
+  },
+  {
+    "id": "hr.exec_assistant",
+    "canonical_name": "Executive Assistant & Kesekretariatan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Sekretaris Direksi",
+      "Travel Arrangement",
+      "Notulensi Rapat",
+      "Correspondency"
+    ]
+  },
+  {
+    "id": "hr.data_entry_arsip",
+    "canonical_name": "Pengarsipan & Document Control",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Document Control",
+      "Kearsipan Digital",
+      "Administrasi Kontrak",
+      "Filing System"
+    ]
+  },
+  {
+    "id": "hr.tka_permit",
+    "canonical_name": "Pengurusan IMTA / KITAS TKA",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "RPTKA",
+      "KITAS",
+      "Expatriate Administration"
+    ]
+  },
+  {
+    "id": "hr.onboarding_off",
+    "canonical_name": "Employee Lifecycle & Kontrak Kerja",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Kontrak Kerja Karyawan",
+      "Exit Interview",
+      "Administrasi Personalia"
+    ]
+  },
+  {
+    "id": "hr.okr_kpi",
+    "canonical_name": "KPI & OKR Performance Management",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "parent_id": "hr.od_change",
+    "aliases": [
+      "Performance Review",
+      "360 Feedback",
+      "Balanced Scorecard"
+    ]
+  },
+  {
+    "id": "hr.sop_manual",
+    "canonical_name": "Penyusunan SOP & Kebijakan Perusahaan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Business Process Mapping",
+      "BPMN Flowchart",
+      "Policy Drafting"
+    ]
+  },
+  {
+    "id": "hr.headhunting",
+    "canonical_name": "Executive Search & Boolean Sourcing",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Boolean Search",
+      "Headhunting",
+      "Passive Candidate Sourcing"
+    ],
+    "parent_id": "hr.recruitment"
+  },
+  {
+    "id": "hr.tech_recruiting",
+    "canonical_name": "IT & Engineering Talent Acquisition",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Technical Screening",
+      "HackerRank / Codility Review"
+    ],
+    "parent_id": "hr.recruitment"
+  },
+  {
+    "id": "hr.blue_collar",
+    "canonical_name": "Mass Hiring & Operator Pabrik Recruitment",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Mass Recruitment",
+      "High-Volume Hiring",
+      "Outsource Vendor Mgmt"
+    ],
+    "parent_id": "hr.recruitment"
+  },
+  {
+    "id": "hr.bpjs_edabu",
+    "canonical_name": "Administrasi EDABU BPJS & SIPP Online",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "tools_tech",
+    "aliases": [
+      "EDABU BPJS Kesehatan",
+      "SIPP BPJS TK",
+      "JMO Perusahaan",
+      "VLKP"
+    ],
+    "parent_id": "hr.bpjs"
+  },
+  {
+    "id": "hr.wlkp_norma",
+    "canonical_name": "Kepatuhan Norma Kerja (WLKP Kemnaker)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "WLKP Online",
+      "Peraturan Perusahaan",
+      "Audit Ketenagakerjaan"
+    ],
+    "parent_id": "hr.ir_phil"
+  },
+  {
+    "id": "hr.assessment_center",
+    "canonical_name": "Assessment Center & BEI Competency",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "LGD",
+      "In-Basket Exercise",
+      "Roleplay Assessment",
+      "360 Assessment"
+    ],
+    "parent_id": "hr.psikotes",
+    "requires_domain_context": true
+  },
+  {
+    "id": "hr.employee_eng",
+    "canonical_name": "Employee Engagement & Internal Culture",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Pulse Survey",
+      "Townhall Event",
+      "Retention Program"
+    ],
+    "parent_id": "hr.od_change"
+  },
+  {
+    "id": "hr.expat_visa",
+    "canonical_name": "Manajemen TKA (RPTKA / Notifikasi / KITAS)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "TKA Online Kemnaker",
+      "IMTA",
+      "VITAS / ITAS"
+    ],
+    "parent_id": "hr.tka_permit"
+  },
+  {
+    "id": "hr.fleet_ops",
+    "canonical_name": "Manajemen Armada & Perizinan Operasional",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "KIR Kendaraan",
+      "GPS Tracking Armada",
+      "BBM & Tol Control"
+    ],
+    "parent_id": "hr.ga_asset"
+  },
+  {
+    "id": "hr.mailroom_corresp",
+    "canonical_name": "Administrasi Persuratan & Tata Naskah Dinas",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Surat Menyurat Resmi",
+      "Notulensi",
+      "Penjadwalan Direksi"
+    ],
+    "parent_id": "ops.administrasi"
+  },
+  {
+    "id": "hr.reception_fo",
+    "canonical_name": "Front Desk & Hospitality Kantor",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "soft_skill",
+    "aliases": [
+      "Resepsionis Korporat",
+      "Visitor Management",
+      "Switchboard"
+    ],
+    "parent_id": "ops.administrasi"
+  },
+  {
+    "id": "hr.qms_doc",
+    "canonical_name": "Pengendalian Dokumen ISO (DCC)",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Master List Dokumen",
+      "Revisi SOP",
+      "Audit Arsip"
+    ],
+    "parent_id": "hr.data_entry_arsip"
+  },
+  {
+    "id": "hr.bipa_hr",
+    "canonical_name": "Penyusunan Job Description & Grading Jabatan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Job Analysis",
+      "Job Description",
+      "Job Grading",
+      "Mercer IPE"
+    ],
+    "parent_id": "hr.comp_ben"
+  },
+  {
+    "id": "hr.hr_analytics",
+    "canonical_name": "People Analytics & Turnover Dashboard",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Attrition Analysis",
+      "Headcount Budgeting",
+      "Time-to-Hire Metrics"
+    ],
+    "parent_id": "hr.hrbp"
+  },
+  {
+    "id": "hr.k3_hr",
+    "canonical_name": "Kesehatan Kerja & Program Wellness Karyawan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Employee Assistance Program",
+      "MCU Scheduling",
+      "BPJS Kecelakaan Kerja"
+    ],
+    "parent_id": "hr.bpjs"
+  },
+  {
+    "id": "hr.background_check",
+    "canonical_name": "Pre-Employment Screening & Reference Check",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Background Check",
+      "SKCK Verification",
+      "Ijazah Verifikasi"
+    ],
+    "parent_id": "hr.recruitment"
+  },
+  {
+    "id": "hr.konseling_klinis",
+    "canonical_name": "Konseling Karier & Kesehatan Mental Kerja",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Workplace Counseling",
+      "Stress Management",
+      "Psychological First Aid"
+    ],
+    "parent_id": "hr.psychometrics"
+  },
+  {
+    "id": "hr.perjalanan_dinas",
+    "canonical_name": "Corporate Travel, Visa Bisnis & Event Kantor",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Business Travel Booking",
+      "Corporate Gathering",
+      "Outing Kantor"
+    ],
+    "parent_id": "hr.ga_asset"
+  },
+  {
+    "id": "hr.legal_hr_doc",
+    "canonical_name": "Administrasi SP1/2/3 & Dokumen PHK Sesuai PP",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Surat Peringatan",
+      "Paklaring",
+      "Perjanjian Bersama"
+    ],
+    "parent_id": "hr.ir_phil"
+  },
+  {
+    "id": "hr.call_center_qa",
+    "canonical_name": "Quality Monitoring Call Center & QA Layanan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Call Scoring",
+      "AHT Average Handle Time",
+      "FCR First Call Resolution"
+    ],
+    "parent_id": "ops.customer_service"
+  },
+  {
+    "id": "hr.shift_roster",
+    "canonical_name": "Manajemen Shift Kerja, Lembur & Absensi Pabrik",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Roster Scheduling",
+      "Overtime Calculation",
+      "Fingerprint / Face Attendance"
+    ],
+    "parent_id": "hr.payroll"
+  },
+  {
+    "id": "hr.bpjs_klaim",
+    "canonical_name": "Klaim Kesehatan Karyawan & Asuransi Jiwa Korporat",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "AdMedika",
+      "Reimbursement Medis",
+      "Rawat Inap Karyawan"
+    ],
+    "parent_id": "hr.bpjs"
+  },
+  {
+    "id": "hr.kemnaker_lks",
+    "canonical_name": "LKS Bipartit & Pembinaan Karyawan",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "LKS Bipartit",
+      "Konseling Kedisiplinan",
+      "Evaluasi Masa Percobaan"
+    ],
+    "parent_id": "hr.ir_phil"
+  },
+  {
+    "id": "hr.ga_security",
+    "canonical_name": "Koordinasi Security, Kebersihan & K3 Perkantoran",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Vendor Cleaning & Security",
+      "ATK & Pantry Control",
+      "Access Card Mgmt"
+    ],
+    "parent_id": "hr.ga_asset"
+  },
+  {
+    "id": "hr.hris_data",
+    "canonical_name": "Integritas Master Data Karyawan & Mutasi/Promosi",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Employee Movement",
+      "SK Mutasi Promosi",
+      "Org Chart Management"
+    ],
+    "parent_id": "hr.hris"
+  },
+  {
+    "id": "hr.campus_mt",
+    "canonical_name": "Manajemen Program Internship & Management Trainee",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "Kampus Merdeka MSIB",
+      "Evaluasi Intern",
+      "Rotasi MT"
+    ],
+    "parent_id": "hr.lnd"
+  },
+  {
+    "id": "hr.disnaker_p3k",
+    "canonical_name": "Pelaporan Wajib Lapor & Klinik P3K Kerja",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "P2K3 Perusahaan",
+      "Pelaporan Kecelakaan Kerja BPJS"
+    ],
+    "parent_id": "hr.bpjs"
+  },
+  {
+    "id": "hr.office_proc",
+    "canonical_name": "Pengadaan Perlengkapan Kantor & Negosiasi Gedung",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core_hard",
+    "aliases": [
+      "Sewa Kantor",
+      "Asset Tagging Inventaris",
+      "Stock ATK"
+    ],
+    "parent_id": "hr.ga_asset"
+  },
+  {
+    "id": "hr.talent_mgmt",
+    "canonical_name": "Talent Management & Succession",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core",
+    "aliases": [
+      "talent management",
+      "succession planning",
+      "9 box grid",
+      "talent pool"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "hr.hrbp"
+  },
+  {
+    "id": "hr.expat_permit",
+    "canonical_name": "RPTKA, KITAS & Expatriate Ops",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "compliance",
+    "aliases": [
+      "rptka",
+      "kitas",
+      "imta",
+      "tka",
+      "expatriate admin",
+      "imigrasi kerja"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "hr.general_affairs"
+  },
+  {
+    "id": "hr.people_analytics",
+    "canonical_name": "People Analytics & HR Metrics",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "tool",
+    "aliases": [
+      "people analytics",
+      "hr analytics",
+      "turnover rate",
+      "time to hire",
+      "headcount planning"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "hr.hris"
+  },
+  {
+    "id": "ops.freight_forward",
+    "canonical_name": "Freight Forwarding & Customs Clearance",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "domain",
+    "aliases": [
+      "freight forwarding",
+      "pib",
+      "peb",
+      "ceisa",
+      "ppjk",
+      "bill of lading"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "ops.exim"
+  },
+  {
+    "id": "ops.vendor_mgmt",
+    "canonical_name": "Vendor Management & e-Procurement",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core",
+    "aliases": [
+      "vendor management",
+      "ariba",
+      "coupa",
+      "rfq",
+      "rfp",
+      "evaluasi vendor"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "ops.procurement"
+  },
+  {
+    "id": "hr.ee_relations",
+    "canonical_name": "Industrial Relations, UU Cipta Kerja & LKS",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "compliance",
+    "aliases": [
+      "industrial relations",
+      "hubungan industrial",
+      "uu cipta kerja",
+      "pp pkb",
+      "bipartit",
+      "disnaker"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "hr.kpi_perf",
+    "canonical_name": "Performance Appraisal & Competency Matrix",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "core",
+    "aliases": [
+      "performance appraisal",
+      "kpi karyawan",
+      "360 feedback",
+      "competency matrix"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "ops.sop_iso9001",
+    "canonical_name": "SOP Authoring & ISO 9001 Documentation",
+    "domain": "hr_psikologi_admin_ops",
+    "category": "compliance",
+    "aliases": [
+      "penyusunan sop",
+      "iso 9001",
+      "document control",
+      "audit internal mutu"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate"
+  }
 ]

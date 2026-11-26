@@ -19,7 +19,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         .error_handling(ErrorHandlingMode::Result)
         .dangerously_cast_bigints_to_number()
         .commands(collect_commands![
-        // Settings & Offline AI (9)
+        // Settings & Offline AI (11)
         settings::get_api_key_status,
         settings::save_and_test_api_key,
         settings::delete_api_key,
@@ -29,19 +29,25 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         settings::get_local_ai_status,
         settings::get_scraper_mode,
         settings::set_scraper_mode,
-        // Profile & Keywords (5)
+        settings::export_vecta_backup,
+        settings::import_vecta_backup,
+        // Profile & Keywords (9)
         profile::parse_user_story,
         profile::save_confirmed_profile,
         profile::get_active_profile,
         profile::toggle_scrape_keyword,
         profile::add_custom_keyword,
+        profile::list_prodi_roles_catalog,
+        profile::list_user_profiles,
+        profile::switch_active_profile,
+        profile::delete_user_profile,
         // CV Import, Master CV & ATS PDF Export (5)
         cv::import_cv_pdf,
         cv::parse_story_local,
         cv::get_master_cv,
         cv::save_master_cv,
         cv::export_tailored_ats_pdf,
-        // Jobs, Decoupled AI Queue, Tracker & Apply Copilot (11)
+        // Jobs, Decoupled AI Queue, Tracker, Watchlists, Apply Copilot & Interview Prep (15)
         jobs::ingest_manual_job,
         jobs::run_scrape_for_active_keywords,
         jobs::scrape_and_store_jobs,
@@ -53,9 +59,16 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         jobs::update_job_application,
         jobs::generate_gap_analysis,
         jobs::generate_apply_kit,
-        // Competency Map (2)
+        jobs::generate_interview_prep,
+        jobs::list_saved_watchlists,
+        jobs::save_watchlist,
+        jobs::delete_watchlist,
+        // Competency Map & Market Analytics (5)
         competency::list_available_roles,
         competency::get_competency_map,
+        competency::simulate_skill_impact,
+        competency::get_salary_benchmark,
+        competency::get_company_snapshot,
         // Roadmap (5)
         roadmap::generate_learning_roadmap,
         roadmap::list_roadmaps,
@@ -112,7 +125,7 @@ pub fn run() {
                 .unwrap_or_else(|_| data_dir.clone())
                 .join("Vecta_CVs");
 
-            let state = AppState::production(db, resource_dirs, export_dir)
+            let state = AppState::production(db, &data_dir, resource_dirs, export_dir)
                 .expect("failed to initialize Vecta AppState");
             app.manage(state);
             Ok(())
@@ -149,11 +162,17 @@ mod tests {
             "get_local_ai_status",
             "get_scraper_mode",
             "set_scraper_mode",
+            "export_vecta_backup",
+            "import_vecta_backup",
             "parse_user_story",
             "save_confirmed_profile",
             "get_active_profile",
             "toggle_scrape_keyword",
             "add_custom_keyword",
+            "list_prodi_roles_catalog",
+            "list_user_profiles",
+            "switch_active_profile",
+            "delete_user_profile",
             "import_cv_pdf",
             "parse_story_local",
             "get_master_cv",
@@ -170,8 +189,15 @@ mod tests {
             "update_job_application",
             "generate_gap_analysis",
             "generate_apply_kit",
+            "generate_interview_prep",
+            "list_saved_watchlists",
+            "save_watchlist",
+            "delete_watchlist",
             "list_available_roles",
             "get_competency_map",
+            "simulate_skill_impact",
+            "get_salary_benchmark",
+            "get_company_snapshot",
             "generate_learning_roadmap",
             "list_roadmaps",
             "get_roadmap_detail",
@@ -179,7 +205,7 @@ mod tests {
             "quick_add_user_skill",
         ];
 
-        assert_eq!(expected_commands.len(), 37);
+        assert_eq!(expected_commands.len(), 50);
         for cmd in expected_commands {
             assert!(
                 content.contains(cmd),

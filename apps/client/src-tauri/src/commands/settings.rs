@@ -5,18 +5,31 @@ use crate::core::local_embedder::LocalAiModelStatus;
 use crate::core::worker::validate_worker_url;
 use crate::error::AppError;
 use crate::models::job::SearchPreferences;
-use crate::models::profile::{ApiKeyStatus, WorkerHealth};
+use crate::models::profile::{ApiKeyStatus, VectaBackupReport, VectaImportReport, WorkerHealth};
 use crate::state::AppState;
 
 const SETTING_SEARCH_PREFS: &str = "search_preferences";
 
 fn normalize_search_preferences(mut prefs: SearchPreferences) -> SearchPreferences {
-    let loc = prefs.location.trim();
-    prefs.location = if loc.is_empty() {
-        "Indonesia".into()
-    } else {
-        loc.chars().take(80).collect()
-    };
+    let mut clean_locs: Vec<String> = prefs
+        .locations
+        .into_iter()
+        .map(|l| l.trim().chars().take(60).collect::<String>())
+        .filter(|l| !l.is_empty())
+        .collect();
+    if clean_locs.is_empty() {
+        let loc = prefs.location.trim();
+        clean_locs.push(if loc.is_empty() {
+            "Indonesia".into()
+        } else {
+            loc.chars().take(60).collect()
+        });
+    }
+    let mut seen_loc = std::collections::HashSet::new();
+    clean_locs.retain(|l| seen_loc.insert(l.to_lowercase()));
+    clean_locs.truncate(5);
+    prefs.location = clean_locs[0].clone();
+    prefs.locations = clean_locs;
 
     let valid_sources: Vec<String> = prefs
         .sources
@@ -133,6 +146,36 @@ pub fn get_scraper_mode_impl(state: &AppState) -> String {
 
 pub fn set_scraper_mode_impl(state: &AppState, mode: String) -> Result<String, AppError> {
     state.set_scraper_mode(&mode)
+}
+
+pub fn export_vecta_backup_impl(state: &AppState) -> Result<VectaBackupReport, AppError> {
+    state.db.export_backup_json()
+}
+
+pub fn import_vecta_backup_impl(
+    state: &AppState,
+    backup_json: String,
+) -> Result<VectaImportReport, AppError> {
+    let report = state.db.import_backup_json(&backup_json)?;
+    if let Ok(Some(prof)) = state.db.get_active_profile() {
+        let _ = state.recalculate_all_matches_for_user(&prof.id);
+    }
+    Ok(report)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn export_vecta_backup(state: State<'_, AppState>) -> Result<VectaBackupReport, AppError> {
+    export_vecta_backup_impl(&state)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn import_vecta_backup(
+    state: State<'_, AppState>,
+    backup_json: String,
+) -> Result<VectaImportReport, AppError> {
+    import_vecta_backup_impl(&state, backup_json)
 }
 
 #[tauri::command]

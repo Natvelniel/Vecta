@@ -1,0 +1,250 @@
+[
+  {
+    "id": "ind.ak3_umum",
+    "canonical_name": "Ahli K3 Umum Kemnaker & CSMS",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "domain",
+    "aliases": [
+      "AK3 Umum",
+      "AK3U",
+      "Sertifikat Kemnaker",
+      "SMK3 PP 50",
+      "HIRADC",
+      "JSA",
+      "LOTO",
+      "CSMS"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "ind.lean_6sigma",
+    "canonical_name": "Lean Six Sigma (Green / Black Belt)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "Green Belt",
+      "Black Belt",
+      "Kaizen",
+      "5S / 5R",
+      "VSM Value Stream Mapping",
+      "DMAIC"
+    ]
+  },
+  {
+    "id": "ind.time_motion",
+    "canonical_name": "Work Study & Time-Motion Analysis",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "Line Balancing",
+      "Cycle Time",
+      "MOST / MTM",
+      "Ergonomi Industri"
+    ]
+  },
+  {
+    "id": "ind.iso_auditor",
+    "canonical_name": "Lead Auditor ISO (9001 / 14001 / 45001)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "domain",
+    "aliases": [
+      "Internal Audit ISO",
+      "Quality Management System",
+      "QMS",
+      "CAPA Management"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "ind.minitab_spc",
+    "canonical_name": "Minitab & Statistical Process Control",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "tools_tech",
+    "aliases": [
+      "Minitab",
+      "Process Capability Cp Cpk",
+      "DOE Design of Experiments",
+      "MSA Gage R&R"
+    ]
+  },
+  {
+    "id": "ind.operation_res",
+    "canonical_name": "Operations Research & Simulasi Sistem",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "Arena Simulation",
+      "FlexSim",
+      "Linear Programming",
+      "Optimization"
+    ]
+  },
+  {
+    "id": "ind.ergo_safety",
+    "canonical_name": "Ergonomi Kerja & Higiene Industri",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "domain",
+    "parent_id": "ind.ak3_umum",
+    "aliases": [
+      "Industrial Hygiene",
+      "Pengukuran Kebisingan & Pencahayaan",
+      "Safety Patrol"
+    ]
+  },
+  {
+    "id": "ind.iso22_fssc",
+    "canonical_name": "Lead Implementer FSSC 22000 & BRCGS",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "domain",
+    "aliases": [
+      "FSSC 22000",
+      "BRCGS Food",
+      "Food Safety Culture"
+    ],
+    "parent_id": "ind.iso_auditor"
+  },
+  {
+    "id": "ind.oee_tpm",
+    "canonical_name": "OEE & Total Productive Maintenance (TPM)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "Overall Equipment Effectiveness",
+      "SMED Setup Reduction",
+      "Autonomous Maintenance"
+    ],
+    "parent_id": "ind.lean_6sigma"
+  },
+  {
+    "id": "ind.fire_rescue",
+    "canonical_name": "Tanggap Darurat Kebakaran (Damkar Kelas A/B/C/D)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "domain",
+    "aliases": [
+      "Emergency Response Team",
+      "Fire Drill",
+      "SCBA",
+      "Confined Space K3"
+    ],
+    "parent_id": "ind.ak3_umum"
+  },
+  {
+    "id": "ind.cost_engineering",
+    "canonical_name": "Cost Engineering & Value Analysis (VAVE)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "Should-Cost Analysis",
+      "VAVE",
+      "Man-Hour Estimation"
+    ],
+    "parent_id": "ind.time_motion"
+  },
+  {
+    "id": "ind.k3_kimia_migas",
+    "canonical_name": "Ahli K3 Kimia & K3 Pesawat Uap / Bejana Tekan",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "domain",
+    "aliases": [
+      "AK3 Kimia",
+      "AK3 PUBT",
+      "AK3 PAA",
+      "Ahli K3 Kebakaran"
+    ],
+    "parent_id": "ind.ak3_umum"
+  },
+  {
+    "id": "ind.iso14_45",
+    "canonical_name": "Manajemen Lingkungan & K3 Terintegrasi (QHSE)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "QHSE Management",
+      "Contractor Safety",
+      "Near-Miss Reporting"
+    ],
+    "parent_id": "ind.iso_auditor"
+  },
+  {
+    "id": "ind.layout_pabrik",
+    "canonical_name": "Facility Layout Design & Material Flow pabrik",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "Systematic Layout Planning",
+      "Takt Time Balancing"
+    ],
+    "parent_id": "ind.time_motion"
+  },
+  {
+    "id": "ind.ergo_workstation",
+    "canonical_name": "Evaluasi Ergonomi Kerja (RULA / REBA / NIOSH)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "RULA Assessment",
+      "REBA Ergonomi",
+      "Manual Handling Safety"
+    ],
+    "parent_id": "ind.ergo_safety"
+  },
+  {
+    "id": "ind.qc_incoming",
+    "canonical_name": "Incoming, In-Process & Final Quality Inspection (IQC / IPQC / OQC)",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core_hard",
+    "aliases": [
+      "IQC Inspection",
+      "IPQC",
+      "OQC / FQC",
+      "AQL Sampling ANSI"
+    ],
+    "parent_id": "ind.minitab_spc"
+  },
+  {
+    "id": "ind.scrum_pm",
+    "canonical_name": "Product Ownership, Scrum & Agile Delivery",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core",
+    "aliases": [
+      "scrum master",
+      "product owner",
+      "sprint planning",
+      "backlog grooming",
+      "jira"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "ind.mt_odp_bumn",
+    "canonical_name": "Management Trainee, ODP & MAGENTA BUMN",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "program",
+    "aliases": [
+      "management trainee",
+      "odp",
+      "mdp",
+      "magenta bumn",
+      "rekruitmen bersama bumn"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "ind.ergonomics_ie",
+    "canonical_name": "Time & Motion Study, OEE & Line Balancing",
+    "domain": "teknik_industri_k3_mutu",
+    "category": "core",
+    "aliases": [
+      "time study",
+      "motion study",
+      "line balancing",
+      "oee",
+      "takt time",
+      "yamazumi"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  }
+]

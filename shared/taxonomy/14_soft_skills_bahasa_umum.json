@@ -1,10 +1,386 @@
 [
-  {"id":"gen.excel","canonical_name":"Microsoft Excel","domain":"umum_lintas_bidang","category":"tools_tech","aliases":["Excel","MS Excel","VLOOKUP","XLOOKUP","Pivot Table","Macro VBA","Spreadsheet","Google Sheets"]},
-  {"id":"gen.ms_office","canonical_name":"Microsoft Office","domain":"umum_lintas_bidang","category":"tools_tech","aliases":["MS Office","Microsoft Word","Microsoft PowerPoint","Google Workspace"]},
-  {"id":"gen.project_mgmt","canonical_name":"Project Management","domain":"umum_lintas_bidang","category":"domain","aliases":["Manajemen Proyek","Agile","Scrum","Kanban","Jira","Trello","Asana","Notion","PMP"]},
-  {"id":"gen.english","canonical_name":"Bahasa Inggris","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["English","Fluent in English","English Proficiency","TOEFL","IELTS","TOEIC","Business English"]},
-  {"id":"gen.mandarin","canonical_name":"Bahasa Mandarin / Jepang","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Bahasa Mandarin","Mandarin","HSK","Bahasa Jepang","JLPT","Bahasa Korea"]},
-  {"id":"gen.communication","canonical_name":"Komunikasi & Presentasi","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Communication","Komunikasi","Public Speaking","Presentasi","Teamwork","Kolaborasi","Interpersonal"]},
-  {"id":"gen.negotiation","canonical_name":"Negosiasi & Kepemimpinan","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Negosiasi","Negotiation","Leadership","Kepemimpinan","People Management","Stakeholder Management"]},
-  {"id":"gen.problem_solving","canonical_name":"Problem Solving & Analisis","domain":"umum_lintas_bidang","category":"soft_skill","aliases":["Problem Solving","Analytical Thinking","Critical Thinking","Berpikir Analitis","Detail Oriented"]}
+  {
+    "id": "gen.excel",
+    "canonical_name": "Microsoft Excel",
+    "domain": "umum_lintas_bidang",
+    "category": "tools_tech",
+    "aliases": [
+      "Excel",
+      "MS Excel",
+      "VLOOKUP",
+      "XLOOKUP",
+      "Pivot Table",
+      "Macro VBA",
+      "Spreadsheet",
+      "Google Sheets"
+    ]
+  },
+  {
+    "id": "gen.ms_office",
+    "canonical_name": "Microsoft Office",
+    "domain": "umum_lintas_bidang",
+    "category": "tools_tech",
+    "aliases": [
+      "MS Office",
+      "Microsoft Word",
+      "Microsoft PowerPoint",
+      "Google Workspace",
+      "PowerPoint",
+      "Google Docs",
+      "Google Slides"
+    ]
+  },
+  {
+    "id": "gen.project_mgmt",
+    "canonical_name": "Project Management",
+    "domain": "umum_lintas_bidang",
+    "category": "domain",
+    "aliases": [
+      "Manajemen Proyek",
+      "Agile",
+      "Scrum",
+      "Kanban",
+      "Jira",
+      "Trello",
+      "Asana",
+      "Notion",
+      "PMP"
+    ]
+  },
+  {
+    "id": "gen.english",
+    "canonical_name": "Bahasa Inggris",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "English",
+      "Fluent in English",
+      "English Proficiency",
+      "TOEFL",
+      "IELTS",
+      "TOEIC",
+      "Business English"
+    ]
+  },
+  {
+    "id": "gen.mandarin",
+    "canonical_name": "Bahasa Mandarin / Jepang",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Bahasa Mandarin",
+      "Mandarin",
+      "HSK",
+      "Bahasa Jepang",
+      "JLPT",
+      "Bahasa Korea",
+      "Mandarin Fluency",
+      "HSK 4",
+      "HSK 5",
+      "HSK 6",
+      "Mandarin Speaker"
+    ]
+  },
+  {
+    "id": "gen.communication",
+    "canonical_name": "Komunikasi & Presentasi",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Communication",
+      "Komunikasi",
+      "Public Speaking",
+      "Presentasi",
+      "Teamwork",
+      "Kolaborasi",
+      "Interpersonal"
+    ]
+  },
+  {
+    "id": "gen.negotiation",
+    "canonical_name": "Negosiasi & Kepemimpinan",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Negosiasi",
+      "Negotiation",
+      "Leadership",
+      "Kepemimpinan",
+      "People Management",
+      "Stakeholder Management"
+    ]
+  },
+  {
+    "id": "gen.problem_solving",
+    "canonical_name": "Problem Solving & Analisis",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Problem Solving",
+      "Analytical Thinking",
+      "Critical Thinking",
+      "Berpikir Analitis",
+      "Detail Oriented"
+    ]
+  },
+  {
+    "id": "gen.agile_scrum",
+    "canonical_name": "Agile, Scrum & Kanban",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Scrum Master",
+      "Kanban",
+      "Sprint Planning",
+      "Jira",
+      "Trello",
+      "Asana"
+    ]
+  },
+  {
+    "id": "gen.critical_thinking",
+    "canonical_name": "Analytical & Critical Thinking",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Root Cause Analysis",
+      "Problem Solving",
+      "5 Why",
+      "Fishbone Diagram"
+    ]
+  },
+  {
+    "id": "gen.stakeholder_mgmt",
+    "canonical_name": "Stakeholder Management",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Cross-Functional Collaboration",
+      "Manajemen Pemangku Kepentingan"
+    ]
+  },
+  {
+    "id": "gen.data_literacy",
+    "canonical_name": "Data-Driven Decision Making",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Reporting Dashboard",
+      "KPI Tracking",
+      "Google Sheets",
+      "Looker"
+    ]
+  },
+  {
+    "id": "gen.bahasa_jepang",
+    "canonical_name": "Bahasa Jepang (JLPT)",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Japanese Fluency",
+      "JLPT N3",
+      "JLPT N2",
+      "JLPT N1"
+    ]
+  },
+  {
+    "id": "gen.bahasa_korea",
+    "canonical_name": "Bahasa Korea (TOPIK)",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "TOPIK",
+      "Korean Speaker"
+    ]
+  },
+  {
+    "id": "gen.bahasa_arab",
+    "canonical_name": "Bahasa Arab (Ekonomi/Diplomasi)",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Arabic Speaker",
+      "TOEFL Arab"
+    ]
+  },
+  {
+    "id": "gen.time_mgmt",
+    "canonical_name": "Time Management & Prioritas Kerja",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Multitasking",
+      "Attention to Detail",
+      "Ketelitian Tinggi"
+    ]
+  },
+  {
+    "id": "gen.public_speaking",
+    "canonical_name": "Public Speaking & Presentasi Eksekutif",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Executive Presentation",
+      "Storytelling Data",
+      "Mc Acara"
+    ],
+    "parent_id": "gen.communication"
+  },
+  {
+    "id": "gen.conflict_res",
+    "canonical_name": "Resolusi Konflik & Emotional Intelligence",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Emotional Intelligence",
+      "Coaching & Mentoring",
+      "Empati Pelanggan"
+    ],
+    "parent_id": "gen.negotiation"
+  },
+  {
+    "id": "gen.project_coord",
+    "canonical_name": "Koordinasi Proyek & Timeline Tracking",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Project Coordination",
+      "Milestone Tracking",
+      "Risk Mitigation"
+    ],
+    "parent_id": "gen.project_mgmt"
+  },
+  {
+    "id": "gen.growth_mindset",
+    "canonical_name": "Adaptabilitas & Continuous Learning",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Fast Learner",
+      "Self-Starter",
+      "Growth Mindset"
+    ],
+    "parent_id": "gen.communication"
+  },
+  {
+    "id": "gen.ethics_integrity",
+    "canonical_name": "Integritas, Etika Kerja & Kerahasiaan Data",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Compliance Mindset",
+      "Etika Profesional",
+      "Confidentiality"
+    ]
+  },
+  {
+    "id": "gen.mentoring",
+    "canonical_name": "Coaching, Mentoring & People Empowerment",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Team Coaching",
+      "Peer Mentoring",
+      "Constructive Feedback"
+    ]
+  },
+  {
+    "id": "gen.remote_async",
+    "canonical_name": "Komunikasi Asinkron & Kerja Tim Jarak Jauh",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Async Communication",
+      "Remote Collaboration",
+      "Notion / Confluence Wiki"
+    ]
+  },
+  {
+    "id": "gen.doc_reporting",
+    "canonical_name": "Penulisan Laporan Eksekutif & Business Writing",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Executive Summary",
+      "Business Correspondence",
+      "Proposal Writing"
+    ]
+  },
+  {
+    "id": "gen.leadership_team",
+    "canonical_name": "Supervisi Tim & Delegasi Pekerjaan",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Team Supervision",
+      "Delegation",
+      "People Management"
+    ]
+  },
+  {
+    "id": "gen.service_exc",
+    "canonical_name": "Service Excellence & Orientasi Kepuasan Pelanggan",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Customer-Centricity",
+      "Hospitality Mindset",
+      "Complaint Resolution"
+    ]
+  },
+  {
+    "id": "gen.adaptability_press",
+    "canonical_name": "Ketahanan Kerja di Bawah Tekanan & Tenggat Waktu",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "Work Under Pressure",
+      "Deadline Driven",
+      "Resilience"
+    ],
+    "parent_id": "gen.time_mgmt"
+  },
+  {
+    "id": "gen.pbi_looker_basic",
+    "canonical_name": "Data Presentation & Storytelling",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "data storytelling",
+      "executive presentation",
+      "slide deck",
+      "powerpoint mastery"
+    ],
+    "base_weight": 1.0,
+    "difficulty": "intermediate",
+    "parent_id": "gen.communication"
+  },
+  {
+    "id": "gen.okr_kpi",
+    "canonical_name": "OKR, KPI & Performance Tracking",
+    "domain": "umum_lintas_bidang",
+    "category": "soft_skill",
+    "aliases": [
+      "okr",
+      "kpi tracking",
+      "balanced scorecard",
+      "performance dashboard"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate",
+    "parent_id": "gen.project_mgmt"
+  },
+  {
+    "id": "gen.arabic_prof",
+    "canonical_name": "Bahasa Arab Profesional",
+    "domain": "umum_lintas_bidang",
+    "category": "language",
+    "aliases": [
+      "bahasa arab",
+      "arabic language",
+      "toafl"
+    ],
+    "base_weight": 1.0,
+    "difficulty": "intermediate"
+  }
 ]

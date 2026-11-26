@@ -5,7 +5,8 @@ use crate::core::gemini::EmbeddingTaskType;
 use crate::core::matching::{encode_embedding, format_profile_embedding_text};
 use crate::error::AppError;
 use crate::models::profile::{
-    ConfirmedProfileInput, ScrapeKeywordItem, StoryProfileDraft, UserProfileDetail,
+    ConfirmedProfileInput, ProdiRoleItem, ProfileSummaryItem, ScrapeKeywordItem, StoryProfileDraft,
+    UserProfileDetail,
 };
 use crate::state::AppState;
 
@@ -93,6 +94,57 @@ pub fn add_custom_keyword_impl(
     state.db.add_custom_keyword(&user_id, &role_label, &queries)
 }
 
+pub fn list_prodi_roles_catalog_impl(
+    query: Option<String>,
+) -> Result<Vec<ProdiRoleItem>, AppError> {
+    let q = query.unwrap_or_default().trim().to_lowercase();
+    let catalog = vecta_taxonomy::TaxonomyEngine::global().roles_catalog();
+    let items: Vec<ProdiRoleItem> = catalog
+        .iter()
+        .filter(|entry| {
+            if q.is_empty() {
+                return true;
+            }
+            entry.prodi_label.to_lowercase().contains(&q)
+                || entry.role_title.to_lowercase().contains(&q)
+                || entry.domain.to_lowercase().contains(&q)
+        })
+        .map(|entry| ProdiRoleItem {
+            id: entry.id.clone(),
+            prodi_label: entry.prodi_label.clone(),
+            domain: entry.domain.clone(),
+            role_title: entry.role_title.clone(),
+            mandatory_skills: entry.mandatory_skills.clone(),
+            preferred_skills: entry.preferred_skills.clone(),
+            certifications: entry.certifications.clone(),
+            scrape_queries: entry.scrape_queries.clone(),
+        })
+        .collect();
+    Ok(items)
+}
+
+pub fn list_user_profiles_impl(state: &AppState) -> Result<Vec<ProfileSummaryItem>, AppError> {
+    state.db.list_user_profiles()
+}
+
+pub fn switch_active_profile_impl(
+    state: &AppState,
+    profile_id: String,
+) -> Result<UserProfileDetail, AppError> {
+    let detail = state.db.switch_active_profile(&profile_id)?;
+    state.recalculate_all_matches_for_user(&detail.id)?;
+    Ok(detail)
+}
+
+pub fn delete_user_profile_impl(
+    state: &AppState,
+    profile_id: String,
+) -> Result<UserProfileDetail, AppError> {
+    let remaining_active = state.db.delete_user_profile(&profile_id)?;
+    state.recalculate_all_matches_for_user(&remaining_active.id)?;
+    Ok(remaining_active)
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn parse_user_story(
@@ -138,6 +190,36 @@ pub fn add_custom_keyword(
     queries: Vec<String>,
 ) -> Result<ScrapeKeywordItem, AppError> {
     add_custom_keyword_impl(&state, user_id, role_label, queries)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn list_prodi_roles_catalog(query: Option<String>) -> Result<Vec<ProdiRoleItem>, AppError> {
+    list_prodi_roles_catalog_impl(query)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn list_user_profiles(state: State<'_, AppState>) -> Result<Vec<ProfileSummaryItem>, AppError> {
+    list_user_profiles_impl(&state)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn switch_active_profile(
+    state: State<'_, AppState>,
+    profile_id: String,
+) -> Result<UserProfileDetail, AppError> {
+    switch_active_profile_impl(&state, profile_id)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn delete_user_profile(
+    state: State<'_, AppState>,
+    profile_id: String,
+) -> Result<UserProfileDetail, AppError> {
+    delete_user_profile_impl(&state, profile_id)
 }
 
 #[cfg(test)]

@@ -4,26 +4,36 @@ import type {
   ApplicationStatus,
   ApplyKitResult,
   AtsExportResult,
+  CompanySnapshot,
   CompetencyMapResponse_Serialize,
   ConfirmedProfileInput_Deserialize,
   EnrichmentStatus,
   GapAnalysis,
   ImportedCvDraft,
+  InterviewPrepKit,
   JobFilterInput_Deserialize,
   JobMatchDetail_Serialize,
   JobMatchSummary_Serialize,
   LocalAiModelStatus,
   MasterCvProfile,
+  ProdiRoleItem,
+  ProfileSummaryItem,
   RoadmapDetail_Serialize,
   RoadmapSummary_Serialize,
   RoleJobCount,
+  SalaryBenchmarkSummary,
+  SavedWatchlistItem_Serialize,
   ScrapeKeywordItem_Serialize,
   ScrapeRunReport,
-  SearchPreferences,
+  SearchPreferences_Deserialize,
+  SearchPreferences_Serialize,
+  SkillImpactItem,
   StepStatus,
   StepUpdateResult_Serialize,
   StoryProfileDraft,
   UserProfileDetail_Serialize,
+  VectaBackupReport,
+  VectaImportReport,
   WorkerHealth,
 } from "./bindings";
 import { IpcError } from "./ipc";
@@ -74,9 +84,10 @@ let masterCvState: MasterCvProfile = {
   languages: ["Bahasa Indonesia", "Bahasa Inggris"],
   updated_at: nowIso,
 };
-let searchPrefsState: SearchPreferences = {
+let searchPrefsState: SearchPreferences_Serialize = {
   location: "Indonesia",
-  sources: ["jobstreet", "linkedin", "indeed"],
+  locations: ["Indonesia", "Jakarta", "Bandung"],
+  sources: ["jobstreet", "linkedin", "kalibrr", "dealls"],
   limit_per_query: 25,
   max_pages: 2,
   posted_within_days: 14,
@@ -158,6 +169,8 @@ let activeProfile: UserProfileDetail_Serialize = {
   updated_at: nowIso,
 };
 
+const mockProfilesList: UserProfileDetail_Serialize[] = [activeProfile];
+
 interface MockJobRecord {
   job_id: string;
   source: "linkedin" | "glints" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "manual";
@@ -167,11 +180,15 @@ interface MockJobRecord {
   normalized_role: string;
   company: string;
   location: string | null;
+  location_cluster: string;
   work_mode: "onsite" | "hybrid" | "remote" | "unknown";
   experience_level: "intern" | "junior" | "mid" | "senior" | "unknown";
   enrichment_status: EnrichmentStatus;
   posted_at: string | null;
   salary_text: string | null;
+  salary_min_idr: number | null;
+  salary_max_idr: number | null;
+  opportunity_type: string;
   raw_description: string;
   role_summary: string | null;
   vector_score: number;
@@ -195,12 +212,16 @@ const mockJobs: MockJobRecord[] = [
     title: "Backend Engineer (Rust & SQLite)",
     normalized_role: "Backend Engineer",
     company: "PT Nusantara Teknologi",
-    location: "Jakarta",
+    location: "Jakarta Selatan",
+    location_cluster: "jabodetabek",
     work_mode: "hybrid",
     experience_level: "junior",
     enrichment_status: "ai_enriched",
     posted_at: twoHoursAgo,
     salary_text: "Rp 11jt - 16jt",
+    salary_min_idr: 11_000_000,
+    salary_max_idr: 16_000_000,
+    opportunity_type: "full_time",
     raw_description: "Membangun layanan backend lokal dan API berkinerja tinggi memakai Rust, SQLite, Python, REST API, Git, dan Docker.",
     role_summary: "Mengembangkan engine backend lokal dan REST API dengan standar reliability tinggi.",
     vector_score: 0.91,
@@ -242,12 +263,16 @@ const mockJobs: MockJobRecord[] = [
     title: "Systems Software Engineer",
     normalized_role: "Systems Developer",
     company: "PT Awan Lokal Indonesia",
-    location: "Bandung",
+    location: "Bandung (Remote)",
+    location_cluster: "remote_indonesia",
     work_mode: "remote",
     experience_level: "junior",
     enrichment_status: "local_only",
     posted_at: fiveHoursAgo,
     salary_text: "Rp 10jt - 14jt",
+    salary_min_idr: 10_000_000,
+    salary_max_idr: 14_000_000,
+    opportunity_type: "full_time",
     raw_description: "Pengembangan runtime desktop & CLI memakai Rust, SQLite, Git, Docker, dan gRPC.",
     role_summary: null,
     vector_score: 0.84,
@@ -276,11 +301,15 @@ const mockJobs: MockJobRecord[] = [
     normalized_role: "Backend Engineer",
     company: "Studio Karya Digital",
     location: "Jakarta Selatan",
+    location_cluster: "jabodetabek",
     work_mode: "hybrid",
     experience_level: "mid",
     enrichment_status: "ai_enriched",
     posted_at: oneDayAgo,
     salary_text: null,
+    salary_min_idr: null,
+    salary_max_idr: null,
+    opportunity_type: "full_time",
     raw_description: "Membangun layanan FastAPI, PostgreSQL, Redis, dan Docker untuk produk SaaS.",
     role_summary: "Memelihara dan menskalakan layanan Python API dan database PostgreSQL.",
     vector_score: 0.78,
@@ -300,6 +329,155 @@ const mockJobs: MockJobRecord[] = [
     applied_at: fiveHoursAgo,
     user_notes: "Sudah kirim CV lewat JobStreet.",
     scraped_at: oneDayAgo,
+  },
+  {
+    job_id: "job-4",
+    source: "kalibrr",
+    external_id: "kl-4004",
+    url: "https://kalibrr.com",
+    title: "ODP Technology & Data Track 2026",
+    normalized_role: "Backend Engineer",
+    company: "Bank Digital Nusantara",
+    location: "Surabaya",
+    location_cluster: "surabaya_jatim",
+    work_mode: "onsite",
+    experience_level: "junior",
+    enrichment_status: "local_only",
+    posted_at: twoHoursAgo,
+    salary_text: "Rp 9jt - 12jt",
+    salary_min_idr: 9_000_000,
+    salary_max_idr: 12_000_000,
+    opportunity_type: "mt_odp",
+    raw_description: "Officer Development Program bidang perbankan digital: SQL, Python, REST API, Git, PostgreSQL, dan pemahaman transaksi QRIS/BI-FAST.",
+    role_summary: "Program akselerasi talenta teknologi perbankan dengan rotasi divisi inti.",
+    vector_score: 0.86,
+    level_score: 1.0,
+    skill_refs: [
+      { skill_id: 2, requirement_type: "mandatory" },
+      { skill_id: 4, requirement_type: "mandatory" },
+      { skill_id: 5, requirement_type: "mandatory" },
+      { skill_id: 8, requirement_type: "nice_to_have" },
+    ],
+    ai_gap_analysis: null,
+    ai_apply_kit: null,
+    is_saved: false,
+    application_status: "new",
+    applied_at: null,
+    user_notes: null,
+    scraped_at: twoHoursAgo,
+  },
+];
+
+let mockWatchlists: SavedWatchlistItem_Serialize[] = [
+  {
+    id: "wl-demo-1",
+    user_id: "user-demo-1",
+    name: "Remote & Jabodetabek Bergaji",
+    filter: {
+      normalized_role: null,
+      work_mode: null,
+      source: null,
+      saved_only: null,
+      min_score: null,
+      search_query: null,
+      location_query: null,
+      enrichment_status: null,
+      application_status: null,
+      include_dismissed: null,
+      work_modes: ["remote", "hybrid"],
+      sources: null,
+      location_clusters: ["jabodetabek", "remote_indonesia"],
+      opportunity_types: null,
+      application_statuses: null,
+      salary_only: true,
+      sort_by: "score",
+      limit: 50,
+      offset: 0,
+    },
+    created_at: oneDayAgo,
+  },
+];
+
+const mockProdiCatalog: ProdiRoleItem[] = [
+  {
+    id: "role_001",
+    prodi_label: "S1 Teknik Informatika / Ilmu Komputer",
+    domain: "informatika_data",
+    role_title: "Backend Developer",
+    mandatory_skills: ["Rust", "Python", "REST API", "SQLite", "Git"],
+    preferred_skills: ["Docker", "PostgreSQL", "Redis"],
+    certifications: [],
+    scrape_queries: ["Backend Developer", "Backend Engineer"],
+  },
+  {
+    id: "role_020",
+    prodi_label: "S1 Akuntansi / Perpajakan",
+    domain: "ekonomi_akuntansi_pajak",
+    role_title: "Tax & Accounting Staff",
+    mandatory_skills: ["Akuntansi", "Brevet Pajak A & B", "Laporan Keuangan", "PSAK / IFRS", "Microsoft Excel"],
+    preferred_skills: ["Accurate Accounting", "SAP ERP"],
+    certifications: ["Brevet A/B"],
+    scrape_queries: ["Tax Staff", "Accounting Staff"],
+  },
+  {
+    id: "role_042",
+    prodi_label: "S1 Manajemen / Bisnis Digital",
+    domain: "bisnis_marketing_sales",
+    role_title: "Digital Marketing & Growth Specialist",
+    mandatory_skills: ["Digital Marketing", "Meta Ads & TikTok Ads", "SEO", "Copywriting", "Google Analytics"],
+    preferred_skills: ["CRM", "SEM & Google Ads"],
+    certifications: [],
+    scrape_queries: ["Digital Marketing", "Performance Marketing"],
+  },
+  {
+    id: "role_055",
+    prodi_label: "S1 Psikologi / Manajemen SDM",
+    domain: "hr_psikologi_admin_ops",
+    role_title: "HRGA & People Operations",
+    mandatory_skills: ["Rekrutmen & Seleksi", "Payroll & Kompensasi", "BPJS & Ketenagakerjaan", "HRIS"],
+    preferred_skills: ["Asesmen Psikologi & Psikotes"],
+    certifications: [],
+    scrape_queries: ["HR Staff", "Talent Acquisition"],
+  },
+  {
+    id: "role_071",
+    prodi_label: "S1 Teknik Sipil",
+    domain: "teknik_sipil_arsitektur_gis",
+    role_title: "Site Engineer / Quantity Surveyor",
+    mandatory_skills: ["AutoCAD", "ETABS", "RAB & Quantity Surveying", "Manajemen Konstruksi"],
+    preferred_skills: ["Revit & BIM"],
+    certifications: ["SKA Muda"],
+    scrape_queries: ["Site Engineer", "Quantity Surveyor"],
+  },
+  {
+    id: "role_112",
+    prodi_label: "S1 Teknik Pertambangan / Geologi",
+    domain: "pertambangan_migas_energi",
+    role_title: "Mine Plan & Drilling Engineer",
+    mandatory_skills: ["Perencanaan Tambang (Surpac / Minescape / Vulcan)", "Operasi Peledakan & Pemboran (Drilling & Blasting)", "K3 / HSE"],
+    preferred_skills: ["Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"],
+    certifications: ["POP Minerba"],
+    scrape_queries: ["Mine Plan Engineer", "Mining Engineer"],
+  },
+  {
+    id: "role_140",
+    prodi_label: "Profesi Apoteker / S1 Farmasi",
+    domain: "kesehatan_farmasi_keperawatan",
+    role_title: "Apoteker QA & Regulatory Affairs",
+    mandatory_skills: ["Farmasi Klinis & Apoteker", "CPOB / CPOTB / CDOB", "Registrasi BPOM & Regulatory Affairs"],
+    preferred_skills: ["Farmakovigilans"],
+    certifications: ["STRA"],
+    scrape_queries: ["Apoteker", "Regulatory Affairs"],
+  },
+  {
+    id: "role_185",
+    prodi_label: "S1 Perbankan / Aktuaria / Keuangan",
+    domain: "perbankan_aktuaria_asuransi",
+    role_title: "ODP / Corporate Credit Analyst",
+    mandatory_skills: ["Analisis Kredit Korporasi & UMKM", "Treasury, Pasar Uang & Devisa", "Financial Modeling"],
+    preferred_skills: ["Ilmu Aktuaria & Valuasi Liabilitas"],
+    certifications: ["BSMR"],
+    scrape_queries: ["ODP Bank", "Credit Analyst"],
   },
 ];
 
@@ -410,11 +588,15 @@ function computeJobDetail(job: MockJobRecord): JobMatchDetail_Serialize {
     normalized_role: job.normalized_role,
     company: job.company,
     location: job.location,
+    location_cluster: job.location_cluster,
     work_mode: job.work_mode,
     experience_level: job.experience_level,
     enrichment_status: job.enrichment_status,
     posted_at: job.posted_at,
     salary_text: job.salary_text,
+    salary_min_idr: job.salary_min_idr,
+    salary_max_idr: job.salary_max_idr,
+    opportunity_type: job.opportunity_type,
     domain_slug: "informatika_data",
     quality_score: 0.98,
     red_flags: [],
@@ -461,12 +643,69 @@ export const mockCommands = {
     if (workerUrl) workerUrlState = workerUrl;
     return { status: `ok (${workerUrlState})`, version: "0.1.0", available_sources: ["linkedin", "jobstreet", "indeed", "glints"] };
   },
-  async getSearchPreferences(): Promise<SearchPreferences> {
-    return { ...searchPrefsState, sources: [...searchPrefsState.sources], custom_queries: [...searchPrefsState.custom_queries] };
+  async getSearchPreferences(): Promise<SearchPreferences_Serialize> {
+    return {
+      ...searchPrefsState,
+      locations: [...searchPrefsState.locations],
+      sources: [...searchPrefsState.sources],
+      custom_queries: [...searchPrefsState.custom_queries],
+    };
   },
-  async saveSearchPreferences(prefs: SearchPreferences): Promise<SearchPreferences> {
-    searchPrefsState = { ...prefs, sources: [...prefs.sources], custom_queries: [...prefs.custom_queries] };
-    return searchPrefsState;
+  async saveSearchPreferences(prefs: SearchPreferences_Deserialize): Promise<SearchPreferences_Serialize> {
+    const locs = prefs.locations && prefs.locations.length > 0 ? prefs.locations : [prefs.location || "Indonesia"];
+    searchPrefsState = {
+      ...prefs,
+      location: locs[0],
+      locations: [...locs],
+      posted_within_days: prefs.posted_within_days ?? null,
+      sources: [...prefs.sources],
+      custom_queries: [...prefs.custom_queries],
+    };
+    return this.getSearchPreferences();
+  },
+  async listProdiRolesCatalog(query: string | null): Promise<ProdiRoleItem[]> {
+    const q = (query ?? "").trim().toLowerCase();
+    if (!q) return mockProdiCatalog;
+    return mockProdiCatalog.filter(
+      (r) =>
+        r.prodi_label.toLowerCase().includes(q) ||
+        r.role_title.toLowerCase().includes(q) ||
+        r.domain.toLowerCase().includes(q),
+    );
+  },
+  async exportVectaBackup(): Promise<VectaBackupReport> {
+    const payload = {
+      schema_version: 1,
+      exported_at: new Date().toISOString(),
+      active_profile: activeProfile,
+      master_cv: masterCvState,
+      search_preferences_json: JSON.stringify(searchPrefsState),
+      watchlists: mockWatchlists,
+    };
+    return {
+      schema_version: 1,
+      exported_at: payload.exported_at,
+      file_name: "vecta-backup.vecta",
+      payload_json: JSON.stringify(payload, null, 2),
+      profiles_count: 1,
+      watchlists_count: mockWatchlists.length,
+      tracked_jobs_count: mockJobs.filter((j) => j.application_status !== "new").length,
+    };
+  },
+  async importVectaBackup(backupJson: string): Promise<VectaImportReport> {
+    const parsed = JSON.parse(backupJson) as {
+      active_profile?: UserProfileDetail_Serialize;
+      watchlists?: SavedWatchlistItem_Serialize[];
+      search_preferences_json?: string;
+    };
+    if (parsed.active_profile) activeProfile = parsed.active_profile;
+    if (parsed.watchlists) mockWatchlists = parsed.watchlists;
+    return {
+      imported_profiles: parsed.active_profile ? 1 : 0,
+      imported_watchlists: parsed.watchlists?.length ?? 0,
+      imported_preferences: Boolean(parsed.search_preferences_json),
+      warnings: [],
+    };
   },
   async parseUserStory(rawStory: string): Promise<StoryProfileDraft> {
     if (rawStory.trim().length < 30) {
@@ -490,13 +729,16 @@ export const mockCommands = {
     };
   },
   async saveConfirmedProfile(input: ConfirmedProfileInput_Deserialize): Promise<UserProfileDetail_Serialize> {
-    activeProfile = {
+    const newId = input.id || `user-demo-${Date.now()}`;
+    const saved: UserProfileDetail_Serialize = {
       ...activeProfile,
+      id: newId,
       profile_name: input.profile_name,
       target_roles: input.target_roles,
       raw_story_text: input.raw_story_text,
       summary: input.summary,
       experience_level: input.experience_level,
+      is_active: true,
       skills: input.skills.map((s, idx) => ({
         skill_id: idx + 1,
         canonical_name: s.canonical_name,
@@ -506,7 +748,7 @@ export const mockCommands = {
       })),
       keywords: input.keywords.map((k, idx) => ({
         id: idx + 1,
-        user_id: activeProfile.id,
+        user_id: newId,
         role_label: k.role_label,
         fit_type: k.fit_type,
         scrape_queries: k.scrape_queries,
@@ -516,9 +758,47 @@ export const mockCommands = {
       })),
       updated_at: new Date().toISOString(),
     };
+    for (const p of mockProfilesList) p.is_active = false;
+    const existingIdx = mockProfilesList.findIndex((p) => p.id === newId);
+    if (existingIdx >= 0) {
+      mockProfilesList[existingIdx] = saved;
+    } else {
+      mockProfilesList.unshift(saved);
+    }
+    activeProfile = saved;
     return activeProfile;
   },
   async getActiveProfile(): Promise<UserProfileDetail_Serialize | null> {
+    return activeProfile;
+  },
+  async listUserProfiles(): Promise<ProfileSummaryItem[]> {
+    return mockProfilesList.map((p) => ({
+      id: p.id,
+      profile_name: p.profile_name,
+      target_roles: [...p.target_roles],
+      experience_level: p.experience_level,
+      skill_count: p.skills.length,
+      is_active: p.id === activeProfile.id,
+      updated_at: p.updated_at,
+    }));
+  },
+  async switchActiveProfile(profileId: string): Promise<UserProfileDetail_Serialize> {
+    const found = mockProfilesList.find((p) => p.id === profileId);
+    if (!found) {
+      throw new IpcError({ code: "VALIDATION_ERROR", message: "Profil tidak ditemukan.", retryable: false });
+    }
+    for (const p of mockProfilesList) p.is_active = p.id === profileId;
+    activeProfile = found;
+    return activeProfile;
+  },
+  async deleteUserProfile(profileId: string): Promise<UserProfileDetail_Serialize> {
+    if (mockProfilesList.length <= 1) {
+      throw new IpcError({ code: "VALIDATION_ERROR", message: "Minimal harus tersisa satu profil aktif.", retryable: false });
+    }
+    const idx = mockProfilesList.findIndex((p) => p.id === profileId);
+    if (idx >= 0) mockProfilesList.splice(idx, 1);
+    mockProfilesList[0].is_active = true;
+    activeProfile = mockProfilesList[0];
     return activeProfile;
   },
   async toggleScrapeKeyword(keywordId: number, isActive: boolean): Promise<null> {
@@ -553,11 +833,15 @@ export const mockCommands = {
       normalized_role: "Backend Engineer",
       company: "Input Manual",
       location: "Indonesia",
+      location_cluster: "remote_indonesia",
       work_mode: "remote",
       experience_level: "junior",
       enrichment_status: "ai_enriched",
       posted_at: new Date().toISOString(),
       salary_text: null,
+      salary_min_idr: null,
+      salary_max_idr: null,
+      opportunity_type: "full_time",
       raw_description: rawText,
       role_summary: "Diekstrak dari deskripsi lowongan manual.",
       vector_score: 0.86,
@@ -582,7 +866,7 @@ export const mockCommands = {
     const pending = mockJobs.filter((j) => j.enrichment_status === "local_only" && j.application_status !== "dismissed").length;
     return { total_fetched: 12, newly_ingested: 0, skipped_duplicates: 12, failed_extractions: 0, pending_local_count: pending, warnings: [] };
   },
-  async scrapeAndStoreJobs(_userId: string, _prefs: SearchPreferences): Promise<ScrapeRunReport> {
+  async scrapeAndStoreJobs(_userId: string, _prefs: SearchPreferences_Deserialize): Promise<ScrapeRunReport> {
     const pending = mockJobs.filter((j) => j.enrichment_status === "local_only" && j.application_status !== "dismissed").length;
     return { total_fetched: 18, newly_ingested: 0, skipped_duplicates: 18, failed_extractions: 0, pending_local_count: pending, warnings: [] };
   },
@@ -664,15 +948,32 @@ export const mockCommands = {
     const filtered = mockJobs
       .map(computeJobDetail)
       .filter((j) => {
-        if (filter.application_status) {
+        if (filter.application_statuses && filter.application_statuses.length > 0) {
+          if (!filter.application_statuses.includes(j.application_status)) return false;
+        } else if (filter.application_status) {
           if (j.application_status !== filter.application_status) return false;
         } else if (!filter.include_dismissed && j.application_status === "dismissed") {
           return false;
         }
         if (filter.normalized_role && j.normalized_role !== filter.normalized_role) return false;
         if (filter.saved_only && !j.is_saved) return false;
-        if (filter.work_mode && j.work_mode !== filter.work_mode) return false;
-        if (filter.source && j.source !== filter.source) return false;
+        if (filter.salary_only && j.salary_min_idr == null && !j.salary_text) return false;
+        if (filter.work_modes && filter.work_modes.length > 0) {
+          if (!filter.work_modes.includes(j.work_mode)) return false;
+        } else if (filter.work_mode && j.work_mode !== filter.work_mode) {
+          return false;
+        }
+        if (filter.sources && filter.sources.length > 0) {
+          if (!filter.sources.includes(j.source)) return false;
+        } else if (filter.source && j.source !== filter.source) {
+          return false;
+        }
+        if (filter.location_clusters && filter.location_clusters.length > 0) {
+          if (!filter.location_clusters.includes(j.location_cluster)) return false;
+        }
+        if (filter.opportunity_types && filter.opportunity_types.length > 0) {
+          if (!filter.opportunity_types.includes(j.opportunity_type)) return false;
+        }
         if (filter.enrichment_status && j.enrichment_status !== filter.enrichment_status) return false;
         if (locQuery && !(j.location ?? "").toLowerCase().includes(locQuery)) return false;
         if (
@@ -684,7 +985,15 @@ export const mockCommands = {
         }
         return true;
       })
-      .sort((a, b) => (b.final_score ?? 0) - (a.final_score ?? 0));
+      .sort((a, b) => {
+        if (filter.sort_by === "newest") {
+          return (b.posted_at ?? b.scraped_at).localeCompare(a.posted_at ?? a.scraped_at);
+        }
+        if (filter.sort_by === "salary_desc") {
+          return (b.salary_max_idr ?? b.salary_min_idr ?? 0) - (a.salary_max_idr ?? a.salary_min_idr ?? 0);
+        }
+        return (b.final_score ?? 0) - (a.final_score ?? 0);
+      });
 
     const offset = filter.offset ?? 0;
     const sliced = filter.limit != null ? filtered.slice(offset, offset + filter.limit) : filtered.slice(offset);
@@ -698,11 +1007,15 @@ export const mockCommands = {
         normalized_role: d.normalized_role,
         company: d.company,
         location: d.location,
+        location_cluster: d.location_cluster,
         work_mode: d.work_mode,
         experience_level: d.experience_level,
         enrichment_status: d.enrichment_status,
         posted_at: d.posted_at,
         salary_text: d.salary_text,
+        salary_min_idr: d.salary_min_idr,
+        salary_max_idr: d.salary_max_idr,
+        opportunity_type: d.opportunity_type,
         domain_slug: d.domain_slug,
         quality_score: d.quality_score,
         red_flags_count: d.red_flags.length,
@@ -729,6 +1042,44 @@ export const mockCommands = {
     if (!found) return false;
     found.is_saved = !found.is_saved;
     return found.is_saved;
+  },
+  async listSavedWatchlists(_userId: string): Promise<SavedWatchlistItem_Serialize[]> {
+    return [...mockWatchlists];
+  },
+  async saveWatchlist(
+    userId: string,
+    name: string,
+    filter: JobFilterInput_Deserialize,
+  ): Promise<SavedWatchlistItem_Serialize> {
+    const item: SavedWatchlistItem_Serialize = {
+      id: `wl-${Date.now()}`,
+      user_id: userId,
+      name,
+      filter: { ...filter } as unknown as SavedWatchlistItem_Serialize["filter"],
+      created_at: new Date().toISOString(),
+    };
+    mockWatchlists = [item, ...mockWatchlists];
+    return item;
+  },
+  async deleteWatchlist(id: string): Promise<null> {
+    mockWatchlists = mockWatchlists.filter((w) => w.id !== id);
+    return null;
+  },
+  async simulateSkillImpact(
+    _userId: string,
+    _targetRole: string,
+    candidateSkillIds: number[],
+  ): Promise<SkillImpactItem[]> {
+    return candidateSkillIds.map((id, i) => {
+      const meta = skillCatalog.get(id);
+      return {
+        skill_id: id,
+        canonical_name: meta?.canonical_name ?? `Skill #${id}`,
+        affected_jobs_count: Math.max(1, 3 - i),
+        avg_score_delta: Number((14.2 - i * 3.1).toFixed(1)),
+        jobs_crossing_75_count: i === 0 ? 2 : 1,
+      };
+    });
   },
   async generateGapAnalysis(_userId: string, jobId: string, _forceRefresh: boolean): Promise<GapAnalysis> {
     const found = mockJobs.find((j) => j.job_id === jobId);
@@ -901,11 +1252,134 @@ export const mockCommands = {
     _language: "id" | "en",
   ): Promise<AtsExportResult> {
     return {
+      file_name: "CV_Budi_Santoso_ATS.pdf",
       file_path: "Documents/Vecta_CVs/CV_Budi_Santoso_ATS.pdf",
       ats_keyword_score: 86,
       matched_keywords: ["Rust", "SQLite", "REST API", "Python"],
       missing_keywords: ["Docker"],
       pdf_size_bytes: 28450,
+      pdf_base64: "JVBERi0xLjQKJSBWRVNUQSBNT0NLICBQREYK",
+    };
+  },
+  async getSalaryBenchmark(
+    roleFilter: string | null,
+    clusterFilter: string | null,
+  ): Promise<SalaryBenchmarkSummary> {
+    const filtered = mockJobs.filter((j) => {
+      if (roleFilter && j.normalized_role.toLowerCase() !== roleFilter.toLowerCase()) return false;
+      if (clusterFilter && j.location_cluster !== clusterFilter) return false;
+      return j.salary_min_idr !== null || j.salary_max_idr !== null;
+    });
+    const mids = filtered
+      .map((j) => {
+        if (j.salary_min_idr && j.salary_max_idr) return Math.round((j.salary_min_idr + j.salary_max_idr) / 2);
+        return j.salary_min_idr ?? j.salary_max_idr ?? 0;
+      })
+      .filter((v) => v > 0)
+      .sort((a, b) => a - b);
+
+    const med = mids.length ? mids[Math.floor(mids.length / 2)] : null;
+    return {
+      role_filter: roleFilter,
+      cluster_filter: clusterFilter,
+      sample_count: mids.length,
+      is_small_sample: mids.length < 3,
+      min_idr: mids[0] ?? null,
+      p25_idr: mids.length ? mids[Math.floor((mids.length - 1) * 0.25)] : null,
+      median_idr: med,
+      p75_idr: mids.length ? mids[Math.floor((mids.length - 1) * 0.75)] : null,
+      max_idr: mids[mids.length - 1] ?? null,
+      by_cluster: [
+        { location_cluster: "jabodetabek", sample_count: Math.max(1, mids.length), median_idr: med ?? 12_000_000 },
+        { location_cluster: "bandung_jabar", sample_count: 1, median_idr: 9_500_000 },
+      ],
+    };
+  },
+  async getCompanySnapshot(_userId: string, companyName: string): Promise<CompanySnapshot> {
+    const owned = new Set(activeProfile.skills.map((s) => s.canonical_name.toLowerCase()));
+    const rawMatches = mockJobs.filter((j) => j.company.toLowerCase() === companyName.toLowerCase());
+    const list = (rawMatches.length > 0 ? rawMatches : [mockJobs[0]]).map(computeJobDetail);
+    const freq = new Map<string, number>();
+    let remoteCount = 0;
+    let hybridCount = 0;
+    let onsiteCount = 0;
+    for (const j of list) {
+      if (j.work_mode === "remote") remoteCount += 1;
+      else if (j.work_mode === "hybrid") hybridCount += 1;
+      else if (j.work_mode === "onsite") onsiteCount += 1;
+      for (const s of [...j.matched_skills, ...j.missing_skills]) {
+        freq.set(s.canonical_name, (freq.get(s.canonical_name) ?? 0) + 1);
+      }
+    }
+    return {
+      company_name: companyName,
+      total_jobs: list.length,
+      avg_match_score: Math.round(
+        (list.reduce((acc, j) => acc + (j.final_score ?? 0), 0) / list.length) * 1000,
+      ) / 10,
+      remote_count: remoteCount,
+      hybrid_count: hybridCount,
+      onsite_count: onsiteCount,
+      salary_min_idr: list[0]?.salary_min_idr ?? null,
+      salary_max_idr: list[0]?.salary_max_idr ?? null,
+      high_risk_count: list.filter((j) => j.red_flags.length > 0).length,
+      top_skills: Array.from(freq.entries()).map(([skill_name, count]) => ({
+        skill_name,
+        count,
+        user_has: owned.has(skill_name.toLowerCase()),
+      })),
+      recent_titles: list.map((j) => j.title).slice(0, 5),
+    };
+  },
+  async generateInterviewPrep(
+    _userId: string,
+    jobId: string,
+    language: "id" | "en" = "id",
+  ): Promise<InterviewPrepKit> {
+    const job = computeJobDetail(mockJobs.find((j) => j.job_id === jobId) ?? mockJobs[0]);
+    const primary = job.matched_skills[0]?.canonical_name ?? "Rust";
+    const gap = job.missing_skills[0]?.canonical_name ?? "Docker";
+    if (language === "en") {
+      return {
+        job_id: job.job_id,
+        language: "en",
+        pitch_30s: `I am a candidate for ${job.title} at ${job.company} with hands-on strength in ${primary}.`,
+        questions: [
+          {
+            category: "Behavioral STAR",
+            question: `Tell me about a challenging project where you applied ${primary}.`,
+            star_hint: "Situation, Task, Action with concrete metrics.",
+            focus_skill: primary,
+          },
+          {
+            category: "Gap Mitigation",
+            question: `How do you plan to ramp up on ${gap} during your first 30 days?`,
+            star_hint: "Connect prior work to fast 2-week sandbox validation.",
+            focus_skill: gap,
+          },
+        ],
+        closing_questions: [`What defines 90-day success for ${job.title}?`],
+      };
+    }
+    return {
+      job_id: job.job_id,
+      language: "id",
+      pitch_30s: `Saya kandidat untuk posisi ${job.title} di ${job.company} dengan pengalaman langsung pada ${primary}.`,
+      questions: [
+        {
+          category: "Behavioral STAR",
+          question: `Ceritakan masalah tersulit yang Anda selesaikan memakai ${primary} beserta dampaknya.`,
+          star_hint: "Jelaskan Situation, Task, Action, dan Result terukur.",
+          focus_skill: primary,
+        },
+        {
+          category: "Mitigasi Gap",
+          question: `Bagaimana rencana Anda menguasai ${gap} dalam 30 hari pertama di ${job.company}?`,
+          star_hint: "Hubungkan pengalaman serupa dan contoh hasil kerja cepat.",
+          focus_skill: gap,
+        },
+      ],
+      closing_questions: [`Apa tolok ukur keberhasilan 90 hari pertama untuk ${job.title}?`],
     };
   },
 };

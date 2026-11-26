@@ -1,0 +1,315 @@
+[
+  {
+    "id": "elc.plc_scada",
+    "canonical_name": "Pemrograman PLC & SCADA (Siemens / Omron / Allen-Bradley)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "TIA Portal",
+      "CX-Programmer",
+      "WinCC",
+      "HMI Design",
+      "Ladder Diagram",
+      "Modbus"
+    ]
+  },
+  {
+    "id": "elc.pcb_embedded",
+    "canonical_name": "Desain PCB & Embedded Systems (STM32 / ESP32)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "Altium Designer",
+      "KiCad",
+      "Eagle CAD",
+      "Embedded C",
+      "RTOS",
+      "ESP32",
+      "Arduino Industri"
+    ]
+  },
+  {
+    "id": "elc.power_system",
+    "canonical_name": "Sistem Tenaga Listrik & Gardu Induk (ETAP)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "ETAP",
+      "DIgSILENT",
+      "Load Flow Analysis",
+      "Short Circuit",
+      "Panel LVMDP / MVMDP",
+      "Trafo & Switchgear"
+    ]
+  },
+  {
+    "id": "elc.autocad_elec",
+    "canonical_name": "AutoCAD Electrical & EPLAN",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "tools_tech",
+    "aliases": [
+      "EPLAN Electric P8",
+      "Single Line Diagram",
+      "Wiring Diagram",
+      "Panel Wiring"
+    ]
+  },
+  {
+    "id": "elc.instrumentasi",
+    "canonical_name": "Instrumentasi & Kontrol Proses (DCS / PID)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "Yokogawa DCS",
+      "Honeywell DCS",
+      "HART Protocol",
+      "Control Valve",
+      "Flowmeter Kalibrasi"
+    ]
+  },
+  {
+    "id": "elc.telko_ftth",
+    "canonical_name": "Telekomunikasi FTTH, RF & 5G Optimization",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "FTTH",
+      "OTDR",
+      "Fiber Splicing",
+      "RF Drive Test",
+      "4G/5G RAN",
+      "BSS/OSS"
+    ]
+  },
+  {
+    "id": "elc.iot_mqtt",
+    "canonical_name": "Industrial IoT & MQTT / LoRaWAN",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "tools_tech",
+    "aliases": [
+      "IIoT",
+      "MQTT",
+      "LoRaWAN",
+      "OPC UA",
+      "Edge Gateway"
+    ]
+  },
+  {
+    "id": "elc.sktt_listrik",
+    "canonical_name": "Sertifikat Kompetensi Tenaga Teknik (SKTTK / AK3 Listrik)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "domain",
+    "aliases": [
+      "SKTTK",
+      "AK3 Listrik",
+      "SLO Instalasi",
+      "PUIL 2011"
+    ]
+  },
+  {
+    "id": "elc.genset_ats",
+    "canonical_name": "Panel ATS/AMF, Genset & Proteksi Petir",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "parent_id": "elc.power_system",
+    "aliases": [
+      "ATS AMF",
+      "Synchronizing Panel",
+      "Grounding & Lightning Protection"
+    ]
+  },
+  {
+    "id": "elc.vfd_servo",
+    "canonical_name": "VFD Inverter & Servo Motor Tuning",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "Variable Frequency Drive",
+      "Servo Drive",
+      "Soft Starter",
+      "Motor Kontrol 3 Phase"
+    ],
+    "parent_id": "elc.plc_scada"
+  },
+  {
+    "id": "elc.bms_smart",
+    "canonical_name": "Building Management System (BMS) & Fire Alarm",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "tools_tech",
+    "aliases": [
+      "BACnet",
+      "Fire Alarm Addressable",
+      "Access Control CCTV"
+    ],
+    "parent_id": "elc.iot_mqtt"
+  },
+  {
+    "id": "elc.datacenter",
+    "canonical_name": "Data Center Infrastructure (UPS, Precision Cooling, PUE)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "domain",
+    "aliases": [
+      "Tier III Data Center",
+      "UPS Redundant",
+      "CRAC Maintenance",
+      "DCIM"
+    ],
+    "parent_id": "elc.power_system"
+  },
+  {
+    "id": "elc.ev_charging",
+    "canonical_name": "Sistem Baterai (BMS EV) & Charging Station",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "domain",
+    "aliases": [
+      "Battery Management System",
+      "OCPP Charger",
+      "Power Electronics"
+    ],
+    "parent_id": "elc.pcb_embedded"
+  },
+  {
+    "id": "elc.radar_rf",
+    "canonical_name": "Desain Antena, RF & Microwave Engineering",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "RF Simulation HFSS",
+      "Link Budget",
+      "VSAT Satellite"
+    ],
+    "parent_id": "elc.telko_ftth"
+  },
+  {
+    "id": "elc.robotics_agv",
+    "canonical_name": "Industrial Robotics & AGV (FANUC / ABB / KUKA)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "Robot Programming",
+      "Palletizing Robot",
+      "Vision Sensor Cognex"
+    ],
+    "parent_id": "elc.plc_scada"
+  },
+  {
+    "id": "elc.substation_pln",
+    "canonical_name": "Komisioning Gardu Induk & Proteksi Relay",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "Relay Protection",
+      "Megger Insulation Test",
+      "HV Testing",
+      "PLN Grid Code"
+    ],
+    "parent_id": "elc.power_system"
+  },
+  {
+    "id": "elc.tower_microwave",
+    "canonical_name": "OSP/ISP Telekomunikasi & Tower BTS Maintenance",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "domain",
+    "aliases": [
+      "Microwave Link",
+      "VSWR Testing",
+      "Power Rectifier BTS"
+    ],
+    "parent_id": "elc.telko_ftth"
+  },
+  {
+    "id": "elc.audio_video_eng",
+    "canonical_name": "Sistem AV Komersial, LED Videotron & Conference",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "tools_tech",
+    "aliases": [
+      "Dante Audio",
+      "LED Controller Novastar",
+      "Extron / Crestron"
+    ]
+  },
+  {
+    "id": "elc.solar_inverter",
+    "canonical_name": "Komisioning Inverter PLTS & Sinkronisasi Grid",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "On-Grid Inverter",
+      "Zero Export Meter",
+      "SCADA PLTS"
+    ],
+    "parent_id": "elc.power_system"
+  },
+  {
+    "id": "elc.pcb_emc",
+    "canonical_name": "EMC/EMI Testing & Desain Power Supply (SMPS)",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "core_hard",
+    "aliases": [
+      "SMPS Design",
+      "EMI Compliance",
+      "Oscilloscope Debugging"
+    ],
+    "parent_id": "elc.pcb_embedded"
+  },
+  {
+    "id": "elc.etap_power",
+    "canonical_name": "ETAP Power System & Short Circuit",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "tool",
+    "aliases": [
+      "etap",
+      "digsilent",
+      "short circuit study",
+      "arc flash",
+      "load flow"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "elc.hv_substation",
+    "canonical_name": "Gardu Induk & Switchgear Tegangan Tinggi",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "domain",
+    "aliases": [
+      "gardu induk",
+      "switchgear",
+      "gis substation",
+      "trafo daya",
+      "relay proteksi"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "elc.dcs_honeywell",
+    "canonical_name": "DCS Yokogawa Centum, Honeywell & Emerson",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "tool",
+    "aliases": [
+      "dcs",
+      "yokogawa centum",
+      "emerson deltav",
+      "honeywell experion"
+    ],
+    "base_weight": 1.25,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "elc.rf_telco",
+    "canonical_name": "RF Drive Test, 5G NR & Fiber Optic FTTH",
+    "domain": "teknik_elektro_otomasi_telko",
+    "category": "domain",
+    "aliases": [
+      "drive test",
+      "tems",
+      "5g nr",
+      "ftth",
+      "olt ont",
+      "splicing fiber"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  }
+]

@@ -2,15 +2,16 @@
 defineProps<{
   title: string;
   subtitle?: string;
+  compactMobile?: boolean;
 }>();
 </script>
 
 <template>
-  <header class="v-page-header">
+  <header class="v-page-header" :class="{ 'v-page-header--compact-mobile': compactMobile }">
     <div class="v-page-header__left">
-      <h1 class="t-page" style="font-size: 22px">{{ title }}</h1>
+      <h1 class="t-page v-page-header__title">{{ title }}</h1>
       <slot name="title-extra" />
-      <span v-if="subtitle" class="t-meta t-num">{{ subtitle }}</span>
+      <span v-if="subtitle" class="t-meta t-num v-page-header__subtitle">{{ subtitle }}</span>
     </div>
     <div class="v-page-header__actions">
       <slot name="actions" />
@@ -37,6 +38,9 @@ defineProps<{
   flex-wrap: wrap;
   min-width: 0;
 }
+.v-page-header__title {
+  font-size: 22px;
+}
 .v-page-header__actions {
   display: flex;
   align-items: center;
@@ -56,6 +60,38 @@ defineProps<{
   .v-page-header__actions > :deep(button),
   .v-page-header__actions > :deep(select) {
     flex: 1;
+  }
+  .v-page-header--compact-mobile {
+    min-height: 52px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-2);
+  }
+  .v-page-header--compact-mobile .v-page-header__left {
+    flex: 1;
+    gap: 6px;
+  }
+  .v-page-header--compact-mobile .v-page-header__title {
+    font-size: 18px;
+  }
+  .v-page-header--compact-mobile .v-page-header__subtitle {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .v-page-header--compact-mobile .v-page-header__actions {
+    width: auto;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .v-page-header--compact-mobile .v-page-header__actions > :deep(button),
+  .v-page-header--compact-mobile .v-page-header__actions > :deep(select) {
+    flex: 0 0 auto;
   }
 }
 </style>

@@ -6,27 +6,37 @@ import {
   type ApplicationStatus,
   type ApplyKitResult,
   type AtsExportResult,
+  type CompanySnapshot,
   type CompetencyMapResponse_Serialize,
   type CompetencySkillItem_Serialize,
   type ConfirmedProfileInput_Deserialize,
   type ErrorCode,
   type GapAnalysis,
   type ImportedCvDraft,
+  type InterviewPrepKit,
   type JobFilterInput_Deserialize,
   type JobMatchDetail_Serialize,
   type JobMatchSummary_Serialize,
   type LocalAiModelStatus,
   type MasterCvProfile,
+  type ProdiRoleItem,
+  type ProfileSummaryItem,
   type RoadmapDetail_Serialize,
   type RoadmapSummary_Serialize,
   type RoleJobCount,
+  type SalaryBenchmarkSummary,
+  type SavedWatchlistItem_Serialize,
   type ScrapeKeywordItem_Serialize,
   type ScrapeRunReport,
-  type SearchPreferences,
+  type SearchPreferences_Deserialize,
+  type SearchPreferences_Serialize,
+  type SkillImpactItem,
   type StepStatus,
   type StepUpdateResult_Serialize,
   type StoryProfileDraft,
   type UserProfileDetail_Serialize,
+  type VectaBackupReport,
+  type VectaImportReport,
   type WorkerHealth,
 } from "./bindings";
 import { safeNumber } from "./format";
@@ -213,14 +223,24 @@ export const ipc = {
     return unwrapResult(await commands.checkWorkerHealth(workerUrl));
   },
 
-  async getSearchPreferences(): Promise<SearchPreferences> {
+  async getSearchPreferences(): Promise<SearchPreferences_Serialize> {
     if (isMockMode()) return (await getMockBackend()).getSearchPreferences();
     return unwrapResult(await commands.getSearchPreferences());
   },
 
-  async saveSearchPreferences(prefs: SearchPreferences): Promise<SearchPreferences> {
+  async saveSearchPreferences(prefs: SearchPreferences_Deserialize): Promise<SearchPreferences_Serialize> {
     if (isMockMode()) return (await getMockBackend()).saveSearchPreferences(prefs);
     return unwrapResult(await commands.saveSearchPreferences(prefs));
+  },
+
+  async exportVectaBackup(): Promise<VectaBackupReport> {
+    if (isMockMode()) return (await getMockBackend()).exportVectaBackup();
+    return unwrapResult(await commands.exportVectaBackup());
+  },
+
+  async importVectaBackup(backupJson: string): Promise<VectaImportReport> {
+    if (isMockMode()) return (await getMockBackend()).importVectaBackup(backupJson);
+    return unwrapResult(await commands.importVectaBackup(backupJson));
   },
 
   async parseUserStory(rawStory: string): Promise<StoryProfileDraft> {
@@ -256,6 +276,26 @@ export const ipc = {
     return unwrapResult(await commands.addCustomKeyword(userId, roleLabel, queries));
   },
 
+  async listProdiRolesCatalog(query: string | null = null): Promise<ProdiRoleItem[]> {
+    if (isMockMode()) return (await getMockBackend()).listProdiRolesCatalog(query);
+    return unwrapResult(await commands.listProdiRolesCatalog(query));
+  },
+
+  async listUserProfiles(): Promise<ProfileSummaryItem[]> {
+    if (isMockMode()) return (await getMockBackend()).listUserProfiles();
+    return unwrapResult(await commands.listUserProfiles());
+  },
+
+  async switchActiveProfile(profileId: string): Promise<UserProfileDetail_Serialize> {
+    if (isMockMode()) return (await getMockBackend()).switchActiveProfile(profileId);
+    return unwrapResult(await commands.switchActiveProfile(profileId));
+  },
+
+  async deleteUserProfile(profileId: string): Promise<UserProfileDetail_Serialize> {
+    if (isMockMode()) return (await getMockBackend()).deleteUserProfile(profileId);
+    return unwrapResult(await commands.deleteUserProfile(profileId));
+  },
+
   async ingestManualJob(
     userId: string,
     titleHint: string | null,
@@ -285,7 +325,7 @@ export const ipc = {
 
   async scrapeAndStoreJobs(
     userId: string,
-    prefs: SearchPreferences,
+    prefs: SearchPreferences_Deserialize,
   ): Promise<ScrapeRunReport> {
     if (isMockMode()) {
       return (await getMockBackend()).scrapeAndStoreJobs(userId, prefs);
@@ -357,6 +397,25 @@ export const ipc = {
     return unwrapResult(await commands.toggleSaveJob(userId, jobId));
   },
 
+  async listSavedWatchlists(userId: string): Promise<SavedWatchlistItem_Serialize[]> {
+    if (isMockMode()) return (await getMockBackend()).listSavedWatchlists(userId);
+    return unwrapResult(await commands.listSavedWatchlists(userId));
+  },
+
+  async saveWatchlist(
+    userId: string,
+    name: string,
+    filter: JobFilterInput_Deserialize,
+  ): Promise<SavedWatchlistItem_Serialize> {
+    if (isMockMode()) return (await getMockBackend()).saveWatchlist(userId, name, filter);
+    return unwrapResult(await commands.saveWatchlist(userId, name, filter));
+  },
+
+  async deleteWatchlist(id: string): Promise<null> {
+    if (isMockMode()) return (await getMockBackend()).deleteWatchlist(id);
+    return unwrapResult(await commands.deleteWatchlist(id));
+  },
+
   async generateGapAnalysis(
     userId: string,
     jobId: string,
@@ -381,6 +440,45 @@ export const ipc = {
       ? await (await getMockBackend()).getCompetencyMap(userId, targetRole)
       : unwrapResult(await commands.getCompetencyMap(userId, targetRole));
     return normalizeCompetencyMap(raw);
+  },
+
+  async simulateSkillImpact(
+    userId: string,
+    targetRole: string,
+    candidateSkillIds: number[],
+  ): Promise<SkillImpactItem[]> {
+    if (isMockMode()) {
+      return (await getMockBackend()).simulateSkillImpact(userId, targetRole, candidateSkillIds);
+    }
+    return unwrapResult(await commands.simulateSkillImpact(userId, targetRole, candidateSkillIds));
+  },
+
+  async getSalaryBenchmark(
+    roleFilter: string | null,
+    clusterFilter: string | null,
+  ): Promise<SalaryBenchmarkSummary> {
+    if (isMockMode()) {
+      return (await getMockBackend()).getSalaryBenchmark(roleFilter, clusterFilter);
+    }
+    return unwrapResult(await commands.getSalaryBenchmark(roleFilter, clusterFilter));
+  },
+
+  async getCompanySnapshot(userId: string, companyName: string): Promise<CompanySnapshot> {
+    if (isMockMode()) {
+      return (await getMockBackend()).getCompanySnapshot(userId, companyName);
+    }
+    return unwrapResult(await commands.getCompanySnapshot(userId, companyName));
+  },
+
+  async generateInterviewPrep(
+    userId: string,
+    jobId: string,
+    language: "id" | "en" = "id",
+  ): Promise<InterviewPrepKit> {
+    if (isMockMode()) {
+      return (await getMockBackend()).generateInterviewPrep(userId, jobId, language);
+    }
+    return unwrapResult(await commands.generateInterviewPrep(userId, jobId, language));
   },
 
   async generateLearningRoadmap(

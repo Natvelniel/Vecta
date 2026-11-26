@@ -35,10 +35,12 @@ services/scraper-worker/.venv/
 .gemini/
 .impeccable/
 .opencode/
+.playwright-mcp/
 .superpowers/
 graphify-out/
 
 # Internal Docs & Specs (local only)
+plan*.md
 product_requirements_document_prd_vecta.md
 PRODUCT.md
 VECTA_DESIGN_SYSTEM.md

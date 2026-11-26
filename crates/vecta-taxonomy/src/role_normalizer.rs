@@ -154,9 +154,37 @@ pub fn normalize_role_universal(
         return "Perhotelan, F&B & Event".into();
     }
 
-    // 13. Sains, Lab & Geologi
-    if t.contains("laboratorium") || t.contains("lab analyst") || t.contains("analis kimia") || t.contains("geolog") || t.contains("tambang") || t.contains("mining") {
-        return "Sains, Laboratorium & Energi".into();
+    // 13. Sains, Lab, Geologi, Tambang & Migas
+    if t.contains("tambang") || t.contains("mining") || t.contains("geolog") || t.contains("migas") || t.contains("drilling") || t.contains("reservoir") || t.contains("petrel") {
+        return "Pertambangan, Geologi & Migas".into();
+    }
+    if t.contains("laboratorium") || t.contains("lab analyst") || t.contains("analis kimia") {
+        return "Sains & Laboratorium".into();
+    }
+
+    // 14. Perbankan, Aktuaria & Asuransi
+    if t.contains("aktuaria") || t.contains("actuary") || t.contains("underwriter") || t.contains("relationship manager") || t.contains("treasury") || t.contains("kredit") || t.contains("teller") {
+        return "Perbankan, Aktuaria & Asuransi".into();
+    }
+
+    // 15. Product Management & Strategi
+    if t.contains("product manager") || t.contains("product owner") || t.contains("scrum master") || t.contains("bizops") {
+        return "Product Management & Strategi".into();
+    }
+
+    // 16. Kebijakan Publik, HI & NGO
+    if t.contains("policy") || t.contains("kebijakan") || t.contains("hubungan internasional") || t.contains("ngo") || t.contains("csr") || t.contains("community dev") {
+        return "Sektor Publik, Kebijakan & NGO".into();
+    }
+
+    // 17. Bahasa, Sastra & Penerjemahan
+    if t.contains("translator") || t.contains("penerjemah") || t.contains("interpreter") || t.contains("localization") || t.contains("technical writer") {
+        return "Bahasa & Penerjemahan".into();
+    }
+
+    // 18. Telekomunikasi, RF & Fiber
+    if t.contains("rf ") || t.contains("telco") || t.contains("telekomunikasi") || t.contains("ftth") || t.contains("fiber optic") {
+        return "Telekomunikasi & Jaringan".into();
     }
 
     query_hint

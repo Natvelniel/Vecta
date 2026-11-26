@@ -4,9 +4,11 @@ import type {
   AiMatchRunReport,
   ApplicationStatus,
   EnrichmentStatus,
+  JobFilterInput_Deserialize,
   JobSource,
+  SavedWatchlistItem_Serialize,
   ScrapeRunReport,
-  SearchPreferences,
+  SearchPreferences_Serialize,
   WorkMode,
 } from "@/lib/bindings";
 import {
@@ -19,9 +21,12 @@ import {
 
 const PAGE_SIZE = 50;
 
-const DEFAULT_PREFS: SearchPreferences = {
+export type JobSortBy = "score" | "newest" | "salary_desc";
+
+const DEFAULT_PREFS: SearchPreferences_Serialize = {
   location: "Indonesia",
-  sources: ["jobstreet", "linkedin", "indeed"],
+  locations: ["Indonesia"],
+  sources: ["jobstreet", "linkedin", "kalibrr", "dealls"],
   limit_per_query: 25,
   max_pages: 2,
   posted_within_days: 14,
@@ -37,16 +42,26 @@ export const useJobsStore = defineStore("jobs", () => {
   const selectedJobId = ref<string | null>(null);
   const selectedDetail = ref<NormalizedJobDetail | null>(null);
 
-  const searchPreferences = ref<SearchPreferences>({ ...DEFAULT_PREFS });
+  const searchPreferences = ref<SearchPreferences_Serialize>({ ...DEFAULT_PREFS });
   const roleFilter = ref<string | null>(null);
-  const workModeFilter = ref<WorkMode | null>(null);
-  const sourceFilter = ref<JobSource | null>(null);
+
+  // Multi-select filter arrays: empty array === "Semua" active (pure color distinction, zero checkmarks)
+  const workModes = ref<WorkMode[]>([]);
+  const sources = ref<JobSource[]>([]);
+  const locationClusters = ref<string[]>([]);
+  const opportunityTypes = ref<string[]>([]);
+  const applicationStatuses = ref<ApplicationStatus[]>([]);
   const enrichmentFilter = ref<EnrichmentStatus | null>(null);
-  const applicationStatusFilter = ref<ApplicationStatus | null>(null);
+
   const locationFilter = ref<string>("");
   const searchQuery = ref<string>("");
   const savedOnly = ref<boolean>(false);
+  const salaryOnly = ref<boolean>(false);
+  const sortBy = ref<JobSortBy>("score");
   const hasMore = ref<boolean>(false);
+
+  const watchlists = ref<SavedWatchlistItem_Serialize[]>([]);
+  const activeWatchlistId = ref<string | null>(null);
 
   const loadingList = ref(false);
   const loadingMore = ref(false);
@@ -68,20 +83,98 @@ export const useJobsStore = defineStore("jobs", () => {
     () => jobs.value.filter((j) => j.enrichment_status === "local_only").length,
   );
 
-  function buildFilter(offset: number) {
+  // Multi-select rule:
+  // - Empty array = "Semua" active
+  // - Toggling an item adds/removes it; when all manual items are removed, "Semua" re-activates automatically
+  function toggleMultiValue<T>(list: T[], item: T): T[] {
+    const idx = list.indexOf(item);
+    return idx >= 0 ? list.filter((v) => v !== item) : [...list, item];
+  }
+
+  function toggleWorkMode(mode: WorkMode) {
+    activeWatchlistId.value = null;
+    workModes.value = toggleMultiValue(workModes.value, mode);
+  }
+  function clearWorkModes() {
+    activeWatchlistId.value = null;
+    workModes.value = [];
+  }
+
+  function toggleSource(src: JobSource) {
+    activeWatchlistId.value = null;
+    sources.value = toggleMultiValue(sources.value, src);
+  }
+  function clearSources() {
+    activeWatchlistId.value = null;
+    sources.value = [];
+  }
+
+  function toggleLocationCluster(cluster: string) {
+    activeWatchlistId.value = null;
+    locationClusters.value = toggleMultiValue(locationClusters.value, cluster);
+  }
+  function clearLocationClusters() {
+    activeWatchlistId.value = null;
+    locationClusters.value = [];
+  }
+
+  function toggleOpportunityType(typeSlug: string) {
+    activeWatchlistId.value = null;
+    opportunityTypes.value = toggleMultiValue(opportunityTypes.value, typeSlug);
+  }
+  function clearOpportunityTypes() {
+    activeWatchlistId.value = null;
+    opportunityTypes.value = [];
+  }
+
+  function toggleApplicationStatus(status: ApplicationStatus) {
+    activeWatchlistId.value = null;
+    applicationStatuses.value = toggleMultiValue(applicationStatuses.value, status);
+  }
+  function clearApplicationStatuses() {
+    activeWatchlistId.value = null;
+    applicationStatuses.value = [];
+  }
+
+  function resetAllFilters() {
+    activeWatchlistId.value = null;
+    roleFilter.value = null;
+    workModes.value = [];
+    sources.value = [];
+    locationClusters.value = [];
+    opportunityTypes.value = [];
+    applicationStatuses.value = [];
+    enrichmentFilter.value = null;
+    locationFilter.value = "";
+    searchQuery.value = "";
+    savedOnly.value = false;
+    salaryOnly.value = false;
+    sortBy.value = "score";
+  }
+
+  function buildFilter(offset: number): JobFilterInput_Deserialize {
     const trimmedSearch = searchQuery.value.trim();
     const trimmedLoc = locationFilter.value.trim();
+    const includeDismissed = applicationStatuses.value.includes("dismissed");
     return {
       normalized_role: roleFilter.value,
-      work_mode: workModeFilter.value,
-      source: sourceFilter.value,
+      work_mode: null,
+      source: null,
       saved_only: savedOnly.value ? true : null,
       min_score: null,
       search_query: trimmedSearch ? trimmedSearch : null,
       location_query: trimmedLoc ? trimmedLoc : null,
       enrichment_status: enrichmentFilter.value,
-      application_status: applicationStatusFilter.value,
-      include_dismissed: applicationStatusFilter.value === "dismissed" ? true : null,
+      application_status: null,
+      include_dismissed: includeDismissed ? true : null,
+      work_modes: workModes.value.length > 0 ? [...workModes.value] : null,
+      sources: sources.value.length > 0 ? [...sources.value] : null,
+      location_clusters: locationClusters.value.length > 0 ? [...locationClusters.value] : null,
+      opportunity_types: opportunityTypes.value.length > 0 ? [...opportunityTypes.value] : null,
+      application_statuses:
+        applicationStatuses.value.length > 0 ? [...applicationStatuses.value] : null,
+      salary_only: salaryOnly.value ? true : null,
+      sort_by: sortBy.value,
       limit: PAGE_SIZE,
       offset,
     };
@@ -89,13 +182,20 @@ export const useJobsStore = defineStore("jobs", () => {
 
   async function loadSearchPreferences() {
     try {
-      searchPreferences.value = await ipc.getSearchPreferences();
+      const prefs = await ipc.getSearchPreferences();
+      searchPreferences.value = {
+        ...prefs,
+        locations:
+          prefs.locations && prefs.locations.length > 0
+            ? prefs.locations
+            : [prefs.location || "Indonesia"],
+      };
     } catch {
       searchPreferences.value = { ...DEFAULT_PREFS };
     }
   }
 
-  async function saveSearchPreferences(prefs: SearchPreferences): Promise<boolean> {
+  async function saveSearchPreferences(prefs: SearchPreferences_Serialize): Promise<boolean> {
     error.value = null;
     try {
       searchPreferences.value = await ipc.saveSearchPreferences(prefs);
@@ -104,6 +204,58 @@ export const useJobsStore = defineStore("jobs", () => {
       error.value = e instanceof IpcError ? e.message : "Gagal menyimpan preferensi pencarian.";
       return false;
     }
+  }
+
+  async function loadWatchlists(userId: string) {
+    try {
+      watchlists.value = await ipc.listSavedWatchlists(userId);
+    } catch {
+      watchlists.value = [];
+    }
+  }
+
+  async function createWatchlist(userId: string, name: string): Promise<boolean> {
+    error.value = null;
+    try {
+      const item = await ipc.saveWatchlist(userId, name, buildFilter(0));
+      watchlists.value = [item, ...watchlists.value];
+      activeWatchlistId.value = item.id;
+      return true;
+    } catch (e) {
+      error.value = e instanceof IpcError ? e.message : "Gagal menyimpan watchlist.";
+      return false;
+    }
+  }
+
+  async function removeWatchlist(id: string): Promise<boolean> {
+    try {
+      await ipc.deleteWatchlist(id);
+      watchlists.value = watchlists.value.filter((w) => w.id !== id);
+      if (activeWatchlistId.value === id) activeWatchlistId.value = null;
+      return true;
+    } catch (e) {
+      error.value = e instanceof IpcError ? e.message : "Gagal menghapus watchlist.";
+      return false;
+    }
+  }
+
+  async function applyWatchlist(userId: string, item: SavedWatchlistItem_Serialize) {
+    resetAllFilters();
+    activeWatchlistId.value = item.id;
+    const f = item.filter;
+    roleFilter.value = f.normalized_role ?? null;
+    workModes.value = f.work_modes ? [...f.work_modes] : [];
+    sources.value = f.sources ? [...f.sources] : [];
+    locationClusters.value = f.location_clusters ? [...f.location_clusters] : [];
+    opportunityTypes.value = f.opportunity_types ? [...f.opportunity_types] : [];
+    applicationStatuses.value = f.application_statuses ? [...f.application_statuses] : [];
+    enrichmentFilter.value = f.enrichment_status ?? null;
+    locationFilter.value = f.location_query ?? "";
+    searchQuery.value = f.search_query ?? "";
+    savedOnly.value = Boolean(f.saved_only);
+    salaryOnly.value = Boolean(f.salary_only);
+    sortBy.value = (f.sort_by as JobSortBy) || "score";
+    await loadJobs(userId);
   }
 
   async function loadJobs(userId: string) {
@@ -161,26 +313,23 @@ export const useJobsStore = defineStore("jobs", () => {
 
   async function toggleSave(userId: string, jobId: string): Promise<boolean | null> {
     try {
-      const nextSaved = await ipc.toggleSaveJob(userId, jobId);
+      const saved = await ipc.toggleSaveJob(userId, jobId);
       const item = jobs.value.find((j) => j.job_id === jobId);
       if (item) {
-        item.is_saved = nextSaved;
-        if (nextSaved && item.application_status === "new") item.application_status = "saved";
-        if (!nextSaved && item.application_status === "saved") item.application_status = "new";
+        item.is_saved = saved;
+        if (saved && item.application_status === "new") item.application_status = "saved";
+        if (!saved && item.application_status === "saved") item.application_status = "new";
       }
       if (selectedDetail.value && selectedDetail.value.job_id === jobId) {
-        selectedDetail.value.is_saved = nextSaved;
-        if (nextSaved && selectedDetail.value.application_status === "new") {
+        selectedDetail.value.is_saved = saved;
+        if (saved && selectedDetail.value.application_status === "new") {
           selectedDetail.value.application_status = "saved";
         }
-        if (!nextSaved && selectedDetail.value.application_status === "saved") {
+        if (!saved && selectedDetail.value.application_status === "saved") {
           selectedDetail.value.application_status = "new";
         }
       }
-      if (savedOnly.value && !nextSaved) {
-        await loadJobs(userId);
-      }
-      return nextSaved;
+      return saved;
     } catch (e) {
       error.value = e instanceof IpcError ? e.message : "Gagal memperbarui status simpan.";
       return null;
@@ -191,7 +340,7 @@ export const useJobsStore = defineStore("jobs", () => {
     userId: string,
     jobId: string,
     status: ApplicationStatus,
-    notes: string | null,
+    notes: string | null = null,
   ): Promise<NormalizedJobDetail | null> {
     updatingApplication.value = true;
     error.value = null;
@@ -200,14 +349,21 @@ export const useJobsStore = defineStore("jobs", () => {
       if (selectedDetail.value && selectedDetail.value.job_id === jobId) {
         selectedDetail.value = updated;
       }
-      if (status === "dismissed" && applicationStatusFilter.value !== "dismissed") {
-        await loadJobs(userId);
+      if (status === "dismissed" && !applicationStatuses.value.includes("dismissed")) {
+        jobs.value = jobs.value.filter((j) => j.job_id !== jobId);
+        if (selectedJobId.value === jobId) {
+          selectedJobId.value = jobs.value[0]?.job_id ?? null;
+          selectedDetail.value = null;
+          if (selectedJobId.value) {
+            await selectJob(userId, selectedJobId.value);
+          }
+        }
       } else {
-        const row = jobs.value.find((j) => j.job_id === jobId);
-        if (row) {
-          row.application_status = updated.application_status;
-          row.applied_at = updated.applied_at;
-          row.is_saved = updated.is_saved;
+        const item = jobs.value.find((j) => j.job_id === jobId);
+        if (item) {
+          item.application_status = updated.application_status;
+          item.is_saved = updated.is_saved;
+          item.applied_at = updated.applied_at;
         }
       }
       return updated;
@@ -219,63 +375,47 @@ export const useJobsStore = defineStore("jobs", () => {
     }
   }
 
-  /**
-   * Decoupled Stage 1: Scrape multi-page & store cleanly to SQLite with 0 Gemini tokens.
-   * If `searchPreferences.ai_enrich_enabled` is ON, automatically chains Stage 2 right after.
-   */
-  async function runScrape(userId: string): Promise<ScrapeRunReport | null> {
+  async function runScrape(
+    userId: string,
+    overridePrefs?: SearchPreferences_Serialize,
+  ): Promise<ScrapeRunReport | null> {
     scraping.value = true;
     error.value = null;
-    progress.value = {
-      stage: "scraping",
-      message: `Menarik lowongan dari ${searchPreferences.value.sources.join(", ")} (${searchPreferences.value.location})...`,
-      current: 0,
-      total: 0,
-    };
+    progress.value = { stage: "starting", message: "Menyiapkan penarikan lowongan...", current: 0, total: 1 };
     try {
-      const report = await ipc.scrapeAndStoreJobs(userId, searchPreferences.value);
+      const prefs = overridePrefs ?? searchPreferences.value;
+      const report = await ipc.scrapeAndStoreJobs(userId, prefs);
       lastScrapeReport.value = report;
       await loadJobs(userId);
-      if (searchPreferences.value.ai_enrich_enabled && report.pending_local_count > 0) {
-        await runAiMatchingQueue(userId);
-      }
       return report;
     } catch (e) {
-      error.value =
-        e instanceof IpcError ? e.message : "Gagal mengambil lowongan dari worker lokal.";
+      error.value = e instanceof IpcError ? e.message : "Penarikan lowongan gagal.";
       return null;
     } finally {
       scraping.value = false;
-      if (!runningAiQueue.value) {
-        progress.value = null;
-      }
+      progress.value = null;
     }
   }
 
-  /**
-   * Decoupled Stage 2: Resumable batched AI enrichment + RPM limiter on pending `local_only` jobs.
-   */
   async function runAiMatchingQueue(
     userId: string,
-    customMaxJobs?: number,
+    maxJobs?: number,
+    rpmLimit?: number,
   ): Promise<AiMatchRunReport | null> {
     runningAiQueue.value = true;
     error.value = null;
-    const maxJobs = customMaxJobs ?? searchPreferences.value.ai_enrich_max_jobs;
-    const rpm = searchPreferences.value.ai_rpm_limit;
-    progress.value = {
-      stage: "ai_batch_extract",
-      message: `Menjalankan AI Matching batch (maks ${maxJobs} lowongan, batas ${rpm} RPM)...`,
-      current: 0,
-      total: maxJobs,
-    };
+    progress.value = { stage: "ai_matching", message: "Menyiapkan antrean AI batching...", current: 0, total: 1 };
     try {
-      const report = await ipc.runAiMatchingQueue(userId, maxJobs, rpm);
+      const report = await ipc.runAiMatchingQueue(
+        userId,
+        maxJobs ?? searchPreferences.value.ai_enrich_max_jobs,
+        rpmLimit ?? searchPreferences.value.ai_rpm_limit,
+      );
       lastAiReport.value = report;
       await loadJobs(userId);
       return report;
     } catch (e) {
-      error.value = e instanceof IpcError ? e.message : "Gagal menjalankan AI Matching batch.";
+      error.value = e instanceof IpcError ? e.message : "AI Matching antrean gagal.";
       return null;
     } finally {
       runningAiQueue.value = false;
@@ -287,8 +427,10 @@ export const useJobsStore = defineStore("jobs", () => {
     enrichingJob.value = true;
     error.value = null;
     try {
-      const updated = await ipc.enrichJobWithAi(userId, jobId);
-      selectedDetail.value = updated;
+      const detail = await ipc.enrichJobWithAi(userId, jobId);
+      if (selectedDetail.value && selectedDetail.value.job_id === jobId) {
+        selectedDetail.value = detail;
+      }
       await loadJobs(userId);
       return true;
     } catch (e) {
@@ -372,14 +514,20 @@ export const useJobsStore = defineStore("jobs", () => {
     selectedDetail,
     searchPreferences,
     roleFilter,
-    workModeFilter,
-    sourceFilter,
+    workModes,
+    sources,
+    locationClusters,
+    opportunityTypes,
+    applicationStatuses,
     enrichmentFilter,
-    applicationStatusFilter,
     locationFilter,
     searchQuery,
     savedOnly,
+    salaryOnly,
+    sortBy,
     hasMore,
+    watchlists,
+    activeWatchlistId,
     pendingLocalCount,
     loadingList,
     loadingMore,
@@ -395,8 +543,24 @@ export const useJobsStore = defineStore("jobs", () => {
     lastScrapeReport,
     lastAiReport,
     error,
+    toggleWorkMode,
+    clearWorkModes,
+    toggleSource,
+    clearSources,
+    toggleLocationCluster,
+    clearLocationClusters,
+    toggleOpportunityType,
+    clearOpportunityTypes,
+    toggleApplicationStatus,
+    clearApplicationStatuses,
+    resetAllFilters,
+    buildFilter,
     loadSearchPreferences,
     saveSearchPreferences,
+    loadWatchlists,
+    createWatchlist,
+    removeWatchlist,
+    applyWatchlist,
     loadJobs,
     loadMoreJobs,
     selectJob,

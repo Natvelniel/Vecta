@@ -1,9 +1,398 @@
 [
-  {"id":"leg.drafting","canonical_name":"Legal Drafting & Review Kontrak","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Legal Drafting","Contract Drafting","Contract Review","Perancangan Kontrak","Perjanjian Kerja Sama","MoU","NDA","SLA"]},
-  {"id":"leg.opinion","canonical_name":"Legal Opinion & Riset Hukum","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Legal Opinion","Legal Research","Riset Hukum","Pendapat Hukum","Due Diligence","Legal Audit"]},
-  {"id":"leg.perizinan","canonical_name":"Perizinan Usaha & OSS/NIB","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["OSS","OSS RBA","NIB","Perizinan Usaha","Corporate Legal","RUPS","Akta Perusahaan","AHU Online"]},
-  {"id":"leg.litigasi","canonical_name":"Litigasi & Penyelesaian Sengketa","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Litigasi","Litigation","Advokat","PERADI","PKPA","Somasi","Mediasi","Arbitrase","Hukum Acara"]},
-  {"id":"leg.kepatuhan","canonical_name":"Kepatuhan & Regulasi (Compliance)","domain":"hukum_regulasi_kepatuhan","category":"domain","aliases":["Compliance","Regulatory Compliance","Kepatuhan OJK","Kepatuhan BI","UU PDP","Perlindungan Data Pribadi","GCG","Good Corporate Governance"]},
-  {"id":"leg.hki","canonical_name":"Hak Kekayaan Intelektual (HKI)","domain":"hukum_regulasi_kepatuhan","category":"domain","aliases":["HKI","Hak Cipta","Merek Dagang","Paten","Intellectual Property","DJKI"]},
-  {"id":"leg.notaris","canonical_name":"Kenotariatan & Pertanahan (PPAT)","domain":"hukum_regulasi_kepatuhan","category":"core_hard","aliases":["Notaris","PPAT","Hukum Agraria","Sertifikat Tanah","BPN","Akta Jual Beli","AJB","Hukum Perbankan"]}
+  {
+    "id": "leg.drafting",
+    "canonical_name": "Legal Drafting & Review Kontrak",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "Legal Drafting",
+      "Contract Drafting",
+      "Contract Review",
+      "Perancangan Kontrak",
+      "Perjanjian Kerja Sama",
+      "MoU",
+      "NDA",
+      "SLA"
+    ]
+  },
+  {
+    "id": "leg.opinion",
+    "canonical_name": "Legal Opinion & Riset Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "Legal Opinion",
+      "Legal Research",
+      "Riset Hukum",
+      "Pendapat Hukum",
+      "Due Diligence",
+      "Legal Audit"
+    ]
+  },
+  {
+    "id": "leg.perizinan",
+    "canonical_name": "Perizinan Usaha & OSS/NIB",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "OSS",
+      "OSS RBA",
+      "NIB",
+      "Perizinan Usaha",
+      "Corporate Legal",
+      "RUPS",
+      "Akta Perusahaan",
+      "AHU Online"
+    ]
+  },
+  {
+    "id": "leg.litigasi",
+    "canonical_name": "Litigasi & Penyelesaian Sengketa",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "Litigasi",
+      "Litigation",
+      "Advokat",
+      "PERADI",
+      "PKPA",
+      "Somasi",
+      "Mediasi",
+      "Arbitrase",
+      "Hukum Acara",
+      "BANI Arbitration",
+      "PKPU & Kepailitan",
+      "Sidang Perdata",
+      "Advokat PERADI"
+    ]
+  },
+  {
+    "id": "leg.kepatuhan",
+    "canonical_name": "Kepatuhan & Regulasi (Compliance)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "Compliance",
+      "Regulatory Compliance",
+      "Kepatuhan OJK",
+      "Kepatuhan BI",
+      "UU PDP",
+      "Perlindungan Data Pribadi",
+      "GCG",
+      "Good Corporate Governance"
+    ]
+  },
+  {
+    "id": "leg.hki",
+    "canonical_name": "Hak Kekayaan Intelektual (HKI)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "HKI",
+      "Hak Cipta",
+      "Merek Dagang",
+      "Paten",
+      "Intellectual Property",
+      "DJKI",
+      "Pendaftaran Merek DJKI"
+    ]
+  },
+  {
+    "id": "leg.notaris",
+    "canonical_name": "Kenotariatan & Pertanahan (PPAT)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "Notaris",
+      "PPAT",
+      "Hukum Agraria",
+      "Sertifikat Tanah",
+      "BPN",
+      "Akta Jual Beli",
+      "AJB",
+      "Hukum Perbankan"
+    ]
+  },
+  {
+    "id": "law.uu_pdp",
+    "canonical_name": "Perlindungan Data Pribadi (UU PDP / GDPR)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "parent_id": "leg.kepatuhan",
+    "aliases": [
+      "UU PDP",
+      "Data Privacy Officer",
+      "GDPR Compliance",
+      "DPIA"
+    ]
+  },
+  {
+    "id": "law.corporate_sec",
+    "canonical_name": "Corporate Secretary & RUPS",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "RUPS",
+      "Akta Pendirian PT",
+      "AHU Kemenkumham",
+      "LKPM BKPM",
+      "Corporate Governance"
+    ]
+  },
+  {
+    "id": "law.ma_cdd",
+    "canonical_name": "Legal Due Diligence & M&A",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "Legal Due Diligence",
+      "Shareholders Agreement",
+      "Joint Venture",
+      "Corporate Action"
+    ]
+  },
+  {
+    "id": "law.pertanahan",
+    "canonical_name": "Hukum Agraria, Pertanahan & PPAT",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "PPAT",
+      "Sertifikat Tanah SHM HGB",
+      "AJB",
+      "Notariat",
+      "Cek Zona BPN"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "law.aml_cft",
+    "canonical_name": "Anti Pencucian Uang (APU PPT / AML)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "parent_id": "leg.kepatuhan",
+    "aliases": [
+      "APU PPT",
+      "PPATK Reporting",
+      "CDD / EDD",
+      "Sanctions Screening"
+    ]
+  },
+  {
+    "id": "law.procurement_law",
+    "canonical_name": "Hukum Pengadaan & Kontrak Konstruksi",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "parent_id": "leg.drafting",
+    "aliases": [
+      "FIDIC Contract",
+      "Perpres Pengadaan",
+      "Claim & Dispute"
+    ]
+  },
+  {
+    "id": "law.ketenagakerjaan",
+    "canonical_name": "Hukum Ketenagakerjaan & Penyelesaian PHI",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core_hard",
+    "aliases": [
+      "Bipartit & Tripartit",
+      "PHK & Pesangon",
+      "PHI Pengadilan Hubungan Industrial"
+    ],
+    "parent_id": "leg.litigasi"
+  },
+  {
+    "id": "law.perbankan_ojk",
+    "canonical_name": "Regulasi Jasa Keuangan & Fintech (OJK / BI)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "POJK Fintech",
+      "P2P Lending Compliance",
+      "Payment Service Provider BI"
+    ],
+    "parent_id": "leg.kepatuhan"
+  },
+  {
+    "id": "law.lingkungan_tambang",
+    "canonical_name": "Hukum Pertambangan, Kehutanan & Lingkungan",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "IUP / IUPK",
+      "IPPKH",
+      "Kontrak Karya",
+      "Audit Kepatuhan Lingkungan"
+    ],
+    "parent_id": "leg.perizinan"
+  },
+  {
+    "id": "law.pajak_hukum",
+    "canonical_name": "Hukum Pajak & Beracara Pengadilan Pajak",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "Kuasa Hukum Pajak",
+      "Sengketa Kepabeanan"
+    ],
+    "parent_id": "leg.litigasi"
+  },
+  {
+    "id": "law.maritim_asuransi",
+    "canonical_name": "Hukum Maritim, Kepelabuhanan & Klaim Kargo",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "Charter Party",
+      "Marine Insurance Claim",
+      "BUP Pelabuhan"
+    ],
+    "parent_id": "leg.drafting"
+  },
+  {
+    "id": "law.corporate_bumn",
+    "canonical_name": "Tata Kelola GCG & Kepatuhan BUMN",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "Good Corporate Governance",
+      "Whistleblowing System",
+      "ISO 37001 Anti Penyuapan"
+    ],
+    "parent_id": "leg.kepatuhan"
+  },
+  {
+    "id": "law.startup_vc",
+    "canonical_name": "Legal Startup, Term Sheet & SAFE / Convertible Note",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "Term Sheet",
+      "ESOP Vesting",
+      "Funding Legal",
+      "Perizinan PSE Komdigi"
+    ],
+    "parent_id": "law.ma_cdd"
+  },
+  {
+    "id": "law.halal_legal",
+    "canonical_name": "Kepatuhan Regulasi Halal & Label Produk",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "UU JPH",
+      "Kontrak Maklon",
+      "Kepatuhan Iklan Produk"
+    ]
+  },
+  {
+    "id": "law.cyber_legal",
+    "canonical_name": "Hukum Siber, ITE & Kepatuhan PSE",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "UU ITE",
+      "PSE Lingkup Privat",
+      "Takedown Legal Notice"
+    ],
+    "parent_id": "law.uu_pdp"
+  },
+  {
+    "id": "law.perizinan_migas",
+    "canonical_name": "Perizinan ESDM, SKT Migas & TKDN Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "CIVD Migas",
+      "SKUP Migas",
+      "Sertifikasi TKDN Kemenperin"
+    ],
+    "parent_id": "law.lingkungan_tambang"
+  },
+  {
+    "id": "law.franchise_ip",
+    "canonical_name": "Kontrak Waralaba (STPW) & Distribusi Eksklusif",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "STPW Kemendag",
+      "Franchise Agreement",
+      "Distribution Agreement"
+    ]
+  },
+  {
+    "id": "law.estate_strata",
+    "canonical_name": "Hukum Properti, PPJB & Perhimpunan Penghuni (PPPSRS)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "domain",
+    "aliases": [
+      "PPJB Apartemen",
+      "Pertelaan Strata Title",
+      "SHGB Murni"
+    ],
+    "parent_id": "law.pertanahan"
+  },
+  {
+    "id": "law.arbitration",
+    "canonical_name": "Arbitrase BANI & Penyelesaian Sengketa",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core",
+    "aliases": [
+      "arbitrase",
+      "bani",
+      "siac",
+      "mediasi",
+      "alternative dispute resolution"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "intermediate",
+    "parent_id": "leg.litigasi"
+  },
+  {
+    "id": "law.antitrust_kppu",
+    "canonical_name": "Hukum Persaingan Usaha & KPPU",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "compliance",
+    "aliases": [
+      "kppu",
+      "persaingan usaha",
+      "merger notification",
+      "antitrust"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "leg.kepatuhan"
+  },
+  {
+    "id": "law.capital_market",
+    "canonical_name": "Hukum Pasar Modal & IPO (HKHPM)",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "compliance",
+    "aliases": [
+      "pasar modal",
+      "hkhpm",
+      "prospektus ipo",
+      "pojk emiten",
+      "right issue"
+    ],
+    "base_weight": 1.25,
+    "difficulty": "advanced",
+    "parent_id": "law.corporate_sec"
+  },
+  {
+    "id": "law.gov_relations",
+    "canonical_name": "Government Relations & Policy Advocacy",
+    "domain": "hukum_regulasi_kepatuhan",
+    "category": "core",
+    "aliases": [
+      "government relations",
+      "public affairs",
+      "regulatory affairs",
+      "policy advocacy"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "leg.perizinan"
+  }
 ]

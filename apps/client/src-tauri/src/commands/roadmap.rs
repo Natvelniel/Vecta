@@ -1,6 +1,8 @@
 use tauri::State;
+use vecta_taxonomy::TaxonomyEngine;
 
 use crate::core::gemini::RoadmapPromptInput;
+use crate::core::roadmap_local::generate_local_roadmap;
 use crate::error::AppError;
 use crate::models::roadmap::{RoadmapDetail, RoadmapSummary, StepStatus, StepUpdateResult};
 use crate::state::AppState;
@@ -24,7 +26,6 @@ pub async fn generate_learning_roadmap_impl(
         ));
     }
 
-    let api_key = state.require_api_key()?;
     let profile = state
         .db
         .get_profile_by_id(&user_id)?
@@ -69,16 +70,34 @@ pub async fn generate_learning_roadmap_impl(
         return Err(AppError::validation_error(msg));
     }
 
-    let prompt_input = RoadmapPromptInput {
-        target_role: role.to_string(),
-        user_level: profile.experience_level.as_str().to_string(),
-        user_summary: profile.summary.unwrap_or_default(),
-        missing_skills: missing_skill_names,
-        hours_per_week,
-        source_job_title,
+    let generated = match state.require_api_key() {
+        Ok(api_key) => {
+            let prompt_input = RoadmapPromptInput {
+                target_role: role.to_string(),
+                user_level: profile.experience_level.as_str().to_string(),
+                user_summary: profile.summary.unwrap_or_default(),
+                missing_skills: missing_skill_names.clone(),
+                hours_per_week,
+                source_job_title,
+            };
+            match state.gemini.generate_roadmap(&api_key, &prompt_input).await {
+                Ok(ai_roadmap) => ai_roadmap,
+                Err(_) => generate_local_roadmap(
+                    role,
+                    &missing_skill_names,
+                    hours_per_week,
+                    TaxonomyEngine::global(),
+                ),
+            }
+        }
+        Err(_) => generate_local_roadmap(
+            role,
+            &missing_skill_names,
+            hours_per_week,
+            TaxonomyEngine::global(),
+        ),
     };
 
-    let generated = state.gemini.generate_roadmap(&api_key, &prompt_input).await?;
     state
         .db
         .insert_roadmap_with_steps(&user_id, clean_source_job_id, &generated)
@@ -334,5 +353,91 @@ mod tests {
             0,
             "must NOT call Gemini when missing skill list is empty"
         );
+    }
+
+    #[tokio::test]
+    async fn generate_roadmap_succeeds_locally_without_api_key() {
+        use crate::core::db::NewJobRecord;
+        use crate::models::job::{
+            EnrichmentStatus, ExtractedJobSkill, JobSource, RequirementType, WorkMode,
+        };
+
+        let gemini = Arc::new(MockGemini::default());
+        let state = build_test_state(
+            None,
+            Arc::clone(&gemini),
+            Arc::new(MockWorker::default()),
+        );
+        let profile = save_confirmed_profile_impl(
+            &state,
+            ConfirmedProfileInput {
+                id: Some("user-rm-local".into()),
+                profile_name: "Primary Local".into(),
+                target_roles: vec!["Backend Engineer".into()],
+                raw_story_text: "Berpengalaman membuat REST API dengan Rust dan SQLite.".into(),
+                summary: "Junior Rust Developer".into(),
+                experience_level: ExperienceLevel::Junior,
+                skills: vec![ConfirmedSkillInput {
+                    canonical_name: "Rust".into(),
+                    category: SkillCategory::CoreHard,
+                    proficiency: Proficiency::Intermediate,
+                    evidence: None,
+                }],
+                keywords: vec![],
+            },
+        )
+        .await
+        .expect("seed local user");
+
+        let job_id = "job-local-rm".to_string();
+        state
+            .db
+            .insert_job_with_skills(
+                &NewJobRecord {
+                    id: job_id.clone(),
+                    source: JobSource::Kalibrr,
+                    external_id: "kal-local-rm".into(),
+                    url: None,
+                    title: "Backend Engineer".into(),
+                    normalized_role: "Backend Engineer".into(),
+                    company: "PT Lokal".into(),
+                    location: Some("Jakarta".into()),
+                    work_mode: WorkMode::Remote,
+                    experience_level: ExperienceLevel::Junior,
+                    raw_description: "Dibutuhkan Backend Engineer Rust dan Docker.".into(),
+                    extracted_summary_json: None,
+                    embedding: None,
+                    enrichment_status: EnrichmentStatus::LocalOnly,
+                    posted_at: None,
+                    salary_text: None,
+                    domain_slug: "informatika_data".into(),
+                    quality_score: 1.0,
+                    red_flags_json: "[]".into(),
+                    also_available_on_json: "[]".into(),
+                    embedding_model: None,
+                },
+                &[ExtractedJobSkill {
+                    canonical_name: "Docker".into(),
+                    category: SkillCategory::ToolsTech,
+                    requirement_type: RequirementType::Mandatory,
+                    matched_aliases: vec![],
+                }],
+            )
+            .expect("seed local job");
+
+        let detail = generate_learning_roadmap_impl(
+            &state,
+            profile.id,
+            "Backend Engineer".into(),
+            Some(job_id),
+            6,
+        )
+        .await
+        .expect("local roadmap must succeed with 0 API keys");
+
+        assert_eq!(gemini.roadmap_calls.load(Ordering::SeqCst), 0);
+        assert!(detail.title.contains("Lokal · 0 Token"));
+        assert!(!detail.steps.is_empty());
+        assert!(detail.steps[0].skill_id.is_some());
     }
 }

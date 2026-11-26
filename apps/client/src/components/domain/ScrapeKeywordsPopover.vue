@@ -184,7 +184,8 @@ onBeforeUnmount(() => {
   .v-pop-panel {
     left: 0;
     right: auto;
-    width: 296px;
+    width: min(316px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
   }
 }
 </style>

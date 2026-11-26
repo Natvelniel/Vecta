@@ -1,0 +1,226 @@
+[
+  {
+    "id": "dsg.design_system",
+    "canonical_name": "Design System & Tokens Architecture",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "Component Library",
+      "Design Tokens",
+      "Auto Layout Figma",
+      "Design Ops"
+    ]
+  },
+  {
+    "id": "dsg.ux_research",
+    "canonical_name": "UX Research & Usability Testing",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "User Interview",
+      "Usability Testing",
+      "Maze",
+      "Information Architecture",
+      "Wireframing"
+    ]
+  },
+  {
+    "id": "dsg.blender_3d",
+    "canonical_name": "3D Modeling & Product Visualization (Blender / C4D)",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "tools_tech",
+    "aliases": [
+      "Blender 3D",
+      "Cinema 4D",
+      "KeyShot",
+      "3D Rendering",
+      "Spline 3D"
+    ]
+  },
+  {
+    "id": "dsg.industrial_prod",
+    "canonical_name": "Desain Produk Industri & Ergonomi",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "Industrial Design",
+      "Rhino 3D",
+      "Rapid Prototyping",
+      "CMF Design"
+    ]
+  },
+  {
+    "id": "dsg.fashion_apparel",
+    "canonical_name": "Desain Fashion, Pattern Making & Textile",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "CLO 3D",
+      "Pattern Grading",
+      "Tech Pack Garment",
+      "Merchandising Fashion"
+    ]
+  },
+  {
+    "id": "dsg.lottie_rive",
+    "canonical_name": "Micro-Interaction & UI Motion (Rive / Lottie)",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "tools_tech",
+    "aliases": [
+      "LottieFiles",
+      "Rive App",
+      "Framer Motion"
+    ]
+  },
+  {
+    "id": "dsg.a11y",
+    "canonical_name": "Design Accessibility (WCAG AA/AAA)",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "domain",
+    "aliases": [
+      "WCAG 2.1",
+      "Color Contrast Audit",
+      "Inclusive Design"
+    ]
+  },
+  {
+    "id": "dsg.ux_writing",
+    "canonical_name": "UX Writing & Microcopy Produk Digital",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "Content Design",
+      "Error State Copy",
+      "Voice & Tone UI"
+    ],
+    "parent_id": "dsg.ux_research"
+  },
+  {
+    "id": "dsg.packaging_3d",
+    "canonical_name": "Desain Kemasan Struktural & Die-Line",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "ArtiosCAD",
+      "Packaging Die-Line",
+      "Mockup Kemasan",
+      "Print Production"
+    ],
+    "parent_id": "dsg.industrial_prod"
+  },
+  {
+    "id": "dsg.game_art",
+    "canonical_name": "2D/3D Game Art, Rigging & Texturing",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "tools_tech",
+    "aliases": [
+      "Substance Painter",
+      "ZBrush",
+      "Maya Rigging",
+      "Low-Poly Asset"
+    ],
+    "parent_id": "dsg.blender_3d"
+  },
+  {
+    "id": "dsg.design_sprint",
+    "canonical_name": "Design Sprint & Workshop Facilitation",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "soft_skill",
+    "aliases": [
+      "FigJam Workshop",
+      "Journey Mapping",
+      "Service Blueprint"
+    ],
+    "parent_id": "dsg.ux_research"
+  },
+  {
+    "id": "dsg.motion_ui",
+    "canonical_name": "3D Motion Graphics & Broadcast Title Design",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "Cinema 4D MoGraph",
+      "Houdini FX",
+      "Broadcast Package"
+    ],
+    "parent_id": "dsg.blender_3d"
+  },
+  {
+    "id": "dsg.furniture_wood",
+    "canonical_name": "Desain Furnitur & Produk Kayu / Rotan Ekspor",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core_hard",
+    "aliases": [
+      "Furniture Technical Drawing",
+      "Woodworking CNC",
+      "Rattan Design"
+    ],
+    "parent_id": "dsg.industrial_prod"
+  },
+  {
+    "id": "dsg.jewelry_craft",
+    "canonical_name": "Desain Perhiasan & Produk Gaya Hidup",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "domain",
+    "aliases": [
+      "MatrixGold",
+      "CAD Perhiasan",
+      "Kriya Modern"
+    ],
+    "parent_id": "dsg.industrial_prod"
+  },
+  {
+    "id": "dsg.wayfinding",
+    "canonical_name": "Environmental Graphic Design & Wayfinding Signage",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "domain",
+    "aliases": [
+      "Wayfinding System",
+      "Signage Mall / RS",
+      "Exhibition Booth 3D"
+    ],
+    "parent_id": "dsg.industrial_prod"
+  },
+  {
+    "id": "dsg.design_ops",
+    "canonical_name": "Handoff Developer, Figma Variables & Token Sync",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "tools_tech",
+    "aliases": [
+      "Figma Dev Mode",
+      "Figma Variables",
+      "Design QA"
+    ],
+    "parent_id": "dsg.design_system"
+  },
+  {
+    "id": "dkv.ux_writing",
+    "canonical_name": "UX Writing & Product Microcopy",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "core",
+    "aliases": [
+      "ux writing",
+      "microcopy",
+      "content design",
+      "tone of voice ui"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "dkv.blender_3d",
+    "canonical_name": "Blender / Cinema 4D & 3D Packaging",
+    "domain": "dkv_produk_ux_kreatif",
+    "category": "tool",
+    "aliases": [
+      "blender",
+      "cinema 4d",
+      "c4d",
+      "3d modeling",
+      "3d rendering",
+      "keyshot"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  }
+]

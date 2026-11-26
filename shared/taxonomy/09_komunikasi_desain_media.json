@@ -1,12 +1,429 @@
 [
-  {"id":"des.figma","canonical_name":"Figma","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Figma Prototyping","Design System"]},
-  {"id":"des.uiux","canonical_name":"UI/UX Design","domain":"komunikasi_desain_media","category":"core_hard","aliases":["UI/UX","UI Design","UX Design","UX Research","Product Design","Wireframing","Usability Testing"]},
-  {"id":"des.photoshop","canonical_name":"Adobe Photoshop","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Photoshop"]},
-  {"id":"des.illustrator","canonical_name":"Adobe Illustrator","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Illustrator","CorelDraw","CorelDRAW"]},
-  {"id":"des.premiere","canonical_name":"Adobe Premiere Pro & Video Editing","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["Premiere Pro","Video Editing","CapCut","DaVinci Resolve","Final Cut Pro"]},
-  {"id":"des.after_effects","canonical_name":"After Effects & Motion Graphics","domain":"komunikasi_desain_media","category":"tools_tech","aliases":["After Effects","Motion Graphics","Animasi 2D","Animasi 3D","Blender"]},
-  {"id":"des.canva","canonical_name":"Canva & Desain Grafis","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Canva","Desain Grafis","Graphic Design","Visual Design","Layouting","InDesign","Branding Visual"]},
-  {"id":"des.fotografi","canonical_name":"Fotografi & Videografi","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Fotografi","Photography","Videografi","Videography","Lighting","Produksi Konten"]},
-  {"id":"des.pr","canonical_name":"Public Relations & Corporate Comm","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Public Relations","Corporate Communication","Media Relations","Press Release","Siaran Pers","Crisis Communication","Hubungan Masyarakat"]},
-  {"id":"des.jurnalistik","canonical_name":"Jurnalistik & Editorial","domain":"komunikasi_desain_media","category":"core_hard","aliases":["Jurnalistik","Journalism","Editorial","Proofreading","News Writing","Broadcasting","MC / Public Speaking"]}
+  {
+    "id": "des.figma",
+    "canonical_name": "Figma",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "aliases": [
+      "Figma Prototyping",
+      "Design System"
+    ]
+  },
+  {
+    "id": "des.uiux",
+    "canonical_name": "UI/UX Design",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "UI/UX",
+      "UI Design",
+      "UX Design",
+      "UX Research",
+      "Product Design",
+      "Wireframing",
+      "Usability Testing"
+    ]
+  },
+  {
+    "id": "des.photoshop",
+    "canonical_name": "Adobe Photoshop",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "aliases": [
+      "Photoshop"
+    ]
+  },
+  {
+    "id": "des.illustrator",
+    "canonical_name": "Adobe Illustrator",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "aliases": [
+      "Illustrator",
+      "CorelDraw",
+      "CorelDRAW"
+    ]
+  },
+  {
+    "id": "des.premiere",
+    "canonical_name": "Adobe Premiere Pro & Video Editing",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "aliases": [
+      "Premiere Pro",
+      "Video Editing",
+      "CapCut",
+      "DaVinci Resolve",
+      "Final Cut Pro"
+    ]
+  },
+  {
+    "id": "des.after_effects",
+    "canonical_name": "After Effects & Motion Graphics",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "aliases": [
+      "After Effects",
+      "Motion Graphics",
+      "Animasi 2D",
+      "Animasi 3D",
+      "Blender"
+    ]
+  },
+  {
+    "id": "des.canva",
+    "canonical_name": "Canva & Desain Grafis",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Canva",
+      "Desain Grafis",
+      "Graphic Design",
+      "Visual Design",
+      "Layouting",
+      "InDesign",
+      "Branding Visual"
+    ]
+  },
+  {
+    "id": "des.fotografi",
+    "canonical_name": "Fotografi & Videografi",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Fotografi",
+      "Photography",
+      "Videografi",
+      "Videography",
+      "Lighting",
+      "Produksi Konten",
+      "Adobe Lightroom",
+      "Product Photography",
+      "Studio Lighting",
+      "Color Grading"
+    ]
+  },
+  {
+    "id": "des.pr",
+    "canonical_name": "Public Relations & Corporate Comm",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Public Relations",
+      "Corporate Communication",
+      "Media Relations",
+      "Press Release",
+      "Siaran Pers",
+      "Crisis Communication",
+      "Hubungan Masyarakat"
+    ]
+  },
+  {
+    "id": "des.jurnalistik",
+    "canonical_name": "Jurnalistik & Editorial",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Jurnalistik",
+      "Journalism",
+      "Editorial",
+      "Proofreading",
+      "News Writing",
+      "Broadcasting",
+      "MC / Public Speaking",
+      "Investigative Writing",
+      "Newsroom Editing",
+      "Kode Etik Jurnalistik"
+    ]
+  },
+  {
+    "id": "cre.pr_media",
+    "canonical_name": "Public Relations & Media Relations",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Public Relations",
+      "Press Release",
+      "Media Monitoring",
+      "Media Pitching",
+      "Spokesperson"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "cre.crisis_comm",
+    "canonical_name": "Crisis Communication & Reputasi",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Manajemen Krisis Komunikasi",
+      "Corporate Communication",
+      "Internal Communications"
+    ]
+  },
+  {
+    "id": "cre.broadcasting",
+    "canonical_name": "Broadcasting, Podcast & Live Production",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "aliases": [
+      "OBS Studio",
+      "vMix",
+      "Live Streaming Production",
+      "Audio Mixing",
+      "Master of Ceremony"
+    ]
+  },
+  {
+    "id": "cre.scriptwriting",
+    "canonical_name": "Scriptwriting & Storytelling",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Video Scriptwriting",
+      "Creative Concepting",
+      "Storyboard"
+    ]
+  },
+  {
+    "id": "cre.capcut_tiktok",
+    "canonical_name": "Short-Form Video (Reels / TikTok / CapCut)",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "parent_id": "des.premiere",
+    "aliases": [
+      "CapCut Pro",
+      "Short Video Editing",
+      "Hook & Retention Editing"
+    ]
+  },
+  {
+    "id": "cre.brand_identity",
+    "canonical_name": "Visual Brand Identity & Guideline",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "parent_id": "des.illustrator",
+    "aliases": [
+      "Logo Design",
+      "Brand Guidelines",
+      "Typography",
+      "Layout Editorial"
+    ]
+  },
+  {
+    "id": "cre.publishing",
+    "canonical_name": "Indesign & Layout Cetak / Digital",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "parent_id": "des.illustrator",
+    "aliases": [
+      "Adobe InDesign",
+      "Packaging Design",
+      "Pre-Press Printing"
+    ]
+  },
+  {
+    "id": "cre.media_buying",
+    "canonical_name": "Media Planning & TV / OOH Placement",
+    "domain": "komunikasi_desain_media",
+    "category": "domain",
+    "aliases": [
+      "Billboard OOH",
+      "TRP / CPRP",
+      "Radio & TV Ad Buying"
+    ],
+    "parent_id": "cre.pr_media"
+  },
+  {
+    "id": "cre.event_mc",
+    "canonical_name": "Public Speaking, Moderator & Host Live",
+    "domain": "komunikasi_desain_media",
+    "category": "soft_skill",
+    "aliases": [
+      "Live Commerce Host",
+      "Host TikTok Shop",
+      "Spokesperson Event"
+    ],
+    "parent_id": "cre.broadcasting"
+  },
+  {
+    "id": "cre.podcast_audio",
+    "canonical_name": "Audio Engineering & Sound Design",
+    "domain": "komunikasi_desain_media",
+    "category": "tools_tech",
+    "aliases": [
+      "Adobe Audition",
+      "Logic Pro",
+      "Pro Tools",
+      "Voice Over Mastering"
+    ],
+    "parent_id": "cre.broadcasting"
+  },
+  {
+    "id": "cre.copy_seo",
+    "canonical_name": "SEO Long-Form Article & Blog Editorial",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "WordPress Publishing",
+      "Headline Optimization",
+      "Fact Checking"
+    ],
+    "parent_id": "des.jurnalistik"
+  },
+  {
+    "id": "cre.kol_talent",
+    "canonical_name": "Talent Management & Creator Relations",
+    "domain": "komunikasi_desain_media",
+    "category": "domain",
+    "aliases": [
+      "Talent Scouting",
+      "Ratecard Negotiation",
+      "Contract KOL"
+    ]
+  },
+  {
+    "id": "cre.illustrator_char",
+    "canonical_name": "Ilustrasi Digital & Character Design",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Procreate",
+      "Clip Studio Paint",
+      "Vector Illustration",
+      "Mascot Design"
+    ],
+    "parent_id": "des.illustrator"
+  },
+  {
+    "id": "cre.editorial_b2b",
+    "canonical_name": "Thought Leadership & Ghostwriting Eksekutif",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "LinkedIn Ghostwriting",
+      "Speechwriting",
+      "Annual Report Copy"
+    ],
+    "parent_id": "des.jurnalistik"
+  },
+  {
+    "id": "cre.event_prod",
+    "canonical_name": "Show Director & Manajemen Panggung Kreatif",
+    "domain": "komunikasi_desain_media",
+    "category": "domain",
+    "aliases": [
+      "Stage Management",
+      "Lighting & Audio Cue",
+      "Show Calling"
+    ]
+  },
+  {
+    "id": "cre.podcast_host",
+    "canonical_name": "Produksi Podcast, Wawancara & Riset Narasumber",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Audio Storytelling",
+      "Interview Techniques",
+      "Podcast Editing"
+    ],
+    "parent_id": "cre.broadcasting"
+  },
+  {
+    "id": "cre.social_crisis",
+    "canonical_name": "Social Media Community & Moderation",
+    "domain": "komunikasi_desain_media",
+    "category": "soft_skill",
+    "aliases": [
+      "Community Moderation",
+      "DM Handling",
+      "Brand Voice Reply"
+    ]
+  },
+  {
+    "id": "cre.ads_video",
+    "canonical_name": "Penyutradaraan Iklan Komersial & Brand Film",
+    "domain": "komunikasi_desain_media",
+    "category": "domain",
+    "aliases": [
+      "TVC Production",
+      "Shooting Schedule",
+      "Call Sheet Produksi"
+    ],
+    "parent_id": "cre.scriptwriting"
+  },
+  {
+    "id": "cre.seo_newsroom",
+    "canonical_name": "Manajemen Desk Berita & Real-Time Live Reporting",
+    "domain": "komunikasi_desain_media",
+    "category": "core_hard",
+    "aliases": [
+      "Breaking News Desk",
+      "Google Discover SEO",
+      "Editorial Calendar"
+    ],
+    "parent_id": "des.jurnalistik"
+  },
+  {
+    "id": "cre.blender_3d",
+    "canonical_name": "Blender / Cinema 4D & 3D Visualization",
+    "domain": "komunikasi_desain_media",
+    "category": "tool",
+    "aliases": [
+      "blender",
+      "cinema 4d",
+      "c4d",
+      "3d modeling",
+      "3d rendering",
+      "keyshot"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "cre.ux_writing",
+    "canonical_name": "UX Writing & Microcopy",
+    "domain": "komunikasi_desain_media",
+    "category": "core",
+    "aliases": [
+      "ux writing",
+      "microcopy",
+      "content design",
+      "tone of voice ui"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "des.uiux"
+  },
+  {
+    "id": "cre.design_system",
+    "canonical_name": "Design System & Token Architecture",
+    "domain": "komunikasi_desain_media",
+    "category": "core",
+    "aliases": [
+      "design system",
+      "design tokens",
+      "component library",
+      "figma variables"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "des.figma"
+  },
+  {
+    "id": "cre.color_grading",
+    "canonical_name": "DaVinci Resolve & Color Grading",
+    "domain": "komunikasi_desain_media",
+    "category": "tool",
+    "aliases": [
+      "davinci resolve",
+      "color grading",
+      "color correction",
+      "luts"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "des.premiere"
+  }
 ]

@@ -1,7 +1,9 @@
 use tauri::State;
 
 use crate::error::AppError;
-use crate::models::competency::{CompetencyMapResponse, RoleJobCount};
+use crate::models::competency::{
+    CompanySnapshot, CompetencyMapResponse, RoleJobCount, SalaryBenchmarkSummary, SkillImpactItem,
+};
 use crate::state::AppState;
 
 pub fn list_available_roles_impl(state: &AppState) -> Result<Vec<RoleJobCount>, AppError> {
@@ -21,6 +23,41 @@ pub fn get_competency_map_impl(
     state.db.get_competency_map(&user_id, &target_role)
 }
 
+pub fn simulate_skill_impact_impl(
+    state: &AppState,
+    user_id: String,
+    target_role: String,
+    candidate_skill_ids: Vec<i64>,
+) -> Result<Vec<SkillImpactItem>, AppError> {
+    state
+        .db
+        .simulate_skill_impact(&user_id, &target_role, &candidate_skill_ids)
+}
+
+pub fn get_salary_benchmark_impl(
+    state: &AppState,
+    role_filter: Option<String>,
+    cluster_filter: Option<String>,
+) -> Result<SalaryBenchmarkSummary, AppError> {
+    state
+        .db
+        .get_salary_benchmark(role_filter.as_deref(), cluster_filter.as_deref())
+}
+
+pub fn get_company_snapshot_impl(
+    state: &AppState,
+    user_id: String,
+    company_name: String,
+) -> Result<CompanySnapshot, AppError> {
+    let clean_company = company_name.trim();
+    if clean_company.is_empty() {
+        return Err(AppError::validation_error(
+            "Nama perusahaan tidak boleh kosong.",
+        ));
+    }
+    state.db.get_company_snapshot(&user_id, clean_company)
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn list_available_roles(state: State<'_, AppState>) -> Result<Vec<RoleJobCount>, AppError> {
@@ -35,6 +72,37 @@ pub fn get_competency_map(
     target_role: String,
 ) -> Result<CompetencyMapResponse, AppError> {
     get_competency_map_impl(&state, user_id, target_role)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn simulate_skill_impact(
+    state: State<'_, AppState>,
+    user_id: String,
+    target_role: String,
+    candidate_skill_ids: Vec<i64>,
+) -> Result<Vec<SkillImpactItem>, AppError> {
+    simulate_skill_impact_impl(&state, user_id, target_role, candidate_skill_ids)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_salary_benchmark(
+    state: State<'_, AppState>,
+    role_filter: Option<String>,
+    cluster_filter: Option<String>,
+) -> Result<SalaryBenchmarkSummary, AppError> {
+    get_salary_benchmark_impl(&state, role_filter, cluster_filter)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_company_snapshot(
+    state: State<'_, AppState>,
+    user_id: String,
+    company_name: String,
+) -> Result<CompanySnapshot, AppError> {
+    get_company_snapshot_impl(&state, user_id, company_name)
 }
 
 #[cfg(test)]

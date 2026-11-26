@@ -1,11 +1,594 @@
 [
-  {"id":"eng.solidworks","canonical_name":"SolidWorks & Mechanical CAD","domain":"teknik_mesin_elektro_industri","category":"tools_tech","aliases":["SolidWorks","Autodesk Inventor","CATIA","Fusion 360","ANSYS","CAD/CAM"]},
-  {"id":"eng.plc_scada","canonical_name":"PLC & Otomasi Industri","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["PLC","SCADA","HMI","Siemens PLC","Omron","Mitsubishi PLC","Otomasi Industri","Instrumentasi","Mikrokontroler","Arduino","ESP32"]},
-  {"id":"eng.elektrikal","canonical_name":"Teknik Elektro & Arus Kuat","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["Electrical Engineering","Panel Listrik","Wiring Diagram","Instalasi Listrik","MEP","HVAC","Chiller","Genset","Inverter"]},
-  {"id":"eng.maintenance","canonical_name":"Maintenance & Reliability","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["Preventive Maintenance","Corrective Maintenance","Troubleshooting Mesin","TPM","Total Productive Maintenance","Perawatan Mesin","Hydraulics","Pneumatics"]},
-  {"id":"eng.k3_hse","canonical_name":"K3 / HSE","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["AK3U","Ahli K3 Umum","K3 Umum","K3 Kemnaker","HSE","OHS","SMK3","HIRADC","JSA","Safety Officer","Keselamatan Kerja"]},
-  {"id":"eng.iso_qms","canonical_name":"ISO 9001 / 14001 / 45001","domain":"teknik_mesin_elektro_industri","category":"domain","aliases":["ISO 9001","ISO 14001","ISO 45001","IATF 16949","Quality Management System","QMS","Audit Internal ISO"]},
-  {"id":"eng.lean_six_sigma","canonical_name":"Lean Manufacturing & Six Sigma","domain":"teknik_mesin_elektro_industri","category":"domain","aliases":["Lean Manufacturing","Six Sigma","Kaizen","5S","5R","Continuous Improvement","Root Cause Analysis","FMEA","Time Motion Study"]},
-  {"id":"eng.qc_qa_mfg","canonical_name":"Quality Control & Assurance (Manufaktur)","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["Quality Control","In-Process QC","Incoming QC","Kalibrasi Alat Ukur","Vernier Caliper","Mikrometer","SPC","Statistical Process Control"]},
-  {"id":"eng.welding_cnc","canonical_name":"CNC, Fabrikasi & Pengelasan","domain":"teknik_mesin_elektro_industri","category":"core_hard","aliases":["CNC","Mesin Bubut","Welding","Pengelasan","NDT","Piping","Proses Manufaktur"]}
+  {
+    "id": "eng.solidworks",
+    "canonical_name": "SolidWorks & Mechanical CAD",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tools_tech",
+    "aliases": [
+      "SolidWorks",
+      "Autodesk Inventor",
+      "CATIA",
+      "Fusion 360",
+      "ANSYS",
+      "CAD/CAM"
+    ]
+  },
+  {
+    "id": "eng.plc_scada",
+    "canonical_name": "PLC & Otomasi Industri",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "PLC",
+      "SCADA",
+      "HMI",
+      "Siemens PLC",
+      "Omron",
+      "Mitsubishi PLC",
+      "Otomasi Industri",
+      "Instrumentasi",
+      "Mikrokontroler",
+      "Arduino",
+      "ESP32"
+    ]
+  },
+  {
+    "id": "eng.elektrikal",
+    "canonical_name": "Teknik Elektro & Arus Kuat",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Electrical Engineering",
+      "Panel Listrik",
+      "Wiring Diagram",
+      "Instalasi Listrik",
+      "MEP",
+      "HVAC",
+      "Chiller",
+      "Genset",
+      "Inverter"
+    ]
+  },
+  {
+    "id": "eng.maintenance",
+    "canonical_name": "Maintenance & Reliability",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Preventive Maintenance",
+      "Corrective Maintenance",
+      "Troubleshooting Mesin",
+      "TPM",
+      "Total Productive Maintenance",
+      "Perawatan Mesin",
+      "Hydraulics",
+      "Pneumatics"
+    ]
+  },
+  {
+    "id": "eng.k3_hse",
+    "canonical_name": "K3 / HSE",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "AK3U",
+      "Ahli K3 Umum",
+      "K3 Umum",
+      "K3 Kemnaker",
+      "HSE",
+      "OHS",
+      "SMK3",
+      "HIRADC",
+      "JSA",
+      "Safety Officer",
+      "Keselamatan Kerja"
+    ]
+  },
+  {
+    "id": "eng.iso_qms",
+    "canonical_name": "ISO 9001 / 14001 / 45001",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "ISO 9001",
+      "ISO 14001",
+      "ISO 45001",
+      "IATF 16949",
+      "Quality Management System",
+      "QMS",
+      "Audit Internal ISO"
+    ]
+  },
+  {
+    "id": "eng.lean_six_sigma",
+    "canonical_name": "Lean Manufacturing & Six Sigma",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "Lean Manufacturing",
+      "Six Sigma",
+      "Kaizen",
+      "5S",
+      "5R",
+      "Continuous Improvement",
+      "Root Cause Analysis",
+      "FMEA",
+      "Time Motion Study"
+    ]
+  },
+  {
+    "id": "eng.qc_qa_mfg",
+    "canonical_name": "Quality Control & Assurance (Manufaktur)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Quality Control",
+      "In-Process QC",
+      "Incoming QC",
+      "Kalibrasi Alat Ukur",
+      "Vernier Caliper",
+      "Mikrometer",
+      "SPC",
+      "Statistical Process Control"
+    ]
+  },
+  {
+    "id": "eng.welding_cnc",
+    "canonical_name": "CNC, Fabrikasi & Pengelasan",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "CNC",
+      "Mesin Bubut",
+      "Welding",
+      "Pengelasan",
+      "NDT",
+      "Piping",
+      "Proses Manufaktur"
+    ]
+  },
+  {
+    "id": "eng.catia_inventor",
+    "canonical_name": "Autodesk Inventor & CATIA",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tools_tech",
+    "parent_id": "eng.solidworks",
+    "aliases": [
+      "Autodesk Inventor",
+      "CATIA",
+      "Siemens NX",
+      "Fusion 360"
+    ]
+  },
+  {
+    "id": "eng.ansys",
+    "canonical_name": "ANSYS / FEA & CFD Simulation",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tools_tech",
+    "parent_id": "eng.solidworks",
+    "aliases": [
+      "ANSYS",
+      "Finite Element Analysis",
+      "CFD Simulation"
+    ]
+  },
+  {
+    "id": "eng.cnc",
+    "canonical_name": "CNC Programming & Machining (CAM)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "parent_id": "eng.qc_qa_mfg",
+    "aliases": [
+      "CNC Milling",
+      "CNC Turning",
+      "Mastercam",
+      "G-Code"
+    ]
+  },
+  {
+    "id": "eng.welding",
+    "canonical_name": "Welding Inspection (AWS CWI / NDT)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Welding Inspector",
+      "NDT Ultrasonic",
+      "Radiography Testing",
+      "ASME IX"
+    ]
+  },
+  {
+    "id": "eng.piping",
+    "canonical_name": "Piping & Pressure Vessel Design",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "PDMS",
+      "E3D",
+      "CAESAR II",
+      "P&ID Reading",
+      "ASME B31.3"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "eng.utility",
+    "canonical_name": "Plant Utility (Boiler, Chiller, Compressor)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "parent_id": "eng.maintenance",
+    "aliases": [
+      "Boiler Operator",
+      "Chiller",
+      "Air Compressor",
+      "WTP / WWTP"
+    ]
+  },
+  {
+    "id": "eng.cmms",
+    "canonical_name": "CMMS & Predictive Maintenance",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tools_tech",
+    "parent_id": "eng.maintenance",
+    "aliases": [
+      "SAP PM",
+      "Maximo CMMS",
+      "Vibration Analysis",
+      "Thermography",
+      "TPM"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "eng.otomotif",
+    "canonical_name": "Diagnostik Otomotif & EV System",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "Automotive Service",
+      "OBD Diagnostics",
+      "Engine Overhaul",
+      "Electric Vehicle"
+    ]
+  },
+  {
+    "id": "eng.iatf",
+    "canonical_name": "IATF 16949 & PPAP Otomotif",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "parent_id": "eng.iso_qms",
+    "aliases": [
+      "IATF 16949",
+      "APQP",
+      "PPAP",
+      "FMEA",
+      "SPC Control"
+    ]
+  },
+  {
+    "id": "eng.hydro_pneu",
+    "canonical_name": "Hidrolik & Pneumatik Industri",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Hydraulic System",
+      "Pneumatic Control",
+      "Electro-Pneumatic"
+    ]
+  },
+  {
+    "id": "eng.rot_equip",
+    "canonical_name": "Rotating Equipment (Pompa, Turbin, Kompresor)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "parent_id": "eng.maintenance",
+    "aliases": [
+      "Centrifugal Pump",
+      "Steam Turbine",
+      "Alignment Laser",
+      "Mechanical Seal"
+    ]
+  },
+  {
+    "id": "eng.sheet_metal",
+    "canonical_name": "Sheet Metal Design & Die Casting",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Stamping Die",
+      "Injection Molding",
+      "Sheet Metal CAD"
+    ],
+    "parent_id": "eng.solidworks"
+  },
+  {
+    "id": "eng.gdt",
+    "canonical_name": "GD&T & Metrologi Manufaktur (CMM)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "GD&T",
+      "Coordinate Measuring Machine",
+      "Vernier & Micrometer",
+      "Kalibrasi Alat Ukur"
+    ],
+    "parent_id": "eng.qc_qa_mfg"
+  },
+  {
+    "id": "eng.boiler_turbin",
+    "canonical_name": "Operasi Pembangkit (Boiler / Turbin / PLTU / PLTG)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "SIO Operator Boiler",
+      "Sertifikat Kelas 1 Boiler",
+      "Steam Cycle"
+    ],
+    "parent_id": "eng.utility"
+  },
+  {
+    "id": "eng.refrigeration",
+    "canonical_name": "Sistem Refrigerasi & Cold Storage Industri",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Ammonia Chiller",
+      "VRV / VRF",
+      "AHU Chiller Maintenance"
+    ],
+    "parent_id": "eng.maintenance"
+  },
+  {
+    "id": "eng.conveyor_material",
+    "canonical_name": "Material Handling & Overhead Crane (SIO Crane)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "SIO Forklift",
+      "Overhead Crane",
+      "Conveyor Maintenance"
+    ],
+    "parent_id": "eng.maintenance"
+  },
+  {
+    "id": "eng.pdm_oil",
+    "canonical_name": "Oil Analysis & Tribologi Mesin",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "Condition Monitoring",
+      "Ultrasonic Leak Detection"
+    ],
+    "parent_id": "eng.cmms"
+  },
+  {
+    "id": "eng.heavy_equip",
+    "canonical_name": "Mekanik Alat Berat (Excavator / Dump Truck / Bulldozer)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Komatsu / Caterpillar",
+      "BMC Heavy Equipment",
+      "Diesel Engine Overhaul",
+      "Hydraulic Excavator"
+    ],
+    "parent_id": "eng.hydro_pneu"
+  },
+  {
+    "id": "eng.ship_marine",
+    "canonical_name": "Teknik Perkapalan & Marine Engineering",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "Naval Architecture",
+      "BKI Classification",
+      "Shipyard Repair",
+      "Hull Design"
+    ]
+  },
+  {
+    "id": "eng.mold_tooling",
+    "canonical_name": "Mold Maintenance & Tooling Engineering",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Injection Mold Repair",
+      "Jig & Fixture Design",
+      "EDM Wire Cut"
+    ],
+    "parent_id": "eng.sheet_metal"
+  },
+  {
+    "id": "eng.boiler_water",
+    "canonical_name": "Water Treatment Boiler & Cooling Tower Chemistry",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "RO Reverse Osmosis",
+      "Softener Resin",
+      "Dosing Chemical Cooling"
+    ],
+    "parent_id": "eng.utility"
+  },
+  {
+    "id": "eng.pipeline_ndt",
+    "canonical_name": "Inspeksi Tangki & Bejana Tekan (API 653 / API 510)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "API 510",
+      "API 653",
+      "Thickness Gauging",
+      "Dye Penetrant PT"
+    ],
+    "parent_id": "eng.welding"
+  },
+  {
+    "id": "eng.marine_engine",
+    "canonical_name": "Operasi & Perawatan Mesin Kapal (ATT / Ahli Teknika)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "ATT III / II / I",
+      "Main Engine Kapal",
+      "Auxiliary Generator Marine"
+    ],
+    "parent_id": "eng.ship_marine"
+  },
+  {
+    "id": "eng.textile_mech",
+    "canonical_name": "Mekanik Mesin Tekstil & Garmen Industri",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "Weaving Loom",
+      "Dyeing Machine",
+      "Sewing Machine Mechanic"
+    ]
+  },
+  {
+    "id": "eng.food_machinery",
+    "canonical_name": "Maintenance Mesin Kemas & Filling F&B",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "Rotary Filler",
+      "Cartoning Machine",
+      "Packaging Line"
+    ],
+    "parent_id": "eng.maintenance"
+  },
+  {
+    "id": "eng.turbine_gas",
+    "canonical_name": "Overhaul Turbin Uap, Gas & Kompresor Sentrifugal",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Borescope Inspection",
+      "Rotor Balancing",
+      "Alignment Kopling"
+    ],
+    "parent_id": "eng.rot_equip"
+  },
+  {
+    "id": "eng.pressure_calc",
+    "canonical_name": "Desain Tangki Timbun & Pressure Vessel (PV Elite)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tools_tech",
+    "aliases": [
+      "PV Elite",
+      "COMPRESS",
+      "API 650 Storage Tank"
+    ],
+    "parent_id": "eng.piping"
+  },
+  {
+    "id": "eng.laser_cutting",
+    "canonical_name": "Fabrikasi Baja, Laser Cutting & Bending CNC",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core_hard",
+    "aliases": [
+      "Fiber Laser Cutting",
+      "Press Brake Bending",
+      "Nesting Plat"
+    ],
+    "parent_id": "eng.cnc"
+  },
+  {
+    "id": "eng.etap_power",
+    "canonical_name": "ETAP & Power System Study",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tool",
+    "aliases": [
+      "etap",
+      "digsilent",
+      "short circuit study",
+      "arc flash",
+      "load flow"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced",
+    "parent_id": "eng.elektrikal"
+  },
+  {
+    "id": "eng.hv_substation",
+    "canonical_name": "Gardu Induk & Tegangan Tinggi",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "domain",
+    "aliases": [
+      "gardu induk",
+      "switchgear",
+      "gis substation",
+      "trafo daya",
+      "relay proteksi"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "intermediate",
+    "parent_id": "eng.elektrikal"
+  },
+  {
+    "id": "eng.dcs_honeywell",
+    "canonical_name": "DCS (Yokogawa Centum, Honeywell, Emerson)",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tool",
+    "aliases": [
+      "dcs",
+      "yokogawa centum",
+      "emerson deltav",
+      "honeywell experion"
+    ],
+    "base_weight": 1.25,
+    "difficulty": "advanced",
+    "parent_id": "eng.plc_scada"
+  },
+  {
+    "id": "eng.pdms_e3d",
+    "canonical_name": "AVEVA E3D / PDMS & SmartPlant 3D",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "tool",
+    "aliases": [
+      "pdms",
+      "aveva e3d",
+      "smartplant 3d",
+      "sp3d",
+      "caesar ii",
+      "pipe stress"
+    ],
+    "base_weight": 1.25,
+    "difficulty": "advanced",
+    "parent_id": "eng.piping"
+  },
+  {
+    "id": "eng.ndt_weld",
+    "canonical_name": "NDT (UT, RT, MT, PT) & Welding Inspector",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "compliance",
+    "aliases": [
+      "ndt",
+      "ultrasonic testing",
+      "radiography",
+      "cswip",
+      "welding inspector"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "intermediate",
+    "parent_id": "eng.welding"
+  },
+  {
+    "id": "eng.ergonomics_ie",
+    "canonical_name": "Time & Motion Study / Line Balancing",
+    "domain": "teknik_mesin_elektro_industri",
+    "category": "core",
+    "aliases": [
+      "time study",
+      "motion study",
+      "line balancing",
+      "oee",
+      "takt time",
+      "yamazumi"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "eng.lean_six_sigma"
+  }
 ]

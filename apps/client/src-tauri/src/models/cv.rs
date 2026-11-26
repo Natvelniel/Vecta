@@ -59,9 +59,11 @@ pub struct ImportedCvDraft {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct AtsExportResult {
+    pub file_name: String,
     pub file_path: String,
     pub ats_keyword_score: f64,
     pub matched_keywords: Vec<String>,
     pub missing_keywords: Vec<String>,
     pub pdf_size_bytes: u32,
+    pub pdf_base64: String,
 }

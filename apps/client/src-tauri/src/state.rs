@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock};
 
@@ -45,6 +45,7 @@ pub struct AppState {
 impl AppState {
     pub fn production(
         db: Database,
+        data_dir: &Path,
         resource_dirs: Vec<PathBuf>,
         export_dir: PathBuf,
     ) -> Result<Self, AppError> {
@@ -55,6 +56,10 @@ impl AppState {
             .and_then(|saved| validate_worker_url(&saved).ok())
             .unwrap_or_else(|| DEFAULT_WORKER_URL.to_string());
 
+        #[cfg(target_os = "android")]
+        let initial_mode = "native_rust".to_string();
+
+        #[cfg(not(target_os = "android"))]
         let initial_mode = db
             .get_app_setting(SETTING_SCRAPER_MODE)
             .ok()
@@ -75,7 +80,7 @@ impl AppState {
 
         Ok(Self {
             db,
-            secrets: Arc::new(OsKeyringStore),
+            secrets: Arc::new(OsKeyringStore::new(data_dir)),
             gemini: Arc::new(HttpGeminiClient::new()?),
             worker: Arc::new(HttpWorkerClient::new()?),
             native_scraper: Arc::new(NativeScraperClient::new()?),
@@ -98,6 +103,12 @@ impl AppState {
     }
 
     pub fn set_scraper_mode(&self, mode: &str) -> Result<String, AppError> {
+        #[cfg(target_os = "android")]
+        let clean = {
+            let _ = mode;
+            "native_rust"
+        };
+        #[cfg(not(target_os = "android"))]
         let clean = match mode.trim().to_lowercase().as_str() {
             "python_worker" => "python_worker",
             _ => "native_rust",

@@ -1,6 +1,7 @@
 /* ============================================================================
-   VECTA DESIGN SYSTEM TOKENS (Authoritative Source: VECTA_DESIGN_SYSTEM.md)
-   Theme: Obsidian Navy x Cobalt Blue (Dark-First)
+   VECTA DUAL-THEME DESIGN TOKENS
+   - Dark  : Obsidian Studio Monochrome (#09090B / #121215 / #5E6AD2)
+   - Light : Swiss Alabaster & Jet Black (#F5F6F8 / #FFFFFF / #0D0E12)
    ============================================================================ */
 
 @font-face {
@@ -35,55 +36,80 @@
   src: url("../assets/fonts/satoshi-700.woff2") format("woff2");
 }
 
-:root {
+:root,
+:root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* BRAND */
-  --brand-primary: #4169E1;
-  --brand-hover: #6F8FFF;
-  --brand-active: #3154C5;
-  --brand-soft: #243B75;
+  /* Core Dual-Theme Tokens (Obsidian Studio Monochrome) */
+  --bg: #09090b;
+  --surface-1: #121215;
+  --surface-2: #18181b;
+  --surface-hover: #222226;
+  --border: #27272a;
+  --border-strong: #3f3f46;
 
-  /* BACKGROUNDS */
-  --bg-primary: #111827;
-  --bg-secondary: #172235;
-  --bg-elevated: #1A2333;
-  --bg-hover: #243249;
+  --text-1: #fafafa;
+  --text-2: #a1aaB8;
+  --text-3: #71717a;
 
-  /* BORDERS */
-  --border-default: #2C3A50;
-  --border-divider: #263449;
-  --border-input: #5D708E;
+  --brand: #5e6ad2;
+  --brand-hover: #6e7bf2;
+  --brand-active: #4c57bd;
+  --brand-fg: #ffffff;
+  --brand-soft: rgba(94, 106, 210, 0.16);
+  --brand-border: rgba(94, 106, 210, 0.38);
 
-  /* TEXT */
-  --text-primary: #E8EDF5;
-  --text-secondary: #98A6BA;
-  --text-muted: #68788F;
+  /* Multi-Filter Manual Pill Accent (Emerald Green - clearly distinct from "Semua") */
+  --filter-active-bg: #059669;
+  --filter-active-hover: #10b981;
+  --filter-active-fg: #ffffff;
+  --filter-active-tint: rgba(16, 185, 129, 0.16);
+  --filter-active-border: rgba(52, 211, 153, 0.48);
+
+  /* Liquid Glass Controls (Floating Dock, Sticky Search Bar, Overlays) */
+  --glass-bg: rgba(18, 18, 22, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --glass-specular: rgba(255, 255, 255, 0.16);
+  --glass-pill: rgba(94, 106, 210, 0.24);
+  --glass-pill-border: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+
+  --ambient-glow-1: rgba(94, 106, 210, 0.14);
+  --ambient-glow-2: rgba(52, 211, 153, 0.08);
+
+  /* Legacy Aliases (Preserves existing components cleanly) */
+  --brand-primary: var(--brand);
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface-1);
+  --bg-elevated: var(--surface-1);
+  --bg-hover: var(--surface-hover);
+  --border-default: var(--border);
+  --border-divider: rgba(63, 63, 70, 0.55);
+  --border-input: var(--border-strong);
+  --text-primary: var(--text-1);
+  --text-secondary: var(--text-2);
+  --text-muted: var(--text-3);
 
   /* SEMANTIC */
-  --status-success: #34C38F;
-  --status-warning: #F0B85A;
-  --status-error: #F07178;
-  --status-info: #55A6E8;
+  --status-success: #34d399;
+  --status-warning: #fbbf24;
+  --status-error: #f87171;
+  --status-info: #60a5fa;
+  --ai-accent: #a78bfa;
 
-  /* AI (strictly reserved for AI-specific interactions) */
-  --ai-accent: #9B8CFA;
-
-  /* DERIVED TRANSLUCENT TINTS */
-  --ai-soft: rgba(155, 140, 250, 0.12);
-  --ai-border: rgba(155, 140, 250, 0.28);
-  --success-soft: rgba(52, 195, 143, 0.12);
-  --warning-soft: rgba(240, 184, 90, 0.12);
-  --warning-border: rgba(240, 184, 90, 0.28);
-  --error-soft: rgba(240, 113, 120, 0.12);
-  --error-border: rgba(240, 113, 120, 0.30);
-  --info-soft: rgba(85, 166, 232, 0.12);
-  --brand-border: rgba(111, 143, 255, 0.32);
+  --ai-soft: rgba(167, 139, 250, 0.14);
+  --ai-border: rgba(167, 139, 250, 0.32);
+  --success-soft: rgba(52, 211, 153, 0.14);
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --warning-border: rgba(251, 191, 36, 0.30);
+  --error-soft: rgba(248, 113, 113, 0.14);
+  --error-border: rgba(248, 113, 113, 0.32);
+  --info-soft: rgba(96, 165, 250, 0.14);
 
   /* TYPOGRAPHY */
   --font-primary: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* SPACING (4px scale) */
+  /* SPACING */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -95,22 +121,94 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* RADIUS (6 / 10 / 15 / 20 / 9999) */
+  /* RADIUS */
   --radius-sm: 6px;
   --radius-control: 10px;
   --radius-card: 15px;
   --radius-dialog: 20px;
   --radius-full: 9999px;
 
-  /* MOTION TIMINGS (Section 10.1) */
-  --dur-press: 100ms;
-  --dur-hover: 150ms;
-  --dur-dropdown: 180ms;
-  --dur-dialog: 220ms;
-  --dur-page: 220ms;
+  /* MOTION */
+  --dur-press: 110ms;
+  --dur-hover: 160ms;
+  --dur-dropdown: 200ms;
+  --dur-dialog: 240ms;
+  --dur-page: 240ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-state: ease-in-out;
 
-  /* SELECTIVE OVERLAY SHADOW */
-  --shadow-overlay: 0 20px 48px rgba(4, 8, 18, 0.58);
+  --shadow-overlay: 0 20px 48px rgba(0, 0, 0, 0.58);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Swiss Alabaster & Jet Black */
+  --bg: #f5f6f8;
+  --surface-1: #ffffff;
+  --surface-2: #edeff3;
+  --surface-hover: #e4e7ee;
+  --border: #dfe3eb;
+  --border-strong: #c7cedb;
+
+  --text-1: #0d0e12;
+  --text-2: #4f5565;
+  --text-3: #7d8597;
+
+  --brand: #0d0e12;
+  --brand-hover: #242731;
+  --brand-active: #000000;
+  --brand-fg: #ffffff;
+  --brand-soft: rgba(13, 14, 18, 0.08);
+  --brand-border: rgba(13, 14, 18, 0.24);
+
+  /* Multi-Filter Manual Pill Accent (Emerald-Teal - contrasts crisply against Jet Black "Semua") */
+  --filter-active-bg: #0d9488;
+  --filter-active-hover: #0f766e;
+  --filter-active-fg: #ffffff;
+  --filter-active-tint: rgba(13, 148, 136, 0.13);
+  --filter-active-border: rgba(13, 148, 136, 0.38);
+
+  /* Liquid Glass Controls (Frosted Translucent Paper) */
+  --glass-bg: rgba(255, 255, 255, 0.76);
+  --glass-border: rgba(13, 14, 18, 0.09);
+  --glass-specular: rgba(255, 255, 255, 0.92);
+  --glass-pill: rgba(13, 14, 18, 0.08);
+  --glass-pill-border: rgba(13, 14, 18, 0.14);
+  --glass-shadow: 0 12px 32px rgba(13, 14, 18, 0.10);
+
+  --ambient-glow-1: rgba(13, 148, 136, 0.08);
+  --ambient-glow-2: rgba(94, 106, 210, 0.07);
+
+  /* Aliases */
+  --brand-primary: var(--brand);
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface-1);
+  --bg-elevated: var(--surface-1);
+  --bg-hover: var(--surface-hover);
+  --border-default: var(--border);
+  --border-divider: rgba(203, 209, 220, 0.65);
+  --border-input: var(--border-strong);
+  --text-primary: var(--text-1);
+  --text-secondary: var(--text-2);
+  --text-muted: var(--text-3);
+
+  /* SEMANTIC (high contrast on light alabaster) */
+  --status-success: #0d9488;
+  --status-warning: #d97706;
+  --status-error: #dc2626;
+  --status-info: #2563eb;
+  --ai-accent: #6d28d9;
+
+  --ai-soft: rgba(109, 40, 217, 0.10);
+  --ai-border: rgba(109, 40, 217, 0.28);
+  --success-soft: rgba(13, 148, 136, 0.12);
+  --warning-soft: rgba(217, 119, 6, 0.12);
+  --warning-border: rgba(217, 119, 6, 0.30);
+  --error-soft: rgba(220, 38, 38, 0.10);
+  --error-border: rgba(220, 38, 38, 0.28);
+  --info-soft: rgba(37, 99, 235, 0.10);
+
+  --shadow-overlay: 0 20px 44px rgba(13, 14, 18, 0.14);
 }

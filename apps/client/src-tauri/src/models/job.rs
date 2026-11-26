@@ -228,6 +228,20 @@ pub struct JobFilterInput {
     pub application_status: Option<ApplicationStatus>,
     #[serde(default)]
     pub include_dismissed: Option<bool>,
+    #[serde(default)]
+    pub work_modes: Option<Vec<WorkMode>>,
+    #[serde(default)]
+    pub sources: Option<Vec<JobSource>>,
+    #[serde(default)]
+    pub location_clusters: Option<Vec<String>>,
+    #[serde(default)]
+    pub opportunity_types: Option<Vec<String>>,
+    #[serde(default)]
+    pub application_statuses: Option<Vec<ApplicationStatus>>,
+    #[serde(default)]
+    pub salary_only: Option<bool>,
+    #[serde(default)]
+    pub sort_by: Option<String>,
     pub limit: Option<u32>,
     pub offset: Option<u32>,
 }
@@ -249,11 +263,15 @@ pub struct JobMatchSummary {
     pub normalized_role: String,
     pub company: String,
     pub location: Option<String>,
+    pub location_cluster: String,
     pub work_mode: WorkMode,
     pub experience_level: ExperienceLevel,
     pub enrichment_status: EnrichmentStatus,
     pub posted_at: Option<String>,
     pub salary_text: Option<String>,
+    pub salary_min_idr: Option<i64>,
+    pub salary_max_idr: Option<i64>,
+    pub opportunity_type: String,
     pub domain_slug: String,
     pub quality_score: f64,
     pub red_flags_count: u32,
@@ -281,11 +299,15 @@ pub struct JobMatchDetail {
     pub normalized_role: String,
     pub company: String,
     pub location: Option<String>,
+    pub location_cluster: String,
     pub work_mode: WorkMode,
     pub experience_level: ExperienceLevel,
     pub enrichment_status: EnrichmentStatus,
     pub posted_at: Option<String>,
     pub salary_text: Option<String>,
+    pub salary_min_idr: Option<i64>,
+    pub salary_max_idr: Option<i64>,
+    pub opportunity_type: String,
     pub domain_slug: String,
     pub quality_score: f64,
     pub red_flags: Vec<JobRedFlag>,
@@ -334,9 +356,20 @@ pub struct AiMatchRunReport {
     pub warnings: Vec<ScrapeWarningItem>,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+pub struct SavedWatchlistItem {
+    pub id: String,
+    pub user_id: String,
+    pub name: String,
+    pub filter: JobFilterInput,
+    pub created_at: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 pub struct SearchPreferences {
     pub location: String,
+    #[serde(default)]
+    pub locations: Vec<String>,
     pub sources: Vec<String>,
     pub limit_per_query: u32,
     pub max_pages: u32,
@@ -352,7 +385,13 @@ impl Default for SearchPreferences {
     fn default() -> Self {
         Self {
             location: "Indonesia".into(),
-            sources: vec!["jobstreet".into(), "linkedin".into(), "indeed".into()],
+            locations: vec!["Indonesia".into()],
+            sources: vec![
+                "jobstreet".into(),
+                "linkedin".into(),
+                "kalibrr".into(),
+                "dealls".into(),
+            ],
             limit_per_query: 25,
             max_pages: 2,
             posted_within_days: Some(14),
@@ -371,4 +410,21 @@ pub struct ScrapeProgressEvent {
     pub message: String,
     pub current: u32,
     pub total: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct InterviewQuestionItem {
+    pub category: String,
+    pub question: String,
+    pub star_hint: String,
+    pub focus_skill: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct InterviewPrepKit {
+    pub job_id: String,
+    pub language: String,
+    pub pitch_30s: String,
+    pub questions: Vec<InterviewQuestionItem>,
+    pub closing_questions: Vec<String>,
 }

@@ -16,6 +16,17 @@ export type IconName =
   | "check"
   | "back"
   | "sliders"
+  | "search"
+  | "sun"
+  | "moon"
+  | "mapPin"
+  | "sparkle"
+  | "download"
+  | "upload"
+  | "trash"
+  | "chevronDown"
+  | "chevronRight"
+  | "cv"
   | "aiNode";
 
 withDefaults(
@@ -291,6 +302,174 @@ withDefaults(
     <path d="M4 7h16M4 17h16" />
     <circle cx="9" cy="7" r="2.2" fill="var(--bg-elevated)" />
     <circle cx="15" cy="17" r="2.2" fill="var(--bg-elevated)" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'search'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'sun'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'moon'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'mapPin'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.85"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 21s-6-5.3-6-10.5A6 6 0 1 1 18 10.5C18 15.7 12 21 12 21z" />
+    <circle cx="12" cy="10.5" r="2.2" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'sparkle'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.85"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'download'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.85"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 3v12M7 10l5 5 5-5M4 19h16" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'upload'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.85"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 15V3M7 8l5-5 5 5M4 19h16" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'trash'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'cv'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+    <path d="M14 3v5h5M9.5 13h5M9.5 16.5h3.5" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'chevronDown'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'chevronRight'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M9 18l6-6-6-6" />
   </svg>
 
   <svg

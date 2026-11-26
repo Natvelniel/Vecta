@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import type { SkillCategory } from "@/lib/bindings";
+import type { SkillCategory, SkillImpactItem } from "@/lib/bindings";
 import { useCompetencyStore } from "@/stores/competency";
 import { useJobsStore } from "@/stores/jobs";
 import { useProfileStore } from "@/stores/profile";
@@ -10,6 +10,7 @@ import { useToast } from "@/composables/useToast";
 import { formatProficiency, formatScore, formatSkillCategory } from "@/lib/format";
 import { ipc, IpcError } from "@/lib/ipc";
 import PageHeader from "@/components/layout/PageHeader.vue";
+import SalaryBenchmarkCard from "@/components/domain/SalaryBenchmarkCard.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VCard from "@/components/ui/VCard.vue";
 import VIcon from "@/components/ui/VIcon.vue";
@@ -30,6 +31,48 @@ const CLUSTERS: Array<{ id: SkillCategory | "all"; label: string }> = [
   { id: "soft_skill", label: "Komunikasi" },
   { id: "domain", label: "Domain" },
 ];
+
+const simSkillIds = ref<number[]>([]);
+const simResults = ref<SkillImpactItem[]>([]);
+const simLoading = ref(false);
+
+async function runImpactSimulation() {
+  const uid = profileStore.userId;
+  const role = competencyStore.selectedRole ?? "";
+  if (!uid || simSkillIds.value.length === 0) {
+    simResults.value = [];
+    return;
+  }
+  simLoading.value = true;
+  try {
+    simResults.value = await ipc.simulateSkillImpact(uid, role, simSkillIds.value);
+  } catch {
+    simResults.value = [];
+  } finally {
+    simLoading.value = false;
+  }
+}
+
+function toggleSimulateSkill(skillId: number) {
+  if (simSkillIds.value.includes(skillId)) {
+    simSkillIds.value = simSkillIds.value.filter((id) => id !== skillId);
+  } else {
+    if (simSkillIds.value.length >= 3) {
+      toast.show("Maksimal 3 skill untuk simulasi What-If sekaligus.", { tone: "info" });
+      return;
+    }
+    simSkillIds.value = [...simSkillIds.value, skillId];
+  }
+  void runImpactSimulation();
+}
+
+watch(
+  () => competencyStore.selectedRole,
+  () => {
+    simSkillIds.value = [];
+    simResults.value = [];
+  },
+);
 
 onMounted(async () => {
   if (!profileStore.activeProfile) {
@@ -143,6 +186,8 @@ async function handleGenerateRoadmap() {
       </VCard>
 
       <template v-else-if="competencyStore.mapData">
+        <SalaryBenchmarkCard :role-filter="competencyStore.selectedRole" />
+
         <div v-if="competencyStore.mapData.is_small_sample" class="v-sample-note" role="status">
           <span class="t-secondary" style="color: var(--status-info)">
             Sampel masih kecil ({{ competencyStore.mapData.total_jobs }} lowongan). Tambah lebih
@@ -165,6 +210,43 @@ async function handleGenerateRoadmap() {
           </div>
           <div style="padding-bottom: 8px">
             <VSwitch v-model="competencyStore.gapOnly" label="Hanya Gap" />
+          </div>
+        </div>
+
+        <!-- What-If Skill Impact Simulator Summary Bar -->
+        <div v-if="simSkillIds.length > 0" class="v-sim-bar liquid-glass" role="status">
+          <div class="v-sim-bar__info">
+            <div class="v-sim-head">
+              <VIcon name="sparkle" :size="15" />
+              <strong>Simulasi Dampak What-If (0 Token)</strong>
+              <span v-if="simLoading" class="t-meta">Menghitung...</span>
+            </div>
+            <div v-if="!simLoading && simResults.length > 0" class="v-sim-metrics">
+              <span v-for="item in simResults" :key="item.skill_id" class="v-sim-chip t-num">
+                <strong>{{ item.canonical_name }}:</strong>
+                +{{ item.avg_score_delta }}% skor · {{ item.affected_jobs_count }} lowongan
+                <span v-if="item.jobs_crossing_75_count > 0">
+                  ({{ item.jobs_crossing_75_count }} tembus >= 75%)
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="v-sim-bar__actions">
+            <VButton
+              variant="tertiary"
+              size="compact"
+              @click="simSkillIds = []; simResults = []"
+            >
+              Reset
+            </VButton>
+            <VButton
+              variant="primary"
+              size="compact"
+              :loading="roadmapStore.generating"
+              @click="handleGenerateRoadmap"
+            >
+              Buat Roadmap
+            </VButton>
           </div>
         </div>
 
@@ -238,7 +320,7 @@ async function handleGenerateRoadmap() {
               </span>
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: flex-end">
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap">
               <span
                 v-if="row.is_owned_by_user"
                 style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--status-success)"
@@ -246,16 +328,25 @@ async function handleGenerateRoadmap() {
                 <VIcon name="check" :size="13" />
                 <span>{{ formatProficiency(row.user_proficiency ?? "beginner") }}</span>
               </span>
-              <VButton
-                v-else
-                variant="secondary"
-                size="compact"
-                :title="`Tambahkan ${row.canonical_name} ke profil (0 token)`"
-                @click="handleQuickAdd(row.skill_id, row.canonical_name)"
-              >
-                <VIcon name="plus" :size="13" />
-                <span>Tambah</span>
-              </VButton>
+              <template v-else>
+                <button
+                  type="button"
+                  class="v-sim-pill"
+                  :class="{ 'v-sim-pill--active': simSkillIds.includes(row.skill_id) }"
+                  @click="toggleSimulateSkill(row.skill_id)"
+                >
+                  {{ simSkillIds.includes(row.skill_id) ? "Disimulasikan" : "Simulasi" }}
+                </button>
+                <VButton
+                  variant="secondary"
+                  size="compact"
+                  :title="`Tambahkan ${row.canonical_name} ke profil (0 token)`"
+                  @click="handleQuickAdd(row.skill_id, row.canonical_name)"
+                >
+                  <VIcon name="plus" :size="13" />
+                  <span>Tambah</span>
+                </VButton>
+              </template>
             </div>
           </div>
         </div>
@@ -375,6 +466,63 @@ async function handleGenerateRoadmap() {
   padding: var(--space-12) var(--space-4);
   text-align: center;
   border-bottom: 1px solid var(--border-divider);
+}
+.v-sim-pill {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.v-sim-pill--active {
+  background: var(--filter-active-bg);
+  border-color: var(--filter-active-border);
+  color: var(--filter-active-fg);
+}
+.v-sim-bar {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.v-sim-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.v-sim-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--text-1);
+}
+.v-sim-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.v-sim-chip {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-control);
+  background: var(--success-soft);
+  color: var(--status-success);
+}
+.v-sim-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 @media (max-width: 1023px) {
   .v-page-container {

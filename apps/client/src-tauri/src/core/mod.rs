@@ -1,12 +1,16 @@
+pub mod analytics;
 pub mod config;
 pub mod cv_export;
 pub mod cv_import;
 pub mod db;
 pub mod gemini;
+pub mod interview_prep;
 pub mod keychain;
 pub mod local_embedder;
 pub mod local_matcher;
 pub mod matching;
 pub mod native_scraper;
+pub mod opportunity;
 pub mod rate_limiter;
+pub mod roadmap_local;
 pub mod worker;

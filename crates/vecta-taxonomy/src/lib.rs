@@ -8,7 +8,8 @@ use std::sync::OnceLock;
 use aho_corasick::{AhoCorasick, AhoCorasickBuilder, MatchKind};
 
 pub use models::{
-    DocumentSections, ExtractedSkill, ExtractionResult, RequirementLevel, TaxonomySkill,
+    DocumentSections, ExtractedSkill, ExtractionResult, ProdiRoleCatalogEntry, RequirementLevel,
+    TaxonomySkill,
 };
 pub use role_normalizer::normalize_role_universal;
 pub use segmenter::segment_job_description;
@@ -28,7 +29,19 @@ const DOMAIN_PACKS: &[&str] = &[
     include_str!("../../../shared/taxonomy/12_pariwisata_perhotelan_fnb.json"),
     include_str!("../../../shared/taxonomy/13_sains_lab_geologi_energi.json"),
     include_str!("../../../shared/taxonomy/14_soft_skills_bahasa_umum.json"),
+    include_str!("../../../shared/taxonomy/15_perbankan_aktuaria_asuransi.json"),
+    include_str!("../../../shared/taxonomy/16_supply_chain_logistik_exim.json"),
+    include_str!("../../../shared/taxonomy/17_administrasi_publik_hi_sosial.json"),
+    include_str!("../../../shared/taxonomy/18_bahasa_sastra_penerjemahan.json"),
+    include_str!("../../../shared/taxonomy/19_teknik_elektro_otomasi_telko.json"),
+    include_str!("../../../shared/taxonomy/20_pertambangan_migas_energi.json"),
+    include_str!("../../../shared/taxonomy/21_kedokteran_keperawatan_gizi_kesmas.json"),
+    include_str!("../../../shared/taxonomy/22_dkv_produk_ux_kreatif.json"),
+    include_str!("../../../shared/taxonomy/23_teknik_industri_k3_mutu.json"),
 ];
+
+const ROLES_CATALOG_JSON: &str =
+    include_str!("../../../shared/taxonomy/roles_catalog.json");
 
 #[derive(Debug, Clone)]
 struct PatternRef {
@@ -40,6 +53,7 @@ struct PatternRef {
 
 pub struct TaxonomyEngine {
     skills: Vec<TaxonomySkill>,
+    roles_catalog: Vec<ProdiRoleCatalogEntry>,
     id_to_idx: HashMap<String, usize>,
     canonical_lower_to_idx: HashMap<String, usize>,
     automaton: AhoCorasick,
@@ -151,8 +165,13 @@ impl TaxonomyEngine {
             .build(&raw_patterns)
             .expect("failed to build taxonomy Aho-Corasick automaton");
 
+        let roles_catalog: Vec<ProdiRoleCatalogEntry> =
+            serde_json::from_str(ROLES_CATALOG_JSON)
+                .expect("embedded roles catalog must be valid JSON");
+
         Self {
             skills,
+            roles_catalog,
             id_to_idx,
             canonical_lower_to_idx,
             automaton,
@@ -162,6 +181,10 @@ impl TaxonomyEngine {
 
     pub fn all_skills(&self) -> &[TaxonomySkill] {
         &self.skills
+    }
+
+    pub fn roles_catalog(&self) -> &[ProdiRoleCatalogEntry] {
+        &self.roles_catalog
     }
 
     pub fn parent_canonical_name(&self, skill_canonical_name: &str) -> Option<&str> {

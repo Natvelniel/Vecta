@@ -1,12 +1,616 @@
 [
-  {"id":"civ.autocad","canonical_name":"AutoCAD","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["AutoCAD 2D","AutoCAD 3D","Civil 3D","Drafting CAD"]},
-  {"id":"civ.revit","canonical_name":"Revit & BIM","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["Revit","Autodesk Revit","BIM","Building Information Modeling","Navisworks"]},
-  {"id":"civ.etabs","canonical_name":"ETABS","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","parent_id":"civ.analisis_struktur","aliases":[]},
-  {"id":"civ.sap2000","canonical_name":"SAP2000","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","parent_id":"civ.analisis_struktur","aliases":["Tekla","Tekla Structures","STAAD.Pro","Plaxis"]},
-  {"id":"civ.analisis_struktur","canonical_name":"Analisis Struktur Sipil","domain":"teknik_sipil_arsitektur_gis","category":"core_hard","aliases":["Structural Analysis","Structural Engineering","Perencanaan Struktur","Beton Bertulang","Struktur Baja","Geoteknik"]},
-  {"id":"civ.sketchup","canonical_name":"SketchUp & Rendering 3D","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["SketchUp","V-Ray","Lumion","Enscape","3ds Max","ArchiCAD"]},
-  {"id":"civ.rab","canonical_name":"RAB & Quantity Surveying","domain":"teknik_sipil_arsitektur_gis","category":"core_hard","aliases":["RAB","Rencana Anggaran Biaya","BoQ","Bill of Quantity","Quantity Surveyor","Estimasi Biaya Konstruksi","AHSP","Tender Konstruksi"]},
-  {"id":"civ.manajemen_konstruksi","canonical_name":"Manajemen Konstruksi","domain":"teknik_sipil_arsitektur_gis","category":"domain","aliases":["Construction Management","Site Engineering","Pengawasan Proyek","Shop Drawing","As-Built Drawing","Kurva S","MS Project","Primavera P6"]},
-  {"id":"civ.gis","canonical_name":"GIS & Pemetaan","domain":"teknik_sipil_arsitektur_gis","category":"tools_tech","aliases":["ArcGIS","QGIS","Sistem Informasi Geografis","Remote Sensing","Penginderaan Jauh","Total Station","Theodolite","Surveyor Pemetaan","Topografi"]},
-  {"id":"civ.arsitektur","canonical_name":"Perancangan Arsitektur & Interior","domain":"teknik_sipil_arsitektur_gis","category":"core_hard","aliases":["Desain Arsitektur","Desain Interior","Interior Design","Gambar Kerja","DED","Detail Engineering Design","Urban Planning","PWK"]}
+  {
+    "id": "civ.autocad",
+    "canonical_name": "AutoCAD",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "AutoCAD 2D",
+      "AutoCAD 3D",
+      "Civil 3D",
+      "Drafting CAD"
+    ]
+  },
+  {
+    "id": "civ.revit",
+    "canonical_name": "Revit & BIM",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "Revit",
+      "Autodesk Revit",
+      "BIM",
+      "Building Information Modeling",
+      "Navisworks"
+    ]
+  },
+  {
+    "id": "civ.etabs",
+    "canonical_name": "ETABS",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "parent_id": "civ.analisis_struktur",
+    "aliases": []
+  },
+  {
+    "id": "civ.sap2000",
+    "canonical_name": "SAP2000",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "parent_id": "civ.analisis_struktur",
+    "aliases": [
+      "Tekla",
+      "Tekla Structures",
+      "STAAD.Pro",
+      "Plaxis"
+    ]
+  },
+  {
+    "id": "civ.analisis_struktur",
+    "canonical_name": "Analisis Struktur Sipil",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Structural Analysis",
+      "Structural Engineering",
+      "Perencanaan Struktur",
+      "Beton Bertulang",
+      "Struktur Baja",
+      "Geoteknik"
+    ]
+  },
+  {
+    "id": "civ.sketchup",
+    "canonical_name": "SketchUp & Rendering 3D",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "SketchUp",
+      "V-Ray",
+      "Lumion",
+      "Enscape",
+      "3ds Max",
+      "ArchiCAD"
+    ]
+  },
+  {
+    "id": "civ.rab",
+    "canonical_name": "RAB & Quantity Surveying",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "RAB",
+      "Rencana Anggaran Biaya",
+      "BoQ",
+      "Bill of Quantity",
+      "Quantity Surveyor",
+      "Estimasi Biaya Konstruksi",
+      "AHSP",
+      "Tender Konstruksi"
+    ]
+  },
+  {
+    "id": "civ.manajemen_konstruksi",
+    "canonical_name": "Manajemen Konstruksi",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Construction Management",
+      "Site Engineering",
+      "Pengawasan Proyek",
+      "Shop Drawing",
+      "As-Built Drawing",
+      "Kurva S",
+      "MS Project",
+      "Primavera P6"
+    ]
+  },
+  {
+    "id": "civ.gis",
+    "canonical_name": "GIS & Pemetaan",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "ArcGIS",
+      "QGIS",
+      "Sistem Informasi Geografis",
+      "Remote Sensing",
+      "Penginderaan Jauh",
+      "Total Station",
+      "Theodolite",
+      "Surveyor Pemetaan",
+      "Topografi"
+    ]
+  },
+  {
+    "id": "civ.arsitektur",
+    "canonical_name": "Perancangan Arsitektur & Interior",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Desain Arsitektur",
+      "Desain Interior",
+      "Interior Design",
+      "Gambar Kerja",
+      "DED",
+      "Detail Engineering Design",
+      "Urban Planning",
+      "PWK"
+    ]
+  },
+  {
+    "id": "civ.civil3d",
+    "canonical_name": "Autodesk Civil 3D",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "parent_id": "civ.autocad",
+    "aliases": [
+      "Civil 3D",
+      "Desain Jalan & Jembatan",
+      "Drainase & Hidrologi"
+    ]
+  },
+  {
+    "id": "civ.ms_project",
+    "canonical_name": "Primavera P6 & MS Project",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "parent_id": "civ.manajemen_konstruksi",
+    "aliases": [
+      "Primavera P6",
+      "Microsoft Project",
+      "Kurva S",
+      "Time Schedule Proyek"
+    ]
+  },
+  {
+    "id": "civ.geoteknik",
+    "canonical_name": "Geoteknik & Mekanika Tanah",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Plaxis",
+      "Sondir & Boring",
+      "Uji Tanah",
+      "Pondasi Tiang Pancang"
+    ]
+  },
+  {
+    "id": "civ.hidrologi",
+    "canonical_name": "Teknik Pengairan & Hidrologi",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "HEC-RAS",
+      "EPANET",
+      "SWMM",
+      "Sistem Drainase Perkotaan"
+    ]
+  },
+  {
+    "id": "civ.total_station",
+    "canonical_name": "Survey Pemetaan (Total Station / Theodolite / Drone)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "parent_id": "civ.gis",
+    "aliases": [
+      "Total Station",
+      "Theodolite",
+      "GPS Geodetik",
+      "RTK GNSS",
+      "Drone Photogrammetry"
+    ]
+  },
+  {
+    "id": "civ.interior",
+    "canonical_name": "Desain Interior & FF&E",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "parent_id": "civ.arsitektur",
+    "aliases": [
+      "Interior Design",
+      "Gambar Kerja Detail (DED)",
+      "Shop Drawing",
+      "As-Built Drawing"
+    ]
+  },
+  {
+    "id": "civ.tender_lpse",
+    "canonical_name": "Tender Konstruksi & LPSE / E-Katalog",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "parent_id": "civ.rab",
+    "aliases": [
+      "Dokumen Tender",
+      "RKS",
+      "Pengadaan Konstruksi",
+      "SKA / SKK Konstruksi"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "civ.mep_coord",
+    "canonical_name": "Koordinasi MEP Bangunan Gedung",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "parent_id": "civ.revit",
+    "aliases": [
+      "MEP Coordination",
+      "Navisworks Clash Detection",
+      "Plumbing & Fire Protection"
+    ]
+  },
+  {
+    "id": "civ.qc_beton",
+    "canonical_name": "Uji Mutu Beton & Material Konstruksi",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "parent_id": "civ.manajemen_konstruksi",
+    "aliases": [
+      "Slump Test",
+      "Uji Kuat Tekan Beton",
+      "QC Sipil",
+      "SNI Beton"
+    ]
+  },
+  {
+    "id": "civ.tata_kota",
+    "canonical_name": "Perencanaan Wilayah & Kota (PWK / Urban Planning)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "parent_id": "civ.gis",
+    "aliases": [
+      "RDTR",
+      "RTRW",
+      "GIS Tata Ruang",
+      "Urban Design"
+    ]
+  },
+  {
+    "id": "civ.qs_costx",
+    "canonical_name": "CostX / Cubicost Take-off Software",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "parent_id": "civ.rab",
+    "aliases": [
+      "Glodon Cubicost",
+      "CostX",
+      "Quantity Take Off"
+    ]
+  },
+  {
+    "id": "civ.steel_struct",
+    "canonical_name": "Desain Struktur Baja (SNI 1729)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "parent_id": "civ.etabs",
+    "aliases": [
+      "Steel Structure",
+      "SNI 1729",
+      "SNI Gempa 1726"
+    ]
+  },
+  {
+    "id": "civ.infra_air",
+    "canonical_name": "Infrastruktur Jalan, Jembatan & Sumber Daya Air",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Highway Engineering",
+      "Bridge Design",
+      "Bendungan & Irigasi"
+    ]
+  },
+  {
+    "id": "civ.archicad_lumion",
+    "canonical_name": "ArchiCAD & Twinmotion Architectural Viz",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "ArchiCAD",
+      "Twinmotion",
+      "D5 Render",
+      "Unreal ArchViz"
+    ],
+    "parent_id": "civ.sketchup"
+  },
+  {
+    "id": "civ.dynamo_bim",
+    "canonical_name": "BIM 4D/5D & Dynamo Automation",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "BIM Coordinator",
+      "LOD 300-500",
+      "Dynamo Revit",
+      "CDE ACC BIM 360"
+    ],
+    "parent_id": "civ.revit"
+  },
+  {
+    "id": "civ.qs_fidic",
+    "canonical_name": "Contract Administration (FIDIC / SSUK)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Progress Claim",
+      "Variation Order",
+      "Addendum Kontrak",
+      "Final Account"
+    ],
+    "parent_id": "civ.rab"
+  },
+  {
+    "id": "civ.ahsp_pupr",
+    "canonical_name": "Penyusunan AHSP & Harga Satuan Pekerjaan (PUPR)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "AHSP PUPR",
+      "Analisa Harga Satuan",
+      "Bill of Quantity"
+    ],
+    "parent_id": "civ.rab"
+  },
+  {
+    "id": "civ.precast_post",
+    "canonical_name": "Struktur Pracetak & Prategang (Precast/Prestressed)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Post-Tensioning",
+      "Girder Jembatan",
+      "Precast Concrete"
+    ],
+    "parent_id": "civ.etabs"
+  },
+  {
+    "id": "civ.marine_port",
+    "canonical_name": "Teknik Pantai & Pelabuhan (Coastal/Marine)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Revetment",
+      "Dredging",
+      "Jetty Construction"
+    ]
+  },
+  {
+    "id": "civ.highrise_fitout",
+    "canonical_name": "Fit-Out Interior Komersial & Retail",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Mall Fit-Out",
+      "Office Fit-Out",
+      "Custom Furniture Joinery"
+    ],
+    "parent_id": "civ.interior"
+  },
+  {
+    "id": "civ.lidar_uav",
+    "canonical_name": "LiDAR Processing & Orthophoto Drone",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "Agisoft Metashape",
+      "Pix4D",
+      "Global Mapper",
+      "Kontur Topografi"
+    ],
+    "parent_id": "civ.total_station"
+  },
+  {
+    "id": "civ.green_bldg",
+    "canonical_name": "Sertifikasi Bangunan Hijau (Greenship / EDGE)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Greenship Associate",
+      "GBCI",
+      "LEED GA"
+    ],
+    "parent_id": "civ.arsitektur"
+  },
+  {
+    "id": "civ.hse_konstruksi",
+    "canonical_name": "K3 Konstruksi (Ahli K3 Konstruksi / Petugas K3)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "SMKK PUPR",
+      "RKK Konstruksi",
+      "Scaffolding Inspection"
+    ],
+    "parent_id": "civ.manajemen_konstruksi"
+  },
+  {
+    "id": "civ.qs_mep",
+    "canonical_name": "Quantity Surveying Khusus MEP (Mekanikal Elektrikal Plumbing)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "RAB MEP",
+      "BoQ Elektrikal",
+      "Plumbing & HVAC BoQ"
+    ],
+    "parent_id": "civ.rab"
+  },
+  {
+    "id": "civ.road_pavement",
+    "canonical_name": "Perkerasan Jalan Aspal & Rigid Pavement",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Marshall Test",
+      "CBR Tanah",
+      "Asphalt Mixing Plant",
+      "Rigid Pavement"
+    ],
+    "parent_id": "civ.infra_air"
+  },
+  {
+    "id": "civ.steel_detail",
+    "canonical_name": "Shop Drawing Struktur Baja & Koneksi Baut",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Steel Detailing",
+      "Fabrication Drawing",
+      "Anchor Bolt Detail"
+    ],
+    "parent_id": "civ.steel_struct"
+  },
+  {
+    "id": "civ.arsitektur_lanskap",
+    "canonical_name": "Arsitektur Lanskap & Tata Hijau Kawasan",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Landscape Architecture",
+      "Hardscape & Softscape",
+      "Masterplan Kawasan"
+    ],
+    "parent_id": "civ.arsitektur"
+  },
+  {
+    "id": "civ.land_acquisition",
+    "canonical_name": "Pembebasan Lahan & Tata Guna Lahan",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "domain",
+    "aliases": [
+      "Land Acquisition",
+      "Analisis Zona RTRW",
+      "Sertifikasi Proyek"
+    ],
+    "parent_id": "civ.tata_kota"
+  },
+  {
+    "id": "civ.water_treatment_sipil",
+    "canonical_name": "Desain Bangunan Pengolahan Air (IPA / WWTP Sipil)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Reservoir Beton",
+      "Bak Sedimentasi",
+      "Jaringan Pipa Distribusi"
+    ],
+    "parent_id": "civ.hidrologi"
+  },
+  {
+    "id": "civ.geotech_retaining",
+    "canonical_name": "Desain Dinding Penahan Tanah & Galian Dalam (Soldier Pile)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Secant Pile",
+      "Diaphragm Wall",
+      "Ground Anchor"
+    ],
+    "parent_id": "civ.geoteknik"
+  },
+  {
+    "id": "civ.green_facade",
+    "canonical_name": "Analisis Pencahayaan & Termal Bangunan (Ecotect / IESVE)",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tools_tech",
+    "aliases": [
+      "Daylight Simulation",
+      "OTTV OTTV",
+      "Pasif Cooling Arsitektur"
+    ],
+    "parent_id": "civ.green_bldg"
+  },
+  {
+    "id": "civ.qs_post_contract",
+    "canonical_name": "Audit Termin Subkontraktor & Backcharge",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "core_hard",
+    "aliases": [
+      "Opname Pekerjaan Mandor",
+      "BAPP Proyek",
+      "Final Measurement"
+    ],
+    "parent_id": "civ.qs_fidic"
+  },
+  {
+    "id": "civ.tekla",
+    "canonical_name": "Tekla Structures & Steel Detailing",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tool",
+    "aliases": [
+      "tekla",
+      "tekla structures",
+      "shop drawing baja",
+      "rebar detailing"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced",
+    "parent_id": "civ.steel_struct"
+  },
+  {
+    "id": "civ.plaxis",
+    "canonical_name": "PLAXIS & Geotech Modeling",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tool",
+    "aliases": [
+      "plaxis",
+      "slope/w",
+      "geostudio",
+      "spt",
+      "sondir",
+      "daya dukung tanah"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced",
+    "parent_id": "civ.geoteknik"
+  },
+  {
+    "id": "civ.hec_ras",
+    "canonical_name": "HEC-RAS, EPA SWMM & Drainase",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tool",
+    "aliases": [
+      "hec-ras",
+      "hec-hms",
+      "epanet",
+      "swmm",
+      "hidrologi banjir"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "civ.hidrologi"
+  },
+  {
+    "id": "civ.drone_photogram",
+    "canonical_name": "Drone Mapping & LiDAR Photogrammetry",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "tool",
+    "aliases": [
+      "drone mapping",
+      "pix4d",
+      "agisoft metashape",
+      "lidar",
+      "uav survey"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "civ.gis"
+  },
+  {
+    "id": "civ.green_building",
+    "canonical_name": "Greenship GBCI & EDGE Building",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "category": "compliance",
+    "aliases": [
+      "greenship",
+      "gbci",
+      "edge certification",
+      "leed",
+      "bangunan hijau"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "civ.arsitektur"
+  }
 ]

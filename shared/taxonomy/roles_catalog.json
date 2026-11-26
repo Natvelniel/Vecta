@@ -1,0 +1,4719 @@
+[
+  {
+    "id": "role_001",
+    "prodi_label": "S1 Teknik Informatika / Ilmu Komputer",
+    "domain": "informatika_data",
+    "role_title": "Backend Developer",
+    "mandatory_skills": [
+      "PHP",
+      "Laravel",
+      "REST API",
+      "MySQL",
+      "Git"
+    ],
+    "preferred_skills": [
+      "Docker",
+      "Redis",
+      "CI/CD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Backend Developer",
+      "API Engineer"
+    ]
+  },
+  {
+    "id": "role_002",
+    "prodi_label": "S1 Teknik Informatika / Ilmu Komputer",
+    "domain": "informatika_data",
+    "role_title": "Frontend Developer",
+    "mandatory_skills": [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Vue.js",
+      "HTML",
+      "CSS"
+    ],
+    "preferred_skills": [
+      "Tailwind CSS",
+      "Next.js"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Frontend Developer",
+      "Web Developer"
+    ]
+  },
+  {
+    "id": "role_003",
+    "prodi_label": "S1 Sistem Informasi",
+    "domain": "informatika_data",
+    "role_title": "Full Stack Developer",
+    "mandatory_skills": [
+      "JavaScript",
+      "PHP",
+      "Laravel",
+      "SQL",
+      "REST API"
+    ],
+    "preferred_skills": [
+      "Docker",
+      "React",
+      "PostgreSQL"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Full Stack Developer",
+      "Web Developer"
+    ]
+  },
+  {
+    "id": "role_004",
+    "prodi_label": "S1 Sains Data / Statistika / Matematika",
+    "domain": "informatika_data",
+    "role_title": "Data Analyst",
+    "mandatory_skills": [
+      "SQL",
+      "Python",
+      "Microsoft Excel",
+      "Data Analysis",
+      "Power BI"
+    ],
+    "preferred_skills": [
+      "Tableau",
+      "Power Query & DAX"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Data Analyst",
+      "Business Intelligence Analyst"
+    ]
+  },
+  {
+    "id": "role_005",
+    "prodi_label": "S1 Teknik Informatika / AI",
+    "domain": "informatika_data",
+    "role_title": "Data & AI Engineer",
+    "mandatory_skills": [
+      "Python",
+      "Machine Learning",
+      "Pandas",
+      "SQL",
+      "LLM Engineering & RAG"
+    ],
+    "preferred_skills": [
+      "Docker",
+      "MLOps",
+      "Apache Airflow"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "AI Engineer",
+      "Data Scientist"
+    ]
+  },
+  {
+    "id": "role_006",
+    "prodi_label": "S1 Teknik Informatika / Sistem Komputer",
+    "domain": "informatika_data",
+    "role_title": "DevOps & Cloud Engineer",
+    "mandatory_skills": [
+      "Linux",
+      "Docker",
+      "Kubernetes",
+      "CI/CD",
+      "AWS"
+    ],
+    "preferred_skills": [
+      "Terraform",
+      "Prometheus & Grafana"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "DevOps Engineer",
+      "Cloud Engineer"
+    ]
+  },
+  {
+    "id": "role_007",
+    "prodi_label": "S1 Teknik Informatika / RPL",
+    "domain": "informatika_data",
+    "role_title": "Mobile Developer",
+    "mandatory_skills": [
+      "Flutter",
+      "Kotlin",
+      "REST API",
+      "Git"
+    ],
+    "preferred_skills": [
+      "Swift",
+      "React Native"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Mobile Developer",
+      "Android Developer"
+    ]
+  },
+  {
+    "id": "role_008",
+    "prodi_label": "S1 Keamanan Siber / Teknik Komputer",
+    "domain": "informatika_data",
+    "role_title": "Cybersecurity Engineer",
+    "mandatory_skills": [
+      "OWASP & AppSec",
+      "SOC Operations & Incident Response",
+      "Linux",
+      "MikroTik & Cisco Networking"
+    ],
+    "preferred_skills": [
+      "CEH / CompTIA Security+"
+    ],
+    "certifications": [
+      "CEH / CompTIA Security+"
+    ],
+    "scrape_queries": [
+      "SOC Analyst",
+      "Cyber Security"
+    ]
+  },
+  {
+    "id": "role_009",
+    "prodi_label": "D3/S1 Manajemen Informatika / Sistem Informasi",
+    "domain": "informatika_data",
+    "role_title": "IT Support & Network",
+    "mandatory_skills": [
+      "IT Helpdesk & Ticketing",
+      "MikroTik & Cisco Networking",
+      "Linux"
+    ],
+    "preferred_skills": [
+      "SQL"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "IT Support",
+      "Network Administrator"
+    ]
+  },
+  {
+    "id": "role_010",
+    "prodi_label": "S1 Sistem Informasi / Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Software QA Engineer",
+    "mandatory_skills": [
+      "Software QA Testing",
+      "SQL",
+      "REST API"
+    ],
+    "preferred_skills": [
+      "Playwright",
+      "Mobile Test Automation"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "QA Engineer",
+      "Quality Assurance Tester"
+    ]
+  },
+  {
+    "id": "role_011",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Tax & Accounting Staff",
+    "mandatory_skills": [
+      "Akuntansi",
+      "Perpajakan",
+      "Brevet Pajak A & B",
+      "e-Faktur & e-Bupot",
+      "Accurate Accounting"
+    ],
+    "preferred_skills": [
+      "Coretax DJP",
+      "PSAK / IFRS"
+    ],
+    "certifications": [
+      "Brevet Pajak A & B"
+    ],
+    "scrape_queries": [
+      "Tax Staff",
+      "Accounting Staff"
+    ]
+  },
+  {
+    "id": "role_012",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Finance & Accounting Officer",
+    "mandatory_skills": [
+      "Laporan Keuangan",
+      "Accounts Payable & Receivable",
+      "PSAK / IFRS",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "SAP FICO"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Accounting Officer",
+      "Finance Accounting"
+    ]
+  },
+  {
+    "id": "role_013",
+    "prodi_label": "S1 Akuntansi / Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Internal Auditor",
+    "mandatory_skills": [
+      "Audit Keuangan & Internal",
+      "Pengendalian Internal (COSO / SOX)",
+      "Kertas Kerja Audit (ATLAS)",
+      "Laporan Keuangan"
+    ],
+    "preferred_skills": [
+      "Audit Forensik & Investigasi"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Internal Auditor",
+      "External Auditor"
+    ]
+  },
+  {
+    "id": "role_014",
+    "prodi_label": "S1 Akuntansi / Manajemen Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "FP&A & Budget Analyst",
+    "mandatory_skills": [
+      "Budgeting & Forecasting",
+      "FP&A & Financial Modeling",
+      "Analisis Keuangan",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "Power BI"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Financial Analyst",
+      "FP&A Analyst"
+    ]
+  },
+  {
+    "id": "role_015",
+    "prodi_label": "S1 Perpajakan / D3 Akuntansi Perpajakan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Tax Consultant",
+    "mandatory_skills": [
+      "Perpajakan",
+      "Brevet Pajak A & B",
+      "Penyusunan SPT Badan & PPh 29",
+      "Transfer Pricing & Tax Planning",
+      "Coretax DJP"
+    ],
+    "preferred_skills": [
+      "Rekonsiliasi Fiskal"
+    ],
+    "certifications": [
+      "Brevet Pajak A & B"
+    ],
+    "scrape_queries": [
+      "Tax Consultant",
+      "Tax Specialist"
+    ]
+  },
+  {
+    "id": "role_016",
+    "prodi_label": "S1 Ekonomi / Keuangan & Perbankan",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Credit Analyst",
+    "mandatory_skills": [
+      "Analisis Kredit Korporasi & UMKM",
+      "Analisis Kredit & Risiko",
+      "Laporan Keuangan",
+      "Pelaporan Regulator (SLIK OJK / ANTASENA BI)"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Credit Analyst",
+      "Analis Kredit"
+    ]
+  },
+  {
+    "id": "role_017",
+    "prodi_label": "S1 Ilmu Aktuaria / Matematika",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Actuarial Analyst",
+    "mandatory_skills": [
+      "Ilmu Aktuaria & Valuasi Liabilitas",
+      "Pemodelan Statistika Aktuaria (Prophet / R)",
+      "Statistika & SPSS / R",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "Underwriting & Aktuaria Klaim Asuransi"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Actuary",
+      "Actuarial Analyst"
+    ]
+  },
+  {
+    "id": "role_018",
+    "prodi_label": "S1 Manajemen / Perbankan",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Relationship Manager Banking",
+    "mandatory_skills": [
+      "Relationship Manager Funding & Wealth",
+      "Analisis Kredit Korporasi & UMKM",
+      "Negosiasi & Kepemimpinan"
+    ],
+    "preferred_skills": [
+      "Perbankan Syariah & Pembiayaan Akad"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Relationship Manager",
+      "Funding Officer"
+    ]
+  },
+  {
+    "id": "role_019",
+    "prodi_label": "S1 Keuangan / Ekonomi",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Treasury & Risk Officer",
+    "mandatory_skills": [
+      "Treasury, Pasar Uang & Devisa",
+      "Manajemen Risiko Perbankan (SMR)",
+      "Pasar Modal & Equity Research"
+    ],
+    "preferred_skills": [],
+    "certifications": [],
+    "scrape_queries": [
+      "Treasury Staff",
+      "Risk Analyst"
+    ]
+  },
+  {
+    "id": "role_020",
+    "prodi_label": "S1 Manajemen / Ilmu Komunikasi",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Digital Marketing Specialist",
+    "mandatory_skills": [
+      "Digital Marketing",
+      "Meta Ads & TikTok Ads",
+      "SEM & Google Ads",
+      "SEO",
+      "Google Analytics 4 & Attribution"
+    ],
+    "preferred_skills": [
+      "Copywriting",
+      "KOL & Influencer Marketing"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Digital Marketing",
+      "Performance Marketing"
+    ]
+  },
+  {
+    "id": "role_021",
+    "prodi_label": "S1 Manajemen / Administrasi Bisnis",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Brand & Product Marketing",
+    "mandatory_skills": [
+      "Brand Management & Positioning",
+      "Pricing & Promotion Strategy"
+    ],
+    "preferred_skills": [
+      "Event Marketing & Sponsorship"
+    ],
+    "certifications": [
+      "Pricing & Promotion Strategy"
+    ],
+    "scrape_queries": [
+      "Brand Executive",
+      "Product Marketing"
+    ]
+  },
+  {
+    "id": "role_022",
+    "prodi_label": "S1 Manajemen / Ekonomi Pembangunan",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Business Development",
+    "mandatory_skills": [
+      "Analisis Keuangan",
+      "Negosiasi & Kepemimpinan"
+    ],
+    "preferred_skills": [
+      "CRM Automation (HubSpot / Salesforce)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Business Development",
+      "Partnership"
+    ]
+  },
+  {
+    "id": "role_023",
+    "prodi_label": "S1 Semua Jurusan / Bisnis",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Key Account & Trade Sales",
+    "mandatory_skills": [
+      "Key Account Management",
+      "Trade Marketing & Merchandising",
+      "Field Sales & Canvassing Area"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Key Account Executive",
+      "Sales Supervisor"
+    ]
+  },
+  {
+    "id": "role_024",
+    "prodi_label": "S1 Bisnis Digital / Manajemen",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "E-Commerce & Marketplace Specialist",
+    "mandatory_skills": [
+      "E-Commerce & Marketplace Management",
+      "KOL & Influencer Marketing",
+      "Meta Ads & TikTok Ads",
+      "Data Analysis"
+    ],
+    "preferred_skills": [
+      "Pricing & Promotion Strategy"
+    ],
+    "certifications": [
+      "Pricing & Promotion Strategy"
+    ],
+    "scrape_queries": [
+      "E-Commerce Specialist",
+      "Marketplace Lead"
+    ]
+  },
+  {
+    "id": "role_025",
+    "prodi_label": "S1 Teknik Industri / Logistik / Manajemen Operasional",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "PPIC & Production Planner",
+    "mandatory_skills": [
+      "PPIC & Perencanaan Produksi",
+      "SAP MM / SD / Ariba",
+      "Microsoft Excel",
+      "Sales & Operations Planning (S&OP)"
+    ],
+    "preferred_skills": [
+      "Lean Manufacturing & Six Sigma"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "PPIC Staff",
+      "Production Planner"
+    ]
+  },
+  {
+    "id": "role_026",
+    "prodi_label": "S1 Manajemen / Administrasi Bisnis",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Procurement & Purchasing",
+    "mandatory_skills": [
+      "Strategic Sourcing & Procurement",
+      "E-Procurement & Manajemen Kontrak Vendor",
+      "Negosiasi & Kepemimpinan"
+    ],
+    "preferred_skills": [
+      "SAP MM / SD / Ariba"
+    ],
+    "certifications": [
+      "Strategic Sourcing & Procurement"
+    ],
+    "scrape_queries": [
+      "Procurement Staff",
+      "Purchasing"
+    ]
+  },
+  {
+    "id": "role_027",
+    "prodi_label": "S1 Manajemen Transportasi / Kepabeanan",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Export Import Specialist",
+    "mandatory_skills": [
+      "Kepabeanan PPJK & Sistem CEISA 4.0",
+      "Incoterms 2020 & Letter of Credit (L/C)",
+      "Ekspor-Impor & Kepabeanan"
+    ],
+    "preferred_skills": [
+      "Freight Forwarding & Transport Management"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Export Import",
+      "Exim Staff"
+    ]
+  },
+  {
+    "id": "role_028",
+    "prodi_label": "D3/S1 Logistik & Supply Chain",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Warehouse & Logistics Supervisor",
+    "mandatory_skills": [
+      "Warehouse Management System (WMS)",
+      "Logistik & Warehouse",
+      "Freight Forwarding & Transport Management"
+    ],
+    "preferred_skills": [
+      "Cold Chain Logistics"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Warehouse Supervisor",
+      "Logistics Coordinator"
+    ]
+  },
+  {
+    "id": "role_029",
+    "prodi_label": "S1 Psikologi",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Talent Acquisition & Recruiter",
+    "mandatory_skills": [
+      "Rekrutmen & Seleksi",
+      "Asesmen Psikologi & Psikotes",
+      "Alat Tes Psikologi (DISC / MBTI / WARTegg)",
+      "Employer Branding & Campus Hiring"
+    ],
+    "preferred_skills": [
+      "Mekari Talenta / SunFish HRIS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "HR Recruitment",
+      "Talent Acquisition"
+    ]
+  },
+  {
+    "id": "role_030",
+    "prodi_label": "S1 Manajemen SDM / Hukum",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "HRGA & Industrial Relations",
+    "mandatory_skills": [
+      "Payroll & Kompensasi",
+      "BPJS & Ketenagakerjaan",
+      "Industrial Relations & UU Ketenagakerjaan",
+      "General Affairs & Asset Facility"
+    ],
+    "preferred_skills": [
+      "Mekari Talenta / SunFish HRIS"
+    ],
+    "certifications": [
+      "Industrial Relations & UU Ketenagakerjaan"
+    ],
+    "scrape_queries": [
+      "HRGA Officer",
+      "HR Generalist"
+    ]
+  },
+  {
+    "id": "role_031",
+    "prodi_label": "S1 Psikologi / Manajemen",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "HRBP & People Development",
+    "mandatory_skills": [
+      "HR Business Partner (HRBP)",
+      "Organization Development (OD)",
+      "Learning & Development (Training)",
+      "Compensation & Benefits (CompBen)"
+    ],
+    "preferred_skills": [
+      "HRIS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "HRBP",
+      "Learning and Development"
+    ]
+  },
+  {
+    "id": "role_032",
+    "prodi_label": "D3/S1 Administrasi Perkantoran / Sekretaris",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Admin & Executive Assistant",
+    "mandatory_skills": [
+      "Administrasi Perkantoran",
+      "Executive Assistant & Kesekretariatan",
+      "Pengarsipan & Document Control",
+      "Microsoft Office & Google Workspace"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [
+      "Administrasi Perkantoran"
+    ],
+    "scrape_queries": [
+      "Admin Staff",
+      "Executive Assistant"
+    ]
+  },
+  {
+    "id": "role_033",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Corporate Legal Officer",
+    "mandatory_skills": [
+      "Legal Drafting & Review Kontrak",
+      "Legal Opinion & Riset Hukum",
+      "Perizinan Usaha & OSS/NIB",
+      "Corporate Secretary & RUPS"
+    ],
+    "preferred_skills": [
+      "Kepatuhan & Regulasi (Compliance)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Legal Officer",
+      "Corporate Legal"
+    ]
+  },
+  {
+    "id": "role_034",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Compliance & Privacy Officer (DPO)",
+    "mandatory_skills": [
+      "Perlindungan Data Pribadi (UU PDP / GDPR)",
+      "Kepatuhan & Regulasi (Compliance)",
+      "Anti Pencucian Uang (APU PPT / AML)"
+    ],
+    "preferred_skills": [
+      "Legal Due Diligence & M&A"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Compliance Officer",
+      "Data Privacy Officer"
+    ]
+  },
+  {
+    "id": "role_035",
+    "prodi_label": "S1 Hukum / Kenotariatan",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Legal Notariat & Pertanahan",
+    "mandatory_skills": [
+      "Hukum Agraria, Pertanahan & PPAT",
+      "Legal Drafting & Review Kontrak",
+      "Hak Kekayaan Intelektual (HKI / Merek)"
+    ],
+    "preferred_skills": [
+      "Corporate Secretary & RUPS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Staf Notaris",
+      "Legal Property"
+    ]
+  },
+  {
+    "id": "role_036",
+    "prodi_label": "S1 Ilmu Hubungan Internasional",
+    "domain": "administrasi_publik_hi_sosial",
+    "role_title": "Government Relations & Public Affairs",
+    "mandatory_skills": [
+      "Hubungan Internasional & Advokasi Pemerintah",
+      "Stakeholder Management",
+      "Bahasa Inggris"
+    ],
+    "preferred_skills": [
+      "Analisis Kebijakan Publik (Regulatory Impact)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Government Relations",
+      "Public Affairs"
+    ]
+  },
+  {
+    "id": "role_037",
+    "prodi_label": "S1 Administrasi Publik / Ilmu Pemerintahan",
+    "domain": "administrasi_publik_hi_sosial",
+    "role_title": "Policy & M&E Analyst",
+    "mandatory_skills": [
+      "Analisis Kebijakan Publik (Regulatory Impact)",
+      "Monitoring & Evaluasi Program (M&E / MEAL)",
+      "Pengadaan Barang & Jasa Pemerintah (PBJP)"
+    ],
+    "preferred_skills": [
+      "Metode Riset Sosial & Pengolahan Survey"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Policy Analyst",
+      "Monitoring Evaluation"
+    ]
+  },
+  {
+    "id": "role_038",
+    "prodi_label": "S1 Sosiologi / Kesejahteraan Sosial",
+    "domain": "administrasi_publik_hi_sosial",
+    "role_title": "CSR & Community Development Officer",
+    "mandatory_skills": [
+      "CSR & Community Development",
+      "Monitoring & Evaluasi Program (M&E / MEAL)",
+      "Stakeholder Management"
+    ],
+    "preferred_skills": [
+      "Manajemen Hibah & Donor Internasional (NGO)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "CSR Specialist",
+      "Community Development"
+    ]
+  },
+  {
+    "id": "role_039",
+    "prodi_label": "S1 Ilmu Komunikasi / Public Relations",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Public Relations Specialist",
+    "mandatory_skills": [
+      "Public Relations & Media Relations",
+      "Crisis Communication & Reputasi",
+      "Copywriting",
+      "Stakeholder Management"
+    ],
+    "preferred_skills": [
+      "Event Marketing & Sponsorship"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Public Relations",
+      "Corporate Communication"
+    ]
+  },
+  {
+    "id": "role_040",
+    "prodi_label": "S1 Jurnalistik / Sastra / Komunikasi",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Content Writer & Journalist",
+    "mandatory_skills": [
+      "Jurnalistik & Penulisan Berita",
+      "Copywriting",
+      "SEO",
+      "Scriptwriting & Storytelling"
+    ],
+    "preferred_skills": [
+      "Social Media Management"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Content Writer",
+      "Copywriter",
+      "Journalist"
+    ]
+  },
+  {
+    "id": "role_041",
+    "prodi_label": "S1 Desain Komunikasi Visual (DKV)",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Graphic & Motion Designer",
+    "mandatory_skills": [
+      "Adobe Photoshop",
+      "Adobe Illustrator",
+      "Visual Brand Identity & Guideline",
+      "After Effects & Motion Graphics"
+    ],
+    "preferred_skills": [
+      "Adobe Premiere Pro & Video Editing",
+      "Canva & Desain Grafis"
+    ],
+    "certifications": [
+      "Adobe Illustrator"
+    ],
+    "scrape_queries": [
+      "Graphic Designer",
+      "Motion Designer"
+    ]
+  },
+  {
+    "id": "role_042",
+    "prodi_label": "S1 DKV / Desain Produk",
+    "domain": "dkv_produk_ux_kreatif",
+    "role_title": "UI/UX & Product Designer",
+    "mandatory_skills": [
+      "Figma",
+      "UI/UX Design",
+      "Design System & Tokens Architecture",
+      "UX Research & Usability Testing"
+    ],
+    "preferred_skills": [
+      "Design Accessibility (WCAG AA/AAA)",
+      "Micro-Interaction & UI Motion (Rive / Lottie)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "UI/UX Designer",
+      "Product Designer"
+    ]
+  },
+  {
+    "id": "role_043",
+    "prodi_label": "S1 Film / Penyiaran / Multimedia",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Video Editor & Creative Producer",
+    "mandatory_skills": [
+      "Adobe Premiere Pro & Video Editing",
+      "Short-Form Video (Reels / TikTok / CapCut)",
+      "Broadcasting, Podcast & Live Production",
+      "Fotografi Produk & Commercial Retouching"
+    ],
+    "preferred_skills": [
+      "After Effects & Motion Graphics"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Video Editor",
+      "Creative Producer"
+    ]
+  },
+  {
+    "id": "role_044",
+    "prodi_label": "S1 Sastra Inggris / Sastra Asing",
+    "domain": "bahasa_sastra_penerjemahan",
+    "role_title": "Translator & Localization Specialist",
+    "mandatory_skills": [
+      "CAT Tools & Translation Memory (Trados / MemoQ)",
+      "Software & Game Localization (L10n)",
+      "Penyuntingan Bahasa & Proofreading (EYD V)",
+      "Bahasa Inggris"
+    ],
+    "preferred_skills": [
+      "Subtitling, Dubbing & Audiovisual Translation"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Translator",
+      "Localization Specialist"
+    ]
+  },
+  {
+    "id": "role_045",
+    "prodi_label": "S1 Sastra Mandarin / Jepang / Korea",
+    "domain": "bahasa_sastra_penerjemahan",
+    "role_title": "Interpreter & Bilingual Coordinator",
+    "mandatory_skills": [
+      "Simultaneous & Consecutive Interpreting",
+      "Bahasa Mandarin (HSK)",
+      "Bahasa Jepang (JLPT)",
+      "Bahasa Korea (TOPIK)"
+    ],
+    "preferred_skills": [
+      "CAT Tools & Translation Memory (Trados / MemoQ)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Interpreter",
+      "Mandarin Translator"
+    ]
+  },
+  {
+    "id": "role_046",
+    "prodi_label": "S1 Pendidikan / PGSD / Pend. Matematika / IPA",
+    "domain": "pendidikan_pelatihan",
+    "role_title": "Guru & Academic Coordinator",
+    "mandatory_skills": [
+      "Kurikulum Merdeka & Perencanaan Ajar",
+      "Pengajaran & Manajemen Kelas",
+      "Asesmen Diagnostik & Bank Soal (AKM)"
+    ],
+    "preferred_skills": [
+      "Kurikulum Internasional (Cambridge / IB)",
+      "Bahasa Inggris"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Guru",
+      "Academic Coordinator"
+    ]
+  },
+  {
+    "id": "role_047",
+    "prodi_label": "S1 Teknologi Pendidikan",
+    "domain": "pendidikan_pelatihan",
+    "role_title": "Instructional Designer & EdTech",
+    "mandatory_skills": [
+      "Instructional Design & E-Learning",
+      "Authoring Tools (Articulate Storyline / SCORM)",
+      "Kurikulum Merdeka & Perencanaan Ajar"
+    ],
+    "preferred_skills": [
+      "Pembelajaran STEM / STEAM & Coding Anak"
+    ],
+    "certifications": [
+      "Instructional Design & E-Learning"
+    ],
+    "scrape_queries": [
+      "Instructional Designer",
+      "E-Learning Specialist"
+    ]
+  },
+  {
+    "id": "role_048",
+    "prodi_label": "S1 Teknik Sipil",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Site Engineer & Quantity Surveyor",
+    "mandatory_skills": [
+      "AutoCAD",
+      "ETABS",
+      "RAB & Quantity Surveying",
+      "Manajemen Konstruksi",
+      "Uji Mutu Beton & Material Konstruksi"
+    ],
+    "preferred_skills": [
+      "Primavera P6 & MS Project",
+      "Revit & BIM"
+    ],
+    "certifications": [
+      "Manajemen Konstruksi",
+      "Uji Mutu Beton & Material Konstruksi"
+    ],
+    "scrape_queries": [
+      "Site Engineer",
+      "Quantity Surveyor"
+    ]
+  },
+  {
+    "id": "role_049",
+    "prodi_label": "S1 Arsitektur",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Architect & Interior Designer",
+    "mandatory_skills": [
+      "AutoCAD",
+      "Revit & BIM",
+      "Desain Interior & FF&E"
+    ],
+    "preferred_skills": [
+      "Koordinasi MEP Bangunan Gedung"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Architect",
+      "Interior Designer"
+    ]
+  },
+  {
+    "id": "role_050",
+    "prodi_label": "S1 Teknik Geodesi / Geografi / PWK",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "GIS & Survey Specialist",
+    "mandatory_skills": [
+      "Survey Pemetaan (Total Station / Theodolite / Drone)",
+      "Perencanaan Wilayah & Kota (PWK / Urban Planning)",
+      "Autodesk Civil 3D"
+    ],
+    "preferred_skills": [
+      "AutoCAD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "GIS Analyst",
+      "Surveyor"
+    ]
+  },
+  {
+    "id": "role_051",
+    "prodi_label": "S1 Teknik Mesin",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "Mechanical & Maintenance Engineer",
+    "mandatory_skills": [
+      "SolidWorks & Mechanical CAD",
+      "Maintenance & Reliability",
+      "CMMS & Predictive Maintenance",
+      "Plant Utility (Boiler, Chiller, Compressor)"
+    ],
+    "preferred_skills": [
+      "ANSYS / FEA & CFD Simulation",
+      "CNC Programming & Machining (CAM)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Mechanical Engineer",
+      "Maintenance Engineer"
+    ]
+  },
+  {
+    "id": "role_052",
+    "prodi_label": "S1 Teknik Elektro / Mekatronika",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "Electrical & Automation Engineer",
+    "mandatory_skills": [
+      "Pemrograman PLC & SCADA (Siemens / Omron / Allen-Bradley)",
+      "AutoCAD Electrical & EPLAN",
+      "Sistem Tenaga Listrik & Gardu Induk (ETAP)",
+      "Instrumentasi & Kontrol Proses (DCS / PID)"
+    ],
+    "preferred_skills": [
+      "Industrial IoT & MQTT / LoRaWAN"
+    ],
+    "certifications": [
+      "Sistem Tenaga Listrik & Gardu Induk (ETAP)",
+      "Instrumentasi & Kontrol Proses (DCS / PID)",
+      "Industrial IoT & MQTT / LoRaWAN"
+    ],
+    "scrape_queries": [
+      "Automation Engineer",
+      "Electrical Engineer"
+    ]
+  },
+  {
+    "id": "role_053",
+    "prodi_label": "S1 Teknik Industri / K3",
+    "domain": "teknik_industri_k3_mutu",
+    "role_title": "Industrial & Quality Engineer",
+    "mandatory_skills": [
+      "Lean Six Sigma (Green / Black Belt)",
+      "Work Study & Time-Motion Analysis",
+      "Minitab & Statistical Process Control",
+      "Lead Auditor ISO (9001 / 14001 / 45001)"
+    ],
+    "preferred_skills": [
+      "Operations Research & Simulasi Sistem"
+    ],
+    "certifications": [
+      "Lead Auditor ISO (9001 / 14001 / 45001)"
+    ],
+    "scrape_queries": [
+      "Industrial Engineer",
+      "Quality Assurance Manufacturing"
+    ]
+  },
+  {
+    "id": "role_054",
+    "prodi_label": "S1 Teknik Lingkungan / Kesmas K3 / Teknik Kimia",
+    "domain": "teknik_industri_k3_mutu",
+    "role_title": "HSE / Ahli K3 Officer",
+    "mandatory_skills": [
+      "Ahli K3 Umum Kemnaker & CSMS",
+      "K3 / HSE",
+      "Lead Auditor ISO (9001 / 14001 / 45001)",
+      "Pengelolaan Limbah (IPAL / WWTP / B3)"
+    ],
+    "preferred_skills": [],
+    "certifications": [
+      "Lead Auditor ISO (9001 / 14001 / 45001)"
+    ],
+    "scrape_queries": [
+      "HSE Officer",
+      "Safety Officer"
+    ]
+  },
+  {
+    "id": "role_055",
+    "prodi_label": "S1 Teknik Pertambangan",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Mine Plan & Operations Engineer",
+    "mandatory_skills": [
+      "Perencanaan Tambang (Surpac / Minescape / Vulcan)",
+      "Operasi Peledakan & Pemboran (Drilling & Blasting)",
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "preferred_skills": [],
+    "certifications": [
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "scrape_queries": [
+      "Mine Plan Engineer",
+      "Mining Engineer"
+    ]
+  },
+  {
+    "id": "role_056",
+    "prodi_label": "S1 Teknik Geologi / Geofisika",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Exploration Geologist",
+    "mandatory_skills": [
+      "Geologi Eksplorasi & Core Logging"
+    ],
+    "preferred_skills": [
+      "Teknik Perminyakan & Reservoir (Petrel / Eclipse)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Geologist",
+      "Exploration Geologist"
+    ]
+  },
+  {
+    "id": "role_057",
+    "prodi_label": "S1 Teknik Elektro / Fisika Energi",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Renewable Energy / Solar PV Engineer",
+    "mandatory_skills": [
+      "Energi Terbarukan & PLTS (PVsyst / Solar PV)",
+      "Sistem Tenaga Listrik & Gardu Induk (ETAP)",
+      "AutoCAD Electrical & EPLAN"
+    ],
+    "preferred_skills": [
+      "Sertifikat Kompetensi Tenaga Teknik (SKTTK / AK3 Listrik)"
+    ],
+    "certifications": [
+      "Sistem Tenaga Listrik & Gardu Induk (ETAP)",
+      "Sertifikat Kompetensi Tenaga Teknik (SKTTK / AK3 Listrik)"
+    ],
+    "scrape_queries": [
+      "Solar Engineer",
+      "Energy Engineer"
+    ]
+  },
+  {
+    "id": "role_058",
+    "prodi_label": "S1 Farmasi / Profesi Apoteker",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "role_title": "Apoteker & QA/RA Farmasi",
+    "mandatory_skills": [
+      "Farmasi Klinis & Apoteker",
+      "CPOB / CPOTB / CDOB",
+      "Registrasi BPOM & Regulatory Affairs",
+      "Validasi Proses & Kualifikasi Farmasi"
+    ],
+    "preferred_skills": [
+      "Farmakovigilans & Medical Affairs"
+    ],
+    "certifications": [
+      "CPOB / CPOTB / CDOB",
+      "Registrasi BPOM & Regulatory Affairs"
+    ],
+    "scrape_queries": [
+      "Apoteker",
+      "Regulatory Affairs Farmasi"
+    ]
+  },
+  {
+    "id": "role_059",
+    "prodi_label": "S1 Ilmu Keperawatan (Ners) / D3 Keperawatan",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Perawat Klinis & Klinik Perusahaan",
+    "mandatory_skills": [
+      "Asuhan Keperawatan Klinis (Ners / STR Aktif)",
+      "Gawat Darurat (BTCLS / ACLS / ATLS)",
+      "Keselamatan Pasien & PPI / K3RS"
+    ],
+    "preferred_skills": [
+      "Sistem Informasi Manajemen RS (SIMRS / Rekam Medis Elektronik)"
+    ],
+    "certifications": [
+      "Asuhan Keperawatan Klinis (Ners / STR Aktif)",
+      "Gawat Darurat (BTCLS / ACLS / ATLS)"
+    ],
+    "scrape_queries": [
+      "Perawat",
+      "Nurse"
+    ]
+  },
+  {
+    "id": "role_060",
+    "prodi_label": "S1 Ilmu Gizi",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Ahli Gizi & Dietisien",
+    "mandatory_skills": [
+      "Ilmu Gizi Klinis & Penyelenggaraan Makanan RS",
+      "HACCP & Keamanan Pangan",
+      "Sertifikasi Halal (SJPH / BPJPH / LPPOM)"
+    ],
+    "preferred_skills": [
+      "Kesehatan Masyarakat, Epidemiologi & Promkes"
+    ],
+    "certifications": [
+      "Sertifikasi Halal (SJPH / BPJPH / LPPOM)"
+    ],
+    "scrape_queries": [
+      "Ahli Gizi",
+      "Nutritionist"
+    ]
+  },
+  {
+    "id": "role_061",
+    "prodi_label": "S1 Kesehatan Masyarakat / Rekam Medis",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Hospital Casemix & Rekam Medis",
+    "mandatory_skills": [
+      "Verifikasi Klaim JKN / INA-CBGs",
+      "Sistem Informasi Manajemen RS (SIMRS / Rekam Medis Elektronik)"
+    ],
+    "preferred_skills": [
+      "Keselamatan Pasien & PPI / K3RS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Rekam Medis",
+      "Casemix Officer"
+    ]
+  },
+  {
+    "id": "role_062",
+    "prodi_label": "S1 Teknologi Pangan / Teknik Kimia",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "QC / R&D Pangan & Halal",
+    "mandatory_skills": [
+      "HACCP & Keamanan Pangan",
+      "Teknologi Pangan & R&D Produk",
+      "Uji Organoleptik & Formulasi Pangan",
+      "Sertifikasi Halal (SJPH / BPJPH / LPPOM)"
+    ],
+    "preferred_skills": [
+      "ISO 9001 / 14001 / 45001"
+    ],
+    "certifications": [
+      "Sertifikasi Halal (SJPH / BPJPH / LPPOM)",
+      "ISO 9001 / 14001 / 45001"
+    ],
+    "scrape_queries": [
+      "QC Pangan",
+      "R&D Food"
+    ]
+  },
+  {
+    "id": "role_063",
+    "prodi_label": "S1 Agroteknologi / Ilmu Tanah / Kehutanan",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "Agronomist & Asisten Kebun",
+    "mandatory_skills": [
+      "Manajemen Perkebunan Kelapa Sawit / Kehutanan"
+    ],
+    "preferred_skills": [],
+    "certifications": [],
+    "scrape_queries": [
+      "Agronomist",
+      "Asisten Kebun"
+    ]
+  },
+  {
+    "id": "role_064",
+    "prodi_label": "S1 Kimia / Analis Kimia",
+    "domain": "sains_lab_geologi_energi",
+    "role_title": "Analis Laboratorium Kimia (QC Lab)",
+    "mandatory_skills": [
+      "HPLC / GC-MS & Analisis Instrumen",
+      "Pengujian Laboratorium (ISO 17025)",
+      "AAS / ICP-OES & Spektroskopi Atom",
+      "Analisis Kimia Basah & Gravimetri"
+    ],
+    "preferred_skills": [
+      "Kalibrasi Instrumen & Metrologi"
+    ],
+    "certifications": [
+      "HPLC / GC-MS & Analisis Instrumen",
+      "Pengujian Laboratorium (ISO 17025)",
+      "Kalibrasi Instrumen & Metrologi"
+    ],
+    "scrape_queries": [
+      "Analis Lab",
+      "QC Laboratory"
+    ]
+  },
+  {
+    "id": "role_065",
+    "prodi_label": "D3/D4/S1 Pariwisata & Perhotelan",
+    "domain": "pariwisata_perhotelan_fnb",
+    "role_title": "Hotel Operations & Guest Relations",
+    "mandatory_skills": [
+      "Front Office & Hotel PMS",
+      "Housekeeping & Room Division",
+      "Food & Beverage Service & Culinary",
+      "Bahasa Inggris"
+    ],
+    "preferred_skills": [
+      "MICE, Wedding & Event Management"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Front Office",
+      "Hotel Supervisor"
+    ]
+  },
+  {
+    "id": "role_066",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Golang Backend Engineer",
+    "mandatory_skills": [
+      "Go",
+      "REST API",
+      "PostgreSQL",
+      "Docker",
+      "Redis"
+    ],
+    "preferred_skills": [
+      "Kubernetes",
+      "gRPC"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "Golang Developer",
+      "Backend Engineer"
+    ]
+  },
+  {
+    "id": "role_067",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Rust Systems Engineer",
+    "mandatory_skills": [
+      "Rust",
+      "Embedded SQLite & Local-First Sync",
+      "REST API",
+      "Linux"
+    ],
+    "preferred_skills": [
+      "WebAssembly (WASM)",
+      "Docker"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "Rust Developer",
+      "Systems Engineer"
+    ]
+  },
+  {
+    "id": "role_068",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Node.js / TypeScript Developer",
+    "mandatory_skills": [
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "REST API"
+    ],
+    "preferred_skills": [
+      "Next.js",
+      "Redis"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "Node.js Developer",
+      "Backend TypeScript"
+    ]
+  },
+  {
+    "id": "role_069",
+    "prodi_label": "S1 Sistem Informasi",
+    "domain": "informatika_data",
+    "role_title": "ERP Functional Consultant (SAP / Odoo)",
+    "mandatory_skills": [
+      "SAP / Odoo Functional Implementation",
+      "SQL",
+      "System Analysis & BRD / FSD Documentation"
+    ],
+    "preferred_skills": [
+      "Odoo Development"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "ERP Consultant",
+      "SAP Functional"
+    ]
+  },
+  {
+    "id": "role_070",
+    "prodi_label": "S1 Sistem Informasi",
+    "domain": "informatika_data",
+    "role_title": "IT Business / System Analyst",
+    "mandatory_skills": [
+      "System Analysis & BRD / FSD Documentation",
+      "SQL",
+      "REST API",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "Product Management & PRD Writing"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "System Analyst",
+      "IT Business Analyst"
+    ]
+  },
+  {
+    "id": "role_071",
+    "prodi_label": "S1 Sains Data / Statistika",
+    "domain": "informatika_data",
+    "role_title": "Business Intelligence (BI) Engineer",
+    "mandatory_skills": [
+      "Power BI",
+      "Power Query & DAX",
+      "SQL",
+      "Tableau"
+    ],
+    "preferred_skills": [
+      "Cloud Data Warehouse (BigQuery / Snowflake)",
+      "dbt (Data Build Tool)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "BI Analyst",
+      "BI Developer"
+    ]
+  },
+  {
+    "id": "role_072",
+    "prodi_label": "S1 Ilmu Komputer",
+    "domain": "informatika_data",
+    "role_title": "Data Engineer (ETL & Warehouse)",
+    "mandatory_skills": [
+      "Python",
+      "SQL",
+      "Apache Airflow",
+      "Apache Spark"
+    ],
+    "preferred_skills": [
+      "dbt (Data Build Tool)",
+      "Cloud Data Warehouse (BigQuery / Snowflake)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Data Engineer",
+      "ETL Engineer"
+    ]
+  },
+  {
+    "id": "role_073",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Android Native Engineer (Kotlin)",
+    "mandatory_skills": [
+      "Kotlin",
+      "Jetpack Compose & Android Architecture",
+      "REST API",
+      "Git"
+    ],
+    "preferred_skills": [
+      "Android Release (Gradle, Play Console, ProGuard)"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "Android Developer",
+      "Mobile Engineer"
+    ]
+  },
+  {
+    "id": "role_074",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "iOS Engineer (Swift)",
+    "mandatory_skills": [
+      "Swift",
+      "iOS Ecosystem (Xcode, CoreData, TestFlight)",
+      "REST API",
+      "Git"
+    ],
+    "preferred_skills": [
+      "Flutter"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "iOS Developer",
+      "Mobile Engineer"
+    ]
+  },
+  {
+    "id": "role_075",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Flutter Cross-Platform Developer",
+    "mandatory_skills": [
+      "Flutter",
+      "Flutter State Management (BLoC / Riverpod)",
+      "REST API",
+      "Git"
+    ],
+    "preferred_skills": [
+      "Firebase Firestore & Cloud Functions"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "Flutter Developer",
+      "Mobile Developer"
+    ]
+  },
+  {
+    "id": "role_076",
+    "prodi_label": "S1 Keamanan Siber",
+    "domain": "informatika_data",
+    "role_title": "Penetration Tester / AppSec",
+    "mandatory_skills": [
+      "OWASP & AppSec",
+      "CEH / CompTIA Security+",
+      "Linux"
+    ],
+    "preferred_skills": [
+      "DevSecOps (SAST / DAST / Container Scanning)"
+    ],
+    "certifications": [
+      "CEH / CompTIA Security+"
+    ],
+    "scrape_queries": [
+      "Penetration Tester",
+      "Security Engineer"
+    ]
+  },
+  {
+    "id": "role_077",
+    "prodi_label": "S1 Teknik Komputer",
+    "domain": "informatika_data",
+    "role_title": "Network Operations (NOC) Engineer",
+    "mandatory_skills": [
+      "MikroTik & Cisco Networking",
+      "Linux",
+      "Prometheus & Grafana"
+    ],
+    "preferred_skills": [
+      "AWS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Network Engineer",
+      "NOC Engineer"
+    ]
+  },
+  {
+    "id": "role_078",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Cloud & Site Reliability Engineer",
+    "mandatory_skills": [
+      "Linux",
+      "Kubernetes",
+      "Terraform",
+      "AWS",
+      "CI/CD"
+    ],
+    "preferred_skills": [
+      "Prometheus & Grafana",
+      "Service Mesh & Ingress (Istio / Envoy)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "SRE",
+      "Cloud Engineer"
+    ]
+  },
+  {
+    "id": "role_079",
+    "prodi_label": "S1 Sistem Informasi",
+    "domain": "informatika_data",
+    "role_title": "Product Manager Digital",
+    "mandatory_skills": [
+      "Product Management & PRD Writing",
+      "Product Ownership & Backlog Prioritization",
+      "Data Analysis"
+    ],
+    "preferred_skills": [
+      "Statistical A/B Testing & Experimentation"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Product Manager",
+      "Associate Product Manager"
+    ]
+  },
+  {
+    "id": "role_080",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "RPA Developer (UiPath)",
+    "mandatory_skills": [
+      "Robotic Process Automation (UiPath / Power Automate)",
+      "Python",
+      "SQL"
+    ],
+    "preferred_skills": [
+      "Power Platform (Power Automate / Power Apps)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "RPA Developer",
+      "Automation Analyst"
+    ]
+  },
+  {
+    "id": "role_081",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Accounts Payable / Receivable Staff",
+    "mandatory_skills": [
+      "Accounts Payable & Receivable",
+      "Three-Way Matching & Verifikasi PO/GR/Invoice",
+      "Akuntansi",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "Accurate Accounting"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "AP AR Staff",
+      "Finance Billing"
+    ]
+  },
+  {
+    "id": "role_082",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Cost & Manufacturing Accountant",
+    "mandatory_skills": [
+      "Akuntansi Biaya",
+      "Standard Costing & Overhead Allocation",
+      "Akuntansi Persediaan & HPP (FIFO / Average)"
+    ],
+    "preferred_skills": [
+      "SAP FICO"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Cost Accountant",
+      "Plant Accountant"
+    ]
+  },
+  {
+    "id": "role_083",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "External Auditor (KAP)",
+    "mandatory_skills": [
+      "Audit Keuangan & Internal",
+      "PSAK / IFRS",
+      "Kertas Kerja Audit (ATLAS)",
+      "Pengujian Substantif & Analitis Audit"
+    ],
+    "preferred_skills": [
+      "Sertifikasi CA / CPA / CMA"
+    ],
+    "certifications": [
+      "Sertifikasi CA / CPA / CMA"
+    ],
+    "scrape_queries": [
+      "External Auditor",
+      "Junior Auditor KAP"
+    ]
+  },
+  {
+    "id": "role_084",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Finance Controller / Accounting Manager",
+    "mandatory_skills": [
+      "Konsolidasi Laporan Keuangan",
+      "PSAK / IFRS",
+      "Monthly & Annual Closing",
+      "Budgeting & Forecasting"
+    ],
+    "preferred_skills": [
+      "SAP FICO"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Accounting Manager",
+      "Finance Controller"
+    ]
+  },
+  {
+    "id": "role_085",
+    "prodi_label": "S1 Akuntansi / Perpajakan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Tax Compliance & Coretax Officer",
+    "mandatory_skills": [
+      "Coretax DJP",
+      "e-Faktur & e-Bupot",
+      "Brevet Pajak A & B",
+      "Perpajakan"
+    ],
+    "preferred_skills": [
+      "Transfer Pricing & Tax Planning"
+    ],
+    "certifications": [
+      "Coretax DJP",
+      "Brevet Pajak A & B"
+    ],
+    "scrape_queries": [
+      "Tax Officer",
+      "Tax Compliance"
+    ]
+  },
+  {
+    "id": "role_086",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "IT Auditor (COBIT / ITGC)",
+    "mandatory_skills": [
+      "IT Audit & COBIT Governance",
+      "Audit Keuangan & Internal",
+      "Pengendalian Internal (COSO / SOX)"
+    ],
+    "preferred_skills": [
+      "SQL"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "IT Auditor",
+      "GRC Analyst"
+    ]
+  },
+  {
+    "id": "role_087",
+    "prodi_label": "S1 Manajemen Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Treasury & Cash Management Officer",
+    "mandatory_skills": [
+      "Treasury & Cash Management",
+      "Rekonsiliasi Bank & Kas",
+      "Working Capital & Cash Conversion Cycle"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [
+      "Working Capital & Cash Conversion Cycle"
+    ],
+    "scrape_queries": [
+      "Treasury Officer",
+      "Finance Treasury"
+    ]
+  },
+  {
+    "id": "role_088",
+    "prodi_label": "S1 Ekonomi Syariah",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Akuntansi & Kepatuhan Keuangan Syariah",
+    "mandatory_skills": [
+      "Akuntansi Syariah (PSAK 101-112)",
+      "Laporan Keuangan",
+      "PSAK / IFRS"
+    ],
+    "preferred_skills": [
+      "Perpajakan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Finance Syariah",
+      "Accounting Syariah"
+    ]
+  },
+  {
+    "id": "role_089",
+    "prodi_label": "D3 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Staff Finance & Rekonsiliasi Marketplace",
+    "mandatory_skills": [
+      "Rekonsiliasi Marketplace & Payment Gateway",
+      "Accurate Accounting",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "e-Faktur & e-Bupot"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Finance Marketplace",
+      "Accounting Admin"
+    ]
+  },
+  {
+    "id": "role_090",
+    "prodi_label": "S1 Ekonomi / Bisnis",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "ESG & Sustainability Reporting Analyst",
+    "mandatory_skills": [
+      "Pelaporan Keberlanjutan (ESG / GRI)",
+      "Analisis Keuangan",
+      "Data Analysis"
+    ],
+    "preferred_skills": [
+      "Inventarisasi Emisi Karbon & ESG Lingkungan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "ESG Analyst",
+      "Sustainability Officer"
+    ]
+  },
+  {
+    "id": "role_091",
+    "prodi_label": "S1 Ilmu Ekonomi / Manajemen",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Officer Development Program (ODP / MT Bank)",
+    "mandatory_skills": [
+      "Analisis Kredit Korporasi & UMKM",
+      "Laporan Keuangan",
+      "Relationship Manager Funding & Wealth"
+    ],
+    "preferred_skills": [
+      "Manajemen Risiko Perbankan (SMR)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "ODP Bank",
+      "Management Trainee Perbankan"
+    ]
+  },
+  {
+    "id": "role_092",
+    "prodi_label": "S1 Ekonomi / Akuntansi",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Corporate Banking Relationship Manager",
+    "mandatory_skills": [
+      "Corporate & Syndicated Lending",
+      "Analisis Kredit Korporasi & UMKM",
+      "Analisis Keuangan"
+    ],
+    "preferred_skills": [
+      "Trade Finance & Bank Garansi (SBLC)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Corporate RM",
+      "Commercial Banker"
+    ]
+  },
+  {
+    "id": "role_093",
+    "prodi_label": "S1 Manajemen / Ekonomi",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "KPR & Mortgage Analyst",
+    "mandatory_skills": [
+      "Analis & Proses Kredit Pemilikan Rumah (KPR)",
+      "Pelaporan Regulator (SLIK OJK / ANTASENA BI)"
+    ],
+    "preferred_skills": [
+      "Analisis Kredit Korporasi & UMKM"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Mortgage Specialist",
+      "KPR Officer"
+    ]
+  },
+  {
+    "id": "role_094",
+    "prodi_label": "S1 Semua Jurusan / Keuangan",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Micro Banking / Account Officer UMKM",
+    "mandatory_skills": [
+      "Mikro Banking & Pemberdayaan UMKM",
+      "Analisis Kredit Korporasi & UMKM",
+      "Collection Strategy, Desk Call & Restrukturisasi"
+    ],
+    "preferred_skills": [
+      "Negosiasi & Kepemimpinan"
+    ],
+    "certifications": [
+      "Collection Strategy, Desk Call & Restrukturisasi"
+    ],
+    "scrape_queries": [
+      "Account Officer Bank",
+      "Mantri Mikro"
+    ]
+  },
+  {
+    "id": "role_095",
+    "prodi_label": "S1 Asuransi / Aktuaria",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Insurance Underwriter",
+    "mandatory_skills": [
+      "Underwriting & Aktuaria Klaim Asuransi",
+      "Reasuransi Treaty & Facultative"
+    ],
+    "preferred_skills": [
+      "Ilmu Aktuaria & Valuasi Liabilitas"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Underwriter",
+      "Insurance Analyst"
+    ]
+  },
+  {
+    "id": "role_096",
+    "prodi_label": "S1 Keuangan / Manajemen",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Claim & Loss Adjuster",
+    "mandatory_skills": [
+      "Loss Adjusting & Klaim Asuransi Kesehatan/Umum",
+      "Underwriting & Aktuaria Klaim Asuransi"
+    ],
+    "preferred_skills": [
+      "Laporan Keuangan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Claim Analyst",
+      "Loss Adjuster"
+    ]
+  },
+  {
+    "id": "role_097",
+    "prodi_label": "S1 Ekonomi / Pasar Modal",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Equity & Fixed Income Research Analyst",
+    "mandatory_skills": [
+      "Pasar Modal & Equity Research",
+      "Manajemen Investasi & Fixed Income / Obligasi",
+      "Analisis Keuangan"
+    ],
+    "preferred_skills": [
+      "Akuntansi Dana & Bank Kustodian (NAB / NAV)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Equity Analyst",
+      "Investment Analyst"
+    ]
+  },
+  {
+    "id": "role_098",
+    "prodi_label": "S1 Perbankan Syariah",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Account Officer Pembiayaan Syariah",
+    "mandatory_skills": [
+      "Perbankan Syariah & Pembiayaan Akad",
+      "Analisis Kredit Korporasi & UMKM"
+    ],
+    "preferred_skills": [
+      "Akuntansi Syariah (PSAK 101-112)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Financing Officer Syariah",
+      "Account Officer Syariah"
+    ]
+  },
+  {
+    "id": "role_099",
+    "prodi_label": "D3/S1 Manajemen",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Teller & Customer Service Perbankan",
+    "mandatory_skills": [
+      "Frontliner Perbankan (Teller & CS Bank)",
+      "Service Excellence & Orientasi Kepuasan Pelanggan"
+    ],
+    "preferred_skills": [
+      "Perbankan Syariah & Pembiayaan Akad"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Teller Bank",
+      "Customer Service Bank"
+    ]
+  },
+  {
+    "id": "role_100",
+    "prodi_label": "S1 Ekonomi / Multifinance",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Credit Marketing & Leasing Officer",
+    "mandatory_skills": [
+      "Pembiayaan Multifinance & Leasing",
+      "Collection Strategy, Desk Call & Restrukturisasi"
+    ],
+    "preferred_skills": [
+      "Negosiasi & Kepemimpinan"
+    ],
+    "certifications": [
+      "Collection Strategy, Desk Call & Restrukturisasi"
+    ],
+    "scrape_queries": [
+      "Credit Marketing Officer",
+      "Leasing Surveyor"
+    ]
+  },
+  {
+    "id": "role_101",
+    "prodi_label": "S1 Manajemen Pemasaran",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Performance Ads Specialist (Meta / Google / TikTok)",
+    "mandatory_skills": [
+      "Meta Ads & TikTok Ads",
+      "SEM & Google Ads",
+      "Google Analytics 4 & Attribution"
+    ],
+    "preferred_skills": [
+      "Programmatic Ads & DV360"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Performance Marketing",
+      "Paid Ads Specialist"
+    ]
+  },
+  {
+    "id": "role_102",
+    "prodi_label": "S1 Ilmu Komunikasi / Pemasaran",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "SEO Specialist & Content Strategist",
+    "mandatory_skills": [
+      "SEO",
+      "Technical SEO & Keyword Research",
+      "Copywriting"
+    ],
+    "preferred_skills": [
+      "Local SEO & Google Business Profile"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "SEO Specialist",
+      "SEO Content"
+    ]
+  },
+  {
+    "id": "role_103",
+    "prodi_label": "S1 Manajemen / Bisnis",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Social Media & Community Manager",
+    "mandatory_skills": [
+      "Social Media Management",
+      "Editorial & Content Calendar",
+      "Produksi Konten Reels, Shorts & TikTok Organik"
+    ],
+    "preferred_skills": [
+      "KOL & Influencer Marketing"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Social Media Specialist",
+      "Community Manager"
+    ]
+  },
+  {
+    "id": "role_104",
+    "prodi_label": "S1 Bisnis / Komunikasi",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "KOL & Affiliate Marketing Specialist",
+    "mandatory_skills": [
+      "KOL & Influencer Marketing",
+      "Manajemen Tim Host Live Commerce (TikTok / Shopee)",
+      "Digital Marketing"
+    ],
+    "preferred_skills": [
+      "E-Commerce & Marketplace Management"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "KOL Specialist",
+      "Affiliate Manager"
+    ]
+  },
+  {
+    "id": "role_105",
+    "prodi_label": "S1 Manajemen / Teknik Industri",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Trade Marketing & Area Sales Supervisor",
+    "mandatory_skills": [
+      "Trade Marketing & Merchandising",
+      "Manajemen Distributor & Modern Trade (MT/GT)",
+      "Key Account Management"
+    ],
+    "preferred_skills": [
+      "Field Sales & Canvassing Area"
+    ],
+    "certifications": [
+      "Manajemen Distributor & Modern Trade (MT/GT)"
+    ],
+    "scrape_queries": [
+      "Area Sales Supervisor",
+      "Trade Marketing"
+    ]
+  },
+  {
+    "id": "role_106",
+    "prodi_label": "S1 Semua Jurusan / Bisnis",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "B2B Account Executive / SaaS Sales",
+    "mandatory_skills": [
+      "SaaS & Solution Selling",
+      "Telesales, Inside Sales & Cold Calling"
+    ],
+    "preferred_skills": [
+      "CRM Automation (HubSpot / Salesforce)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Account Executive",
+      "B2B Sales"
+    ]
+  },
+  {
+    "id": "role_107",
+    "prodi_label": "S1 Farmasi / Biologi / Manajemen",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Medical Representative & Alkes Product Specialist",
+    "mandatory_skills": [
+      "Medical Sales & Ethical Detailing",
+      "Sales Pitching & Presentasi Klien"
+    ],
+    "preferred_skills": [
+      "Negosiasi & Kepemimpinan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Medical Representative",
+      "Product Specialist Alkes"
+    ]
+  },
+  {
+    "id": "role_108",
+    "prodi_label": "S1 Manajemen / Pemasaran",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "CRM & Lifecycle Retention Specialist",
+    "mandatory_skills": [
+      "CRM Automation (HubSpot / Salesforce)",
+      "Growth Marketing & Retention",
+      "WhatsApp Business API & Chatbot Funnel"
+    ],
+    "preferred_skills": [
+      "Segmentasi RFM & Program Referral Pelanggan"
+    ],
+    "certifications": [
+      "WhatsApp Business API & Chatbot Funnel"
+    ],
+    "scrape_queries": [
+      "CRM Specialist",
+      "Retention Marketing"
+    ]
+  },
+  {
+    "id": "role_109",
+    "prodi_label": "S1 Statistika / Manajemen",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Market Research & Consumer Insights Analyst",
+    "mandatory_skills": [
+      "Data Analysis",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "Google Analytics 4 & Attribution"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Market Research",
+      "Consumer Insights"
+    ]
+  },
+  {
+    "id": "role_110",
+    "prodi_label": "S1 Manajemen / Bisnis",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Management Trainee (MT) Commercial",
+    "mandatory_skills": [
+      "Brand Management & Positioning",
+      "Data-Driven Decision Making"
+    ],
+    "preferred_skills": [
+      "Key Account Management"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Management Trainee Commercial",
+      "MT Sales Marketing"
+    ]
+  },
+  {
+    "id": "role_111",
+    "prodi_label": "S1 Teknik Industri / Manajemen",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Supply Chain & S&OP Planner",
+    "mandatory_skills": [
+      "Sales & Operations Planning (S&OP)",
+      "Demand Planning & Statistical Forecasting",
+      "PPIC & Perencanaan Produksi"
+    ],
+    "preferred_skills": [
+      "SAP MM / SD / Ariba"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Supply Chain Analyst",
+      "Demand Planner"
+    ]
+  },
+  {
+    "id": "role_112",
+    "prodi_label": "S1 Manajemen / Teknik Industri",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Strategic Procurement & Buyer",
+    "mandatory_skills": [
+      "Strategic Sourcing & Procurement",
+      "E-Procurement & Manajemen Kontrak Vendor",
+      "Pengadaan CAPEX, Jasa & Kontrak EPC"
+    ],
+    "preferred_skills": [
+      "SAP MM / SD / Ariba"
+    ],
+    "certifications": [
+      "Strategic Sourcing & Procurement"
+    ],
+    "scrape_queries": [
+      "Buyer",
+      "Procurement Specialist"
+    ]
+  },
+  {
+    "id": "role_113",
+    "prodi_label": "S1 Manajemen Transportasi / Pelayaran",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Customs Clearance & PPJK Specialist",
+    "mandatory_skills": [
+      "Kepabeanan PPJK & Sistem CEISA 4.0",
+      "Kliring Pelabuhan, NPE / SPPB & Bea Cukai",
+      "Operasional Kawasan Berikat (TPB / KITE)"
+    ],
+    "preferred_skills": [
+      "Incoterms 2020 & Letter of Credit (L/C)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "PPJK",
+      "Customs Specialist"
+    ]
+  },
+  {
+    "id": "role_114",
+    "prodi_label": "S1 Logistik / Manajemen",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Freight Forwarding & Shipping Operations",
+    "mandatory_skills": [
+      "Freight Forwarding & Transport Management",
+      "Operasional Pelabuhan, Kontainer & Depot",
+      "Incoterms 2020 & Letter of Credit (L/C)"
+    ],
+    "preferred_skills": [
+      "Cold Chain Logistics"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Freight Operations",
+      "Shipping Coordinator"
+    ]
+  },
+  {
+    "id": "role_115",
+    "prodi_label": "D3/S1 Manajemen Logistik",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "E-Commerce Fulfillment & Hub Supervisor",
+    "mandatory_skills": [
+      "Fulfillment E-Commerce & Sortation Hub Operations",
+      "Warehouse Management System (WMS)",
+      "Reverse Logistics & Return Merchandise (RMA)"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Hub Supervisor",
+      "Warehouse Operations"
+    ]
+  },
+  {
+    "id": "role_116",
+    "prodi_label": "S1 Psikologi",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Psikolog Industri & Assessor",
+    "mandatory_skills": [
+      "Asesmen Psikologi & Psikotes",
+      "Alat Tes Psikologi (DISC / MBTI / WARTegg)",
+      "Assessment Center & BEI Competency"
+    ],
+    "preferred_skills": [
+      "Organization Development (OD)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "HR Assessor",
+      "Psikolog Industri"
+    ]
+  },
+  {
+    "id": "role_117",
+    "prodi_label": "S1 Manajemen SDM",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Payroll & CompBen Specialist",
+    "mandatory_skills": [
+      "Payroll & Kompensasi",
+      "BPJS & Ketenagakerjaan",
+      "Administrasi EDABU BPJS & SIPP Online",
+      "Compensation & Benefits (CompBen)"
+    ],
+    "preferred_skills": [
+      "Akuntansi Payroll & PPh 21 TER"
+    ],
+    "certifications": [
+      "Administrasi EDABU BPJS & SIPP Online"
+    ],
+    "scrape_queries": [
+      "Payroll Specialist",
+      "CompBen Analyst"
+    ]
+  },
+  {
+    "id": "role_118",
+    "prodi_label": "S1 Hukum / Psikologi / MSDM",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Industrial Relations & Compliance HR",
+    "mandatory_skills": [
+      "Industrial Relations & UU Ketenagakerjaan",
+      "Kepatuhan Norma Kerja (WLKP Kemnaker)",
+      "LKS Bipartit & Pembinaan Karyawan"
+    ],
+    "preferred_skills": [
+      "Administrasi SP1/2/3 & Dokumen PHK Sesuai PP"
+    ],
+    "certifications": [
+      "Industrial Relations & UU Ketenagakerjaan",
+      "Administrasi SP1/2/3 & Dokumen PHK Sesuai PP"
+    ],
+    "scrape_queries": [
+      "Industrial Relations",
+      "HR Compliance"
+    ]
+  },
+  {
+    "id": "role_119",
+    "prodi_label": "S1 Manajemen / Psikologi",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Learning & Talent Development",
+    "mandatory_skills": [
+      "Learning & Development (Training)",
+      "KPI & OKR Performance Management",
+      "People Analytics & Turnover Dashboard"
+    ],
+    "preferred_skills": [
+      "Organization Development (OD)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "L&D Specialist",
+      "Talent Development"
+    ]
+  },
+  {
+    "id": "role_120",
+    "prodi_label": "S1 Semua Jurusan",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Tech & Executive Recruiter",
+    "mandatory_skills": [
+      "IT & Engineering Talent Acquisition",
+      "Executive Search & Boolean Sourcing",
+      "Rekrutmen & Seleksi"
+    ],
+    "preferred_skills": [
+      "Pre-Employment Screening & Reference Check"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "IT Recruiter",
+      "Talent Sourcer"
+    ]
+  },
+  {
+    "id": "role_121",
+    "prodi_label": "D3/S1 Administrasi / Manajemen",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "General Affairs & Building Operations",
+    "mandatory_skills": [
+      "General Affairs & Asset Facility",
+      "Manajemen Armada & Perizinan Operasional",
+      "Koordinasi Security, Kebersihan & K3 Perkantoran"
+    ],
+    "preferred_skills": [
+      "Strategic Sourcing & Procurement"
+    ],
+    "certifications": [
+      "Strategic Sourcing & Procurement"
+    ],
+    "scrape_queries": [
+      "GA Staff",
+      "Facility Supervisor"
+    ]
+  },
+  {
+    "id": "role_122",
+    "prodi_label": "S1 Semua Jurusan",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Customer Experience & Call Center Lead",
+    "mandatory_skills": [
+      "Customer Experience & SLA Management",
+      "Quality Monitoring Call Center & QA Layanan",
+      "Service Excellence & Orientasi Kepuasan Pelanggan"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Customer Service Lead",
+      "CX Specialist"
+    ]
+  },
+  {
+    "id": "role_123",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Legal Corporate & M&A Associate",
+    "mandatory_skills": [
+      "Legal Due Diligence & M&A",
+      "Corporate Secretary & RUPS",
+      "Legal Drafting & Review Kontrak"
+    ],
+    "preferred_skills": [],
+    "certifications": [],
+    "scrape_queries": [
+      "Corporate Lawyer",
+      "Legal Associate"
+    ]
+  },
+  {
+    "id": "role_124",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Litigation & Dispute Resolution Lawyer",
+    "mandatory_skills": [
+      "Litigasi, PKPU & Arbitrase",
+      "Hukum Ketenagakerjaan & Penyelesaian PHI",
+      "Legal Opinion & Riset Hukum"
+    ],
+    "preferred_skills": [
+      "Hukum Pajak & Beracara Pengadilan Pajak"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Litigation Lawyer",
+      "Advokat"
+    ]
+  },
+  {
+    "id": "role_125",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Fintech & Banking Regulatory Compliance",
+    "mandatory_skills": [
+      "Regulasi Jasa Keuangan & Fintech (OJK / BI)",
+      "Anti Pencucian Uang (APU PPT / AML)",
+      "Perlindungan Data Pribadi (UU PDP / GDPR)"
+    ],
+    "preferred_skills": [
+      "Kepatuhan & Regulasi (Compliance)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Regulatory Compliance",
+      "AML Officer"
+    ]
+  },
+  {
+    "id": "role_126",
+    "prodi_label": "S1 Administrasi Publik",
+    "domain": "administrasi_publik_hi_sosial",
+    "role_title": "Procurement & PBJP Government Specialist",
+    "mandatory_skills": [
+      "Pengadaan Barang & Jasa Pemerintah (PBJP)",
+      "E-Government & Layanan Publik Digital (SPBE)"
+    ],
+    "preferred_skills": [
+      "Tata Kelola Administrasi Pemerintahan & Arsip Negara"
+    ],
+    "certifications": [
+      "Tata Kelola Administrasi Pemerintahan & Arsip Negara"
+    ],
+    "scrape_queries": [
+      "Procurement PBJP",
+      "Analis Kebijakan"
+    ]
+  },
+  {
+    "id": "role_127",
+    "prodi_label": "S1 Hubungan Internasional / Sosial",
+    "domain": "administrasi_publik_hi_sosial",
+    "role_title": "NGO Program & MEAL Officer",
+    "mandatory_skills": [
+      "Monitoring & Evaluasi Program (M&E / MEAL)",
+      "Manajemen Hibah & Donor Internasional (NGO)",
+      "GESI (Gender Equality & Social Inclusion)"
+    ],
+    "preferred_skills": [
+      "Metode Riset Sosial & Pengolahan Survey"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Program Officer NGO",
+      "MEAL Officer"
+    ]
+  },
+  {
+    "id": "role_128",
+    "prodi_label": "S1 Komunikasi / Jurnalistik",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Corporate Communications & PR Manager",
+    "mandatory_skills": [
+      "Public Relations & Media Relations",
+      "Crisis Communication & Reputasi",
+      "Thought Leadership & Ghostwriting Eksekutif"
+    ],
+    "preferred_skills": [
+      "Media Planning & TV / OOH Placement"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Corporate Communications",
+      "PR Manager"
+    ]
+  },
+  {
+    "id": "role_129",
+    "prodi_label": "S1 Komunikasi / Broadcasting",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Live Stream & Podcast Producer",
+    "mandatory_skills": [
+      "Broadcasting, Podcast & Live Production",
+      "Audio Engineering & Sound Design",
+      "Public Speaking, Moderator & Host Live"
+    ],
+    "preferred_skills": [
+      "Adobe Premiere Pro & Video Editing"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Broadcast Producer",
+      "Podcast Producer"
+    ]
+  },
+  {
+    "id": "role_130",
+    "prodi_label": "S1 DKV",
+    "domain": "dkv_produk_ux_kreatif",
+    "role_title": "Brand & Packaging Designer",
+    "mandatory_skills": [
+      "Visual Brand Identity & Guideline",
+      "Desain Kemasan Struktural & Die-Line",
+      "Adobe Illustrator"
+    ],
+    "preferred_skills": [
+      "Indesign & Layout Cetak / Digital"
+    ],
+    "certifications": [
+      "Desain Kemasan Struktural & Die-Line",
+      "Adobe Illustrator"
+    ],
+    "scrape_queries": [
+      "Packaging Designer",
+      "Brand Designer"
+    ]
+  },
+  {
+    "id": "role_131",
+    "prodi_label": "S1 DKV / Animasi",
+    "domain": "dkv_produk_ux_kreatif",
+    "role_title": "3D Artist & Motion Designer",
+    "mandatory_skills": [
+      "3D Modeling & Product Visualization (Blender / C4D)",
+      "After Effects & Motion Graphics",
+      "2D/3D Game Art, Rigging & Texturing"
+    ],
+    "preferred_skills": [
+      "Adobe Photoshop"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "3D Artist",
+      "Motion Graphics"
+    ]
+  },
+  {
+    "id": "role_132",
+    "prodi_label": "S1 Desain Produk / Tekstil / Fashion",
+    "domain": "dkv_produk_ux_kreatif",
+    "role_title": "Product & Fashion Apparel Designer",
+    "mandatory_skills": [
+      "Desain Produk Industri & Ergonomi",
+      "Desain Fashion, Pattern Making & Textile"
+    ],
+    "preferred_skills": [
+      "Desain Furnitur & Produk Kayu / Rotan Ekspor"
+    ],
+    "certifications": [
+      "Desain Produk Industri & Ergonomi"
+    ],
+    "scrape_queries": [
+      "Industrial Product Designer",
+      "Fashion Designer"
+    ]
+  },
+  {
+    "id": "role_133",
+    "prodi_label": "S1 Sastra Inggris / Linguistik",
+    "domain": "bahasa_sastra_penerjemahan",
+    "role_title": "Technical Writer & UX Copywriter",
+    "mandatory_skills": [
+      "Technical Writing & Documentation",
+      "UX Writing & Microcopy Produk Digital",
+      "Penyuntingan Bahasa & Proofreading (EYD V)"
+    ],
+    "preferred_skills": [
+      "Software & Game Localization (L10n)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Technical Writer",
+      "UX Writer"
+    ]
+  },
+  {
+    "id": "role_134",
+    "prodi_label": "S1 Sastra Indonesia / Asing",
+    "domain": "bahasa_sastra_penerjemahan",
+    "role_title": "Editorial & Book Publisher",
+    "mandatory_skills": [
+      "Penulisan Fiksi, Naskah Buku & Editorial Penerbit",
+      "Penyuntingan Bahasa & Proofreading (EYD V)"
+    ],
+    "preferred_skills": [
+      "Transcreation Iklan & Brand Multibahasa"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Book Editor",
+      "Editorial Specialist"
+    ]
+  },
+  {
+    "id": "role_135",
+    "prodi_label": "S1 Pendidikan Guru PAUD / Psikologi",
+    "domain": "pendidikan_pelatihan",
+    "role_title": "Guru PAUD / Guru Pendamping ABK",
+    "mandatory_skills": [
+      "Pendidikan Anak Usia Dini & Inklusif (ABK)",
+      "Bimbingan Konseling & Psikologi Pendidikan"
+    ],
+    "preferred_skills": [
+      "Kurikulum Merdeka & Perencanaan Ajar"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Guru PAUD",
+      "Shadow Teacher"
+    ]
+  },
+  {
+    "id": "role_136",
+    "prodi_label": "S1 Pendidikan Bahasa Inggris",
+    "domain": "pendidikan_pelatihan",
+    "role_title": "English / IELTS / TOEFL Instructor",
+    "mandatory_skills": [
+      "Pengajaran Bahasa Inggris (TOEFL / IELTS / ESP)",
+      "Pengajaran & Manajemen Kelas",
+      "Kurikulum Internasional (Cambridge / IB)"
+    ],
+    "preferred_skills": [
+      "Bahasa Inggris"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "English Teacher",
+      "IELTS Tutor"
+    ]
+  },
+  {
+    "id": "role_137",
+    "prodi_label": "S1 Semua Jurusan / Pendidikan",
+    "domain": "pendidikan_pelatihan",
+    "role_title": "Corporate Trainer & Fasilitator Vokasi",
+    "mandatory_skills": [
+      "Soft Skill & Sales Training Fasilitator",
+      "Instruktur Pelatihan Vokasi / LPK & Balai Latihan Kerja",
+      "Learning & Development (Training)"
+    ],
+    "preferred_skills": [
+      "Public Speaking & Presentasi Eksekutif"
+    ],
+    "certifications": [
+      "Instruktur Pelatihan Vokasi / LPK & Balai Latihan Kerja"
+    ],
+    "scrape_queries": [
+      "Corporate Trainer",
+      "Training Specialist"
+    ]
+  },
+  {
+    "id": "role_138",
+    "prodi_label": "S1 Teknik Sipil",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Structural Engineer (High-Rise & Steel)",
+    "mandatory_skills": [
+      "ETABS",
+      "Desain Struktur Baja (SNI 1729)",
+      "Struktur Pracetak & Prategang (Precast/Prestressed)"
+    ],
+    "preferred_skills": [
+      "AutoCAD"
+    ],
+    "certifications": [
+      "Desain Struktur Baja (SNI 1729)",
+      "Struktur Pracetak & Prategang (Precast/Prestressed)"
+    ],
+    "scrape_queries": [
+      "Structural Engineer",
+      "Civil Structure"
+    ]
+  },
+  {
+    "id": "role_139",
+    "prodi_label": "S1 Teknik Sipil / Pengairan",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Water Resources & Drainage Engineer",
+    "mandatory_skills": [
+      "Teknik Pengairan & Hidrologi",
+      "Desain Bangunan Pengolahan Air (IPA / WWTP Sipil)",
+      "Autodesk Civil 3D"
+    ],
+    "preferred_skills": [],
+    "certifications": [],
+    "scrape_queries": [
+      "Water Engineer",
+      "Hydrology Engineer"
+    ]
+  },
+  {
+    "id": "role_140",
+    "prodi_label": "S1 Teknik Sipil",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Highway & Bridge Site Engineer",
+    "mandatory_skills": [
+      "Autodesk Civil 3D",
+      "Perkerasan Jalan Aspal & Rigid Pavement",
+      "Uji Mutu Beton & Material Konstruksi",
+      "Primavera P6 & MS Project"
+    ],
+    "preferred_skills": [
+      "Manajemen Konstruksi"
+    ],
+    "certifications": [
+      "Uji Mutu Beton & Material Konstruksi",
+      "Manajemen Konstruksi"
+    ],
+    "scrape_queries": [
+      "Highway Engineer",
+      "Bridge Engineer"
+    ]
+  },
+  {
+    "id": "role_141",
+    "prodi_label": "S1 Arsitektur / Teknik Sipil",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "BIM Coordinator / Modeler",
+    "mandatory_skills": [
+      "Revit & BIM",
+      "BIM 4D/5D & Dynamo Automation",
+      "Koordinasi MEP Bangunan Gedung"
+    ],
+    "preferred_skills": [
+      "AutoCAD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "BIM Modeler",
+      "BIM Coordinator"
+    ]
+  },
+  {
+    "id": "role_142",
+    "prodi_label": "S1 Teknik Geodesi",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Geodetic Surveyor & UAV LiDAR",
+    "mandatory_skills": [
+      "Survey Pemetaan (Total Station / Theodolite / Drone)",
+      "LiDAR Processing & Orthophoto Drone"
+    ],
+    "preferred_skills": [
+      "AutoCAD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Surveyor Pemetaan",
+      "Drone Pilot Mapping"
+    ]
+  },
+  {
+    "id": "role_143",
+    "prodi_label": "S1 Teknik Mesin",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "HVAC & Building Utility Engineer",
+    "mandatory_skills": [
+      "Sistem Refrigerasi & Cold Storage Industri",
+      "Plant Utility (Boiler, Chiller, Compressor)"
+    ],
+    "preferred_skills": [
+      "Koordinasi MEP Bangunan Gedung"
+    ],
+    "certifications": [
+      "Sistem Refrigerasi & Cold Storage Industri"
+    ],
+    "scrape_queries": [
+      "HVAC Engineer",
+      "Building Engineering"
+    ]
+  },
+  {
+    "id": "role_144",
+    "prodi_label": "S1 Teknik Mesin",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "Welding & NDT Inspector",
+    "mandatory_skills": [
+      "Welding Inspection (AWS CWI / NDT)",
+      "Inspeksi Tangki & Bejana Tekan (API 653 / API 510)",
+      "Piping & Pressure Vessel Design"
+    ],
+    "preferred_skills": [
+      "K3 / HSE"
+    ],
+    "certifications": [
+      "Inspeksi Tangki & Bejana Tekan (API 653 / API 510)"
+    ],
+    "scrape_queries": [
+      "Welding Inspector",
+      "QA QC Piping"
+    ]
+  },
+  {
+    "id": "role_145",
+    "prodi_label": "S1 Teknik Mesin / Otomotif",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "Heavy Equipment & Fleet Mechanic",
+    "mandatory_skills": [
+      "Mekanik Alat Berat (Excavator / Dump Truck / Bulldozer)",
+      "Hidrolik & Pneumatik Industri",
+      "Maintenance & Reliability"
+    ],
+    "preferred_skills": [
+      "CMMS & Predictive Maintenance"
+    ],
+    "certifications": [
+      "Hidrolik & Pneumatik Industri"
+    ],
+    "scrape_queries": [
+      "Mekanik Alat Berat",
+      "Heavy Equipment Engineer"
+    ]
+  },
+  {
+    "id": "role_146",
+    "prodi_label": "S1 Teknik Mesin / Metalurgi",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "CNC & Tooling Manufacturing Engineer",
+    "mandatory_skills": [
+      "CNC Programming & Machining (CAM)",
+      "Mold Maintenance & Tooling Engineering",
+      "GD&T & Metrologi Manufaktur (CMM)"
+    ],
+    "preferred_skills": [
+      "SolidWorks & Mechanical CAD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "CNC Programmer",
+      "Manufacturing Engineer"
+    ]
+  },
+  {
+    "id": "role_147",
+    "prodi_label": "S1 Teknik Elektro",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "Power Systems & Substation Engineer",
+    "mandatory_skills": [
+      "Sistem Tenaga Listrik & Gardu Induk (ETAP)",
+      "Komisioning Gardu Induk & Proteksi Relay",
+      "Panel ATS/AMF, Genset & Proteksi Petir"
+    ],
+    "preferred_skills": [
+      "Sertifikat Kompetensi Tenaga Teknik (SKTTK / AK3 Listrik)"
+    ],
+    "certifications": [
+      "Sistem Tenaga Listrik & Gardu Induk (ETAP)",
+      "Sertifikat Kompetensi Tenaga Teknik (SKTTK / AK3 Listrik)"
+    ],
+    "scrape_queries": [
+      "Electrical Power Engineer",
+      "Substation Engineer"
+    ]
+  },
+  {
+    "id": "role_148",
+    "prodi_label": "S1 Teknik Elektro / Mekatronika",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "Robotics, PLC & IIoT Engineer",
+    "mandatory_skills": [
+      "Pemrograman PLC & SCADA (Siemens / Omron / Allen-Bradley)",
+      "Industrial Robotics & AGV (FANUC / ABB / KUKA)",
+      "Industrial IoT & MQTT / LoRaWAN"
+    ],
+    "preferred_skills": [
+      "VFD Inverter & Servo Motor Tuning"
+    ],
+    "certifications": [
+      "Industrial Robotics & AGV (FANUC / ABB / KUKA)",
+      "Industrial IoT & MQTT / LoRaWAN"
+    ],
+    "scrape_queries": [
+      "Robotics Engineer",
+      "PLC Automation"
+    ]
+  },
+  {
+    "id": "role_149",
+    "prodi_label": "S1 Teknik Telekomunikasi / Elektro",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "Telecom FTTH & RF Optimization Engineer",
+    "mandatory_skills": [
+      "Telekomunikasi FTTH, RF & 5G Optimization",
+      "OSP/ISP Telekomunikasi & Tower BTS Maintenance"
+    ],
+    "preferred_skills": [
+      "MikroTik & Cisco Networking"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "RF Engineer",
+      "FTTH Engineer"
+    ]
+  },
+  {
+    "id": "role_150",
+    "prodi_label": "S1 Teknik Elektro / Informatika",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "Embedded Firmware & PCB Engineer",
+    "mandatory_skills": [
+      "Desain PCB & Embedded Systems (STM32 / ESP32)",
+      "Sistem Baterai (BMS EV) & Charging Station"
+    ],
+    "preferred_skills": [
+      "C++"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Embedded Engineer",
+      "Firmware Engineer"
+    ]
+  },
+  {
+    "id": "role_151",
+    "prodi_label": "S1 Teknik Elektro / Mesin",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "Data Center Critical Facilities Engineer",
+    "mandatory_skills": [
+      "Data Center Infrastructure (UPS, Precision Cooling, PUE)",
+      "Building Management System (BMS) & Fire Alarm",
+      "Panel ATS/AMF, Genset & Proteksi Petir"
+    ],
+    "preferred_skills": [],
+    "certifications": [
+      "Data Center Infrastructure (UPS, Precision Cooling, PUE)"
+    ],
+    "scrape_queries": [
+      "Data Center Engineer",
+      "Critical Facilities"
+    ]
+  },
+  {
+    "id": "role_152",
+    "prodi_label": "S1 Teknik Industri",
+    "domain": "teknik_industri_k3_mutu",
+    "role_title": "Lean Six Sigma & Operational Excellence",
+    "mandatory_skills": [
+      "Lean Six Sigma (Green / Black Belt)",
+      "OEE & Total Productive Maintenance (TPM)",
+      "Minitab & Statistical Process Control"
+    ],
+    "preferred_skills": [
+      "Facility Layout Design & Material Flow pabrik"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Operational Excellence",
+      "Continuous Improvement"
+    ]
+  },
+  {
+    "id": "role_153",
+    "prodi_label": "S1 Teknik Lingkungan / K3",
+    "domain": "teknik_industri_k3_mutu",
+    "role_title": "QHSE & Process Safety Specialist",
+    "mandatory_skills": [
+      "Ahli K3 Umum Kemnaker & CSMS",
+      "Manajemen Lingkungan & K3 Terintegrasi (QHSE)",
+      "Ahli K3 Kimia & K3 Pesawat Uap / Bejana Tekan"
+    ],
+    "preferred_skills": [
+      "Tanggap Darurat Kebakaran (Damkar Kelas A/B/C/D)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "QHSE Officer",
+      "HSE Supervisor"
+    ]
+  },
+  {
+    "id": "role_154",
+    "prodi_label": "S1 Teknik Pertambangan",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Drill & Blast / Dispatch Mining Supervisor",
+    "mandatory_skills": [
+      "Operasi Peledakan & Pemboran (Drilling & Blasting)",
+      "Dispatch Tambang & Optimasi Fleet Hauling",
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "preferred_skills": [
+      "Geoteknik Tambang & Slope Stability (Rocscience)"
+    ],
+    "certifications": [
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "scrape_queries": [
+      "Mine Operations",
+      "Drill and Blast"
+    ]
+  },
+  {
+    "id": "role_155",
+    "prodi_label": "S1 Teknik Metalurgi / Kimia",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Metallurgist & Smelter Process Engineer",
+    "mandatory_skills": [
+      "Pengolahan Mineral & Metalurgi (CPP / Smelter)",
+      "Process Simulation (Aspen HYSYS / Flarenet)",
+      "Coal Quality, Blending & Sampling ASTM"
+    ],
+    "preferred_skills": [
+      "Pengujian Laboratorium (ISO 17025)"
+    ],
+    "certifications": [
+      "Pengujian Laboratorium (ISO 17025)"
+    ],
+    "scrape_queries": [
+      "Metallurgist",
+      "Smelter Engineer"
+    ]
+  },
+  {
+    "id": "role_156",
+    "prodi_label": "S1 Teknik Perminyakan",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Drilling, Reservoir & LNG Operations",
+    "mandatory_skills": [
+      "Teknik Perminyakan & Reservoir (Petrel / Eclipse)",
+      "Operasi Terminal LNG, CNG & Pipa Gas",
+      "Keselamatan Migas & BOSIET / HUET"
+    ],
+    "preferred_skills": [
+      "Process Simulation (Aspen HYSYS / Flarenet)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Petroleum Engineer",
+      "Reservoir Engineer"
+    ]
+  },
+  {
+    "id": "role_157",
+    "prodi_label": "Profesi Dokter",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Dokter Umum & Dokter Perusahaan (Hiperkes)",
+    "mandatory_skills": [
+      "Praktik Klinis Dokter Umum (STR & SIP Aktif)",
+      "Kedokteran Kerja & Hiperkes Perusahaan",
+      "Gawat Darurat (BTCLS / ACLS / ATLS)"
+    ],
+    "preferred_skills": [
+      "Sistem Informasi Manajemen RS (SIMRS / Rekam Medis Elektronik)"
+    ],
+    "certifications": [
+      "Praktik Klinis Dokter Umum (STR & SIP Aktif)",
+      "Gawat Darurat (BTCLS / ACLS / ATLS)"
+    ],
+    "scrape_queries": [
+      "Dokter Umum",
+      "Dokter Perusahaan"
+    ]
+  },
+  {
+    "id": "role_158",
+    "prodi_label": "S1 Keperawatan (Ners)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Perawat ICU / Kamar Bedah / Site Tambang",
+    "mandatory_skills": [
+      "Keperawatan Intensif (ICU / NICU / PICU / HD)",
+      "Perawat Perusahaan / Site Paramedic (Hiperkes Perawat)",
+      "Asuhan Keperawatan Klinis (Ners / STR Aktif)"
+    ],
+    "preferred_skills": [
+      "Keperawatan Kamar Bedah & Sterilisasi (CSSD)"
+    ],
+    "certifications": [
+      "Asuhan Keperawatan Klinis (Ners / STR Aktif)"
+    ],
+    "scrape_queries": [
+      "Perawat ICU",
+      "Site Paramedic"
+    ]
+  },
+  {
+    "id": "role_159",
+    "prodi_label": "D3/S1 Kebidanan",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Bidan Klinis & Layanan KIA",
+    "mandatory_skills": [
+      "Kebidanan & Kesehatan Ibu Anak (MU / APN)",
+      "Pelayanan KIA, KB & Konseling Laktasi"
+    ],
+    "preferred_skills": [
+      "Keselamatan Pasien & PPI / K3RS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Bidan",
+      "Midwife"
+    ]
+  },
+  {
+    "id": "role_160",
+    "prodi_label": "D3/S1 Analis Kesehatan (ATLM)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Analis Laboratorium Klinik RS / Lab",
+    "mandatory_skills": [
+      "Teknologi Laboratorium Medik (ATLM)",
+      "Keselamatan Pasien & PPI / K3RS"
+    ],
+    "preferred_skills": [
+      "Sistem Informasi Manajemen RS (SIMRS / Rekam Medis Elektronik)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Analis Kesehatan",
+      "ATLM"
+    ]
+  },
+  {
+    "id": "role_161",
+    "prodi_label": "D3/S1 Teknik Elektromedis / Radiologi",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Radiografer & Teknisi Elektromedis",
+    "mandatory_skills": [
+      "Radiografi & Pencitraan Medis",
+      "Teknik Elektromedis & Kalibrasi Alat RS"
+    ],
+    "preferred_skills": [
+      "Aplikasi Radiasi Industri & Keselamatan Nuklir (PPR Bapeten)"
+    ],
+    "certifications": [
+      "Aplikasi Radiasi Industri & Keselamatan Nuklir (PPR Bapeten)"
+    ],
+    "scrape_queries": [
+      "Radiografer",
+      "Elektromedis"
+    ]
+  },
+  {
+    "id": "role_162",
+    "prodi_label": "S1 Kesehatan Lingkungan",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Sanitarian & K3 Rumah Sakit",
+    "mandatory_skills": [
+      "Kesehatan Lingkungan (Sanitarian) & Limbah Medis",
+      "Keselamatan Pasien & PPI / K3RS"
+    ],
+    "preferred_skills": [
+      "Pengelolaan Limbah (IPAL / WWTP / B3)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Sanitarian",
+      "K3RS Officer"
+    ]
+  },
+  {
+    "id": "role_163",
+    "prodi_label": "S1 Farmasi / Apoteker",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "role_title": "R&D Kosmetik, Herbal & Validasi Farmasi",
+    "mandatory_skills": [
+      "Formulasi Kosmetik & CPKB",
+      "Formulasi Obat Tradisional / Herbal (CPOTB)",
+      "CAPA, Deviasi & Change Control Farmasi"
+    ],
+    "preferred_skills": [
+      "Registrasi BPOM & Regulatory Affairs"
+    ],
+    "certifications": [
+      "Formulasi Kosmetik & CPKB",
+      "Registrasi BPOM & Regulatory Affairs"
+    ],
+    "scrape_queries": [
+      "R&D Kosmetik",
+      "QA Farmasi"
+    ]
+  },
+  {
+    "id": "role_164",
+    "prodi_label": "S1 Farmasi / Profesi Apoteker",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "role_title": "Apoteker Penanggung Jawab PBF & Distribusi",
+    "mandatory_skills": [
+      "GDP / CDOB Distribusi Farmasi",
+      "Operasional Gudang Farmasi & Cold Chain Vaksin",
+      "Farmasi Klinis & Apoteker"
+    ],
+    "preferred_skills": [
+      "Registrasi BPOM & Regulatory Affairs"
+    ],
+    "certifications": [
+      "GDP / CDOB Distribusi Farmasi",
+      "Registrasi BPOM & Regulatory Affairs"
+    ],
+    "scrape_queries": [
+      "Apoteker PBF",
+      "Penanggung Jawab PBF"
+    ]
+  },
+  {
+    "id": "role_165",
+    "prodi_label": "S1 Teknologi Pangan",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "Penyelia Halal & Food Safety FSSC 22000",
+    "mandatory_skills": [
+      "Sertifikasi Halal (SJPH / BPJPH / LPPOM)",
+      "GMP, SSOP & Sanitasi Pabrik Pangan",
+      "Lead Implementer FSSC 22000 & BRCGS"
+    ],
+    "preferred_skills": [
+      "Uji Mikrobiologi Pangan (TPC / Coliform)"
+    ],
+    "certifications": [
+      "Sertifikasi Halal (SJPH / BPJPH / LPPOM)",
+      "Lead Implementer FSSC 22000 & BRCGS"
+    ],
+    "scrape_queries": [
+      "Penyelia Halal",
+      "Food Safety QA"
+    ]
+  },
+  {
+    "id": "role_166",
+    "prodi_label": "S1 Peternakan / Kedokteran Hewan",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "Technical Service & Farm Manager Unggas",
+    "mandatory_skills": [],
+    "preferred_skills": [],
+    "certifications": [],
+    "scrape_queries": [
+      "Farm Manager",
+      "Technical Service Peternakan"
+    ]
+  },
+  {
+    "id": "role_167",
+    "prodi_label": "S1 Perikanan / Ilmu Kelautan",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "Aquaculture Technician & Cold Seafood QC",
+    "mandatory_skills": [
+      "Akuakultur & Teknologi Hasil Perikanan",
+      "Pengolahan Hasil Perikanan & Ekspor Udang/Tuna"
+    ],
+    "preferred_skills": [
+      "HACCP & Keamanan Pangan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Teknisi Tambak",
+      "QC Perikanan"
+    ]
+  },
+  {
+    "id": "role_168",
+    "prodi_label": "S1 Teknik Lingkungan",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "Environmental / AMDAL & WWTP Engineer",
+    "mandatory_skills": [
+      "Penyusunan AMDAL, UKL-UPL & RKL-RPL",
+      "Pengelolaan Limbah (IPAL / WWTP / B3)",
+      "Pemantauan Kualitas Udara, Air & Kebisingan"
+    ],
+    "preferred_skills": [
+      "Inventarisasi Emisi Karbon & ESG Lingkungan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Environmental Engineer",
+      "WWTP Operator"
+    ]
+  },
+  {
+    "id": "role_169",
+    "prodi_label": "D3/S1 Analis Kimia / Kimia",
+    "domain": "sains_lab_geologi_energi",
+    "role_title": "QC Water & Material Lab Analyst",
+    "mandatory_skills": [
+      "Analisis Kualitas Air & Limbah Laboratorium",
+      "Karakterisasi Material (XRD / SEM / TEM)",
+      "Kalibrasi Instrumen & Metrologi"
+    ],
+    "preferred_skills": [
+      "Pengujian Laboratorium (ISO 17025)"
+    ],
+    "certifications": [
+      "Kalibrasi Instrumen & Metrologi",
+      "Pengujian Laboratorium (ISO 17025)"
+    ],
+    "scrape_queries": [
+      "Lab Analyst",
+      "QC Water Lab"
+    ]
+  },
+  {
+    "id": "role_170",
+    "prodi_label": "D3/S1 Tata Boga / Pariwisata",
+    "domain": "pariwisata_perhotelan_fnb",
+    "role_title": "Sous Chef / Pastry & F&B Area Manager",
+    "mandatory_skills": [
+      "Food & Beverage Service & Culinary",
+      "Pastry, Bakery & Cake Decoration",
+      "Food Costing & Kitchen Inventory (FIFO/FEFO)",
+      "Central Kitchen QA & Multi-Outlet F&B Audit"
+    ],
+    "preferred_skills": [
+      "Barista Specialty & Beverage Control"
+    ],
+    "certifications": [
+      "Pastry, Bakery & Cake Decoration"
+    ],
+    "scrape_queries": [
+      "Sous Chef",
+      "F&B Supervisor"
+    ]
+  },
+  {
+    "id": "role_171",
+    "prodi_label": "D3/S1 Pariwisata / Tour & Travel",
+    "domain": "pariwisata_perhotelan_fnb",
+    "role_title": "Ticketing Travel, MICE & Event Planner",
+    "mandatory_skills": [
+      "Reservasi Tiket & Tour Planning (GDS Amadeus/Sabre)",
+      "MICE, Wedding & Event Management",
+      "Operasional Tour Travel, Umroh & Haji Khusus"
+    ],
+    "preferred_skills": [
+      "Public Relations & Media Relations"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Travel Consultant",
+      "Event Coordinator"
+    ]
+  },
+  {
+    "id": "role_172",
+    "prodi_label": "D3/S1 Manajemen Transportasi Udara",
+    "domain": "pariwisata_perhotelan_fnb",
+    "role_title": "Aviation Ground Staff & Cabin Crew",
+    "mandatory_skills": [
+      "Ground Handling & Cabin Crew Safety",
+      "Bahasa Inggris",
+      "Service Excellence & Orientasi Kepuasan Pelanggan"
+    ],
+    "preferred_skills": [
+      "Front Office & Hotel PMS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Ground Staff",
+      "Cabin Crew"
+    ]
+  },
+  {
+    "id": "role_173",
+    "prodi_label": "Semua Jurusan (S1 Fresh Graduate)",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Management Trainee (MT) BUMN / FMCG",
+    "mandatory_skills": [
+      "Data-Driven Decision Making",
+      "Analytical & Critical Thinking",
+      "Stakeholder Management"
+    ],
+    "preferred_skills": [
+      "Microsoft Office & Google Workspace"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Management Trainee",
+      "Graduate Development Program"
+    ]
+  },
+  {
+    "id": "role_174",
+    "prodi_label": "Semua Jurusan (D3 / S1)",
+    "domain": "umum_lintas_bidang",
+    "role_title": "Project Coordinator & PMO Officer",
+    "mandatory_skills": [
+      "Koordinasi Proyek & Timeline Tracking",
+      "Agile, Scrum & Kanban",
+      "Microsoft Excel",
+      "Stakeholder Management"
+    ],
+    "preferred_skills": [
+      "Penulisan Laporan Eksekutif & Business Writing"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Project Coordinator",
+      "PMO"
+    ]
+  },
+  {
+    "id": "role_175",
+    "prodi_label": "Semua Jurusan (D3 / S1)",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Operations & Back Office Specialist",
+    "mandatory_skills": [
+      "Administrasi Perkantoran",
+      "Pengarsipan & Document Control",
+      "Microsoft Excel",
+      "Ketahanan Kerja di Bawah Tekanan & Tenggat Waktu"
+    ],
+    "preferred_skills": [
+      "Data Analysis"
+    ],
+    "certifications": [
+      "Administrasi Perkantoran"
+    ],
+    "scrape_queries": [
+      "Operations Staff",
+      "Back Office"
+    ]
+  },
+  {
+    "id": "role_176",
+    "prodi_label": "S1 Informatika / Teknik Komputer",
+    "domain": "informatika_data",
+    "role_title": "Database Administrator (DBA)",
+    "mandatory_skills": [
+      "SQL",
+      "PostgreSQL",
+      "MySQL",
+      "Query Optimization & Database Indexing"
+    ],
+    "preferred_skills": [
+      "Oracle"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Database Administrator",
+      "DBA"
+    ]
+  },
+  {
+    "id": "role_177",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "API & Payment Integration Engineer",
+    "mandatory_skills": [
+      "REST API",
+      "Integrasi Payment Gateway (Midtrans / Xendit / DOIT)",
+      "OAuth 2.0 & OIDC"
+    ],
+    "preferred_skills": [
+      "Docker"
+    ],
+    "certifications": [
+      "REST API"
+    ],
+    "scrape_queries": [
+      "Payment Integration Engineer",
+      "Backend API"
+    ]
+  },
+  {
+    "id": "role_178",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "WordPress & CMS Web Developer",
+    "mandatory_skills": [
+      "WordPress",
+      "HTML",
+      "CSS",
+      "JavaScript"
+    ],
+    "preferred_skills": [
+      "PHP",
+      "SEO"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "WordPress Developer",
+      "Web Designer"
+    ]
+  },
+  {
+    "id": "role_179",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "WordPress & Shopify E-Commerce Dev",
+    "mandatory_skills": [
+      "WordPress",
+      "JavaScript",
+      "CSS",
+      "E-Commerce & Marketplace Management"
+    ],
+    "preferred_skills": [
+      "Google Analytics 4 & Attribution"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "E-Commerce Web Developer"
+    ]
+  },
+  {
+    "id": "role_180",
+    "prodi_label": "S1 Sains Data",
+    "domain": "informatika_data",
+    "role_title": "Machine Learning / Computer Vision Engineer",
+    "mandatory_skills": [
+      "Python",
+      "Machine Learning",
+      "Computer Vision",
+      "Hugging Face Transformers & Fine-Tuning"
+    ],
+    "preferred_skills": [
+      "MLOps"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Computer Vision Engineer",
+      "ML Engineer"
+    ]
+  },
+  {
+    "id": "role_181",
+    "prodi_label": "S1 Statistika / Matematika",
+    "domain": "informatika_data",
+    "role_title": "Classical ML & Forecasting Scientist",
+    "mandatory_skills": [
+      "Python",
+      "Classical ML (XGBoost / LightGBM)",
+      "Pandas",
+      "SQL"
+    ],
+    "preferred_skills": [
+      "Statistika & SPSS / R"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Forecasting Analyst",
+      "Data Scientist"
+    ]
+  },
+  {
+    "id": "role_182",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "DevSecOps Engineer",
+    "mandatory_skills": [
+      "DevSecOps (SAST / DAST / Container Scanning)",
+      "Docker",
+      "Kubernetes",
+      "CI/CD"
+    ],
+    "preferred_skills": [
+      "OWASP & AppSec"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "DevSecOps Engineer"
+    ]
+  },
+  {
+    "id": "role_183",
+    "prodi_label": "S1 Sistem Informasi",
+    "domain": "informatika_data",
+    "role_title": "Odoo ERP Developer",
+    "mandatory_skills": [
+      "Odoo Development",
+      "Python",
+      "PostgreSQL"
+    ],
+    "preferred_skills": [
+      "Git"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Odoo Developer"
+    ]
+  },
+  {
+    "id": "role_184",
+    "prodi_label": "S1 Desain / Informatika",
+    "domain": "informatika_data",
+    "role_title": "Game Developer (Unity / C#)",
+    "mandatory_skills": [
+      "Unity / Unreal Engine",
+      "C#",
+      "Git"
+    ],
+    "preferred_skills": [
+      "Software & Game Localization (L10n)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Unity Developer",
+      "Game Programmer"
+    ]
+  },
+  {
+    "id": "role_185",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "QA Automation & Performance Engineer",
+    "mandatory_skills": [
+      "Playwright",
+      "Performance & Load Testing (k6 / JMeter)",
+      "Mobile Test Automation",
+      "Software QA Testing"
+    ],
+    "preferred_skills": [
+      "CI/CD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "SDET",
+      "QA Automation"
+    ]
+  },
+  {
+    "id": "role_186",
+    "prodi_label": "S1 Informatika / Geografi",
+    "domain": "informatika_data",
+    "role_title": "WebGIS Developer",
+    "mandatory_skills": [
+      "WebGIS (Mapbox / Leaflet / PostGIS)",
+      "Spatial SQL & Vector Tiles (PostGIS / Tippecanoe)",
+      "JavaScript"
+    ],
+    "preferred_skills": [],
+    "certifications": [],
+    "scrape_queries": [
+      "WebGIS Developer",
+      "GIS Developer"
+    ]
+  },
+  {
+    "id": "role_187",
+    "prodi_label": "D3/S1 Manajemen Informatika",
+    "domain": "informatika_data",
+    "role_title": "Windows & Active Directory SysAdmin",
+    "mandatory_skills": [
+      "Windows Server & Active Directory",
+      "IT Helpdesk & Ticketing",
+      "Virtualization (VMware / Proxmox / Hyper-V)"
+    ],
+    "preferred_skills": [
+      "Linux"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "System Administrator",
+      "IT Infrastructure"
+    ]
+  },
+  {
+    "id": "role_188",
+    "prodi_label": "S1 Teknik Informatika",
+    "domain": "informatika_data",
+    "role_title": "Scrum Master & Agile Delivery Lead",
+    "mandatory_skills": [
+      "Agile, Scrum & Kanban",
+      "Software Project Management",
+      "Product Ownership & Backlog Prioritization"
+    ],
+    "preferred_skills": [
+      "Stakeholder Management"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Scrum Master",
+      "Agile Coach"
+    ]
+  },
+  {
+    "id": "role_189",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Inventory & Stock Audit Accountant",
+    "mandatory_skills": [
+      "Stock Opname & Rekonsiliasi Selisih Gudang",
+      "Akuntansi Persediaan & HPP (FIFO / Average)",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "SAP FICO"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Inventory Accountant",
+      "Stock Audit"
+    ]
+  },
+  {
+    "id": "role_190",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Construction & Property Project Accountant",
+    "mandatory_skills": [
+      "Akuntansi Kontraktor & Properti (PSAK 72)",
+      "PPh Final Jasa Konstruksi & Properti",
+      "Laporan Keuangan"
+    ],
+    "preferred_skills": [
+      "Accurate Accounting"
+    ],
+    "certifications": [
+      "PPh Final Jasa Konstruksi & Properti"
+    ],
+    "scrape_queries": [
+      "Project Accountant",
+      "Accounting Properti"
+    ]
+  },
+  {
+    "id": "role_191",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Mining & Oil/Gas Accountant",
+    "mandatory_skills": [
+      "Akuntansi Sektor Tambang & Migas (PSAK 64)",
+      "PSAK / IFRS",
+      "Konsolidasi Laporan Keuangan"
+    ],
+    "preferred_skills": [
+      "SAP FICO"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Mining Accountant",
+      "Oil Gas Finance"
+    ]
+  },
+  {
+    "id": "role_192",
+    "prodi_label": "S1 Perpajakan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "International Tax & Transfer Pricing Specialist",
+    "mandatory_skills": [
+      "Transfer Pricing & Tax Planning",
+      "Pajak Internasional & P3B (Tax Treaty / DGT)",
+      "Brevet Pajak A & B"
+    ],
+    "preferred_skills": [
+      "Coretax DJP"
+    ],
+    "certifications": [
+      "Brevet Pajak A & B",
+      "Coretax DJP"
+    ],
+    "scrape_queries": [
+      "Transfer Pricing Analyst",
+      "International Tax"
+    ]
+  },
+  {
+    "id": "role_193",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Forensic Auditor & Fraud Investigator",
+    "mandatory_skills": [
+      "Audit Forensik & Investigasi",
+      "Pengendalian Internal (COSO / SOX)",
+      "Audit Keuangan & Internal"
+    ],
+    "preferred_skills": [
+      "Data Analysis"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Fraud Investigator",
+      "Forensic Audit"
+    ]
+  },
+  {
+    "id": "role_194",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Tax Audit & Dispute Officer",
+    "mandatory_skills": [
+      "Pemeriksaan Pajak & Sengketa (Keberatan / Banding)",
+      "Rekonsiliasi Fiskal",
+      "e-Faktur & e-Bupot"
+    ],
+    "preferred_skills": [
+      "Coretax DJP"
+    ],
+    "certifications": [
+      "Coretax DJP"
+    ],
+    "scrape_queries": [
+      "Tax Dispute",
+      "Tax Compliance"
+    ]
+  },
+  {
+    "id": "role_195",
+    "prodi_label": "S1 Akuntansi / Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "IPO & Financial Reporting Specialist",
+    "mandatory_skills": [
+      "Kesiapan Audit IPO & Pelaporan OJK Emiten",
+      "Konsolidasi Laporan Keuangan",
+      "PSAK / IFRS"
+    ],
+    "preferred_skills": [
+      "Sertifikasi CA / CPA / CMA"
+    ],
+    "certifications": [
+      "Sertifikasi CA / CPA / CMA"
+    ],
+    "scrape_queries": [
+      "Financial Reporting",
+      "SEC OJK Reporting"
+    ]
+  },
+  {
+    "id": "role_196",
+    "prodi_label": "S1 Akuntansi",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "Payroll & PPh 21 TER Officer",
+    "mandatory_skills": [
+      "Akuntansi Payroll & PPh 21 TER",
+      "Perhitungan PPh 21 Karyawan, Bukan Pegawai & Pesangon",
+      "Microsoft Excel"
+    ],
+    "preferred_skills": [
+      "BPJS & Ketenagakerjaan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Payroll Accounting"
+    ]
+  },
+  {
+    "id": "role_197",
+    "prodi_label": "S1 Keuangan",
+    "domain": "ekonomi_akuntansi_pajak",
+    "role_title": "CAPEX & OPEX Financial Controller",
+    "mandatory_skills": [
+      "Analisis CAPEX & OPEX",
+      "Budget vs Actual Variance Analysis",
+      "FP&A & Financial Modeling"
+    ],
+    "preferred_skills": [
+      "Power BI"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Financial Controller",
+      "Budget Control"
+    ]
+  },
+  {
+    "id": "role_198",
+    "prodi_label": "S1 Ekonomi Pembangunan",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Digital Banking & e-KYC Operations",
+    "mandatory_skills": [
+      "Operasional Bank Digital & Onboarding e-KYC",
+      "Payment Gateway & Settlement Keuangan"
+    ],
+    "preferred_skills": [
+      "Anti Pencucian Uang (APU PPT / AML)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Digital Banking Ops",
+      "Fraud Analyst Bank"
+    ]
+  },
+  {
+    "id": "role_199",
+    "prodi_label": "S1 Ilmu Aktuaria / Matematika",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Employee Benefits & Pension Actuary",
+    "mandatory_skills": [
+      "Aktuaria Dana Pensiun & Imbalan Kerja (PSAK 24 / 219)",
+      "Ilmu Aktuaria & Valuasi Liabilitas"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Pension Actuary",
+      "PSAK 219 Analyst"
+    ]
+  },
+  {
+    "id": "role_200",
+    "prodi_label": "S1 Keuangan",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Fund Accounting & Custodian Specialist",
+    "mandatory_skills": [
+      "Akuntansi Dana & Bank Kustodian (NAB / NAV)",
+      "Pasar Modal & Equity Research"
+    ],
+    "preferred_skills": [
+      "Laporan Keuangan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Fund Accountant",
+      "Custodian Bank"
+    ]
+  },
+  {
+    "id": "role_201",
+    "prodi_label": "S1 Ekonomi / Manajemen",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Trade Finance & LC Banking Officer",
+    "mandatory_skills": [
+      "Trade Finance & Bank Garansi (SBLC)",
+      "Incoterms 2020 & Letter of Credit (L/C)"
+    ],
+    "preferred_skills": [
+      "Treasury, Pasar Uang & Devisa"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Trade Finance Officer"
+    ]
+  },
+  {
+    "id": "role_202",
+    "prodi_label": "S1 Manajemen",
+    "domain": "perbankan_aktuaria_asuransi",
+    "role_title": "Wealth Management & Priority Advisor",
+    "mandatory_skills": [
+      "Relationship Manager Funding & Wealth",
+      "Pasar Modal & Equity Research",
+      "Negosiasi & Kepemimpinan"
+    ],
+    "preferred_skills": [
+      "Manajemen Investasi & Fixed Income / Obligasi"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Wealth Manager",
+      "Priority Banking"
+    ]
+  },
+  {
+    "id": "role_203",
+    "prodi_label": "S1 Manajemen Pemasaran",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "B2G & Government Tender Sales",
+    "mandatory_skills": [
+      "Penjualan B2G (Business to Government) & LPSE",
+      "Presentasi Proposal & Tender Korporasi B2B"
+    ],
+    "preferred_skills": [
+      "Pengadaan Barang & Jasa Pemerintah (PBJP)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Government Sales",
+      "B2G Account Manager"
+    ]
+  },
+  {
+    "id": "role_204",
+    "prodi_label": "S1 Bisnis Digital",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Omnichannel Retail & O2O Growth",
+    "mandatory_skills": [
+      "Omnichannel Retail (Online-to-Offline / O2O)",
+      "E-Commerce & Marketplace Management",
+      "Store Operations & Visual Merchandising Retail"
+    ],
+    "preferred_skills": [
+      "CRM Automation (HubSpot / Salesforce)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Omnichannel Manager"
+    ]
+  },
+  {
+    "id": "role_205",
+    "prodi_label": "S1 Manajemen / Komunikasi",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Inside Sales / Telesales Team Lead",
+    "mandatory_skills": [
+      "Telesales, Inside Sales & Cold Calling",
+      "Revenue Operations (RevOps) & Sales Ops",
+      "CRM Automation (HubSpot / Salesforce)"
+    ],
+    "preferred_skills": [
+      "Negosiasi & Kepemimpinan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Inside Sales Lead",
+      "Telesales Supervisor"
+    ]
+  },
+  {
+    "id": "role_206",
+    "prodi_label": "S1 Manajemen",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Franchise & Store Expansion Specialist",
+    "mandatory_skills": [
+      "Franchise & Outlet Expansion"
+    ],
+    "preferred_skills": [
+      "Analisis Keuangan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Business Expansion",
+      "Store Leasing"
+    ]
+  },
+  {
+    "id": "role_207",
+    "prodi_label": "S1 Ilmu Komunikasi",
+    "domain": "bisnis_marketing_sales",
+    "role_title": "Live Commerce Studio & Host Lead",
+    "mandatory_skills": [
+      "Manajemen Tim Host Live Commerce (TikTok / Shopee)",
+      "Public Speaking, Moderator & Host Live",
+      "KOL & Influencer Marketing"
+    ],
+    "preferred_skills": [],
+    "certifications": [],
+    "scrape_queries": [
+      "Live Commerce Manager"
+    ]
+  },
+  {
+    "id": "role_208",
+    "prodi_label": "S1 Teknik Industri / Logistik",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Bonded Zone (Kawasan Berikat) Specialist",
+    "mandatory_skills": [
+      "Operasional Kawasan Berikat (TPB / KITE)",
+      "Kepabeanan PPJK & Sistem CEISA 4.0"
+    ],
+    "preferred_skills": [
+      "Ekspor-Impor & Kepabeanan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Exim Kawasan Berikat"
+    ]
+  },
+  {
+    "id": "role_209",
+    "prodi_label": "S1 Teknik Industri",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Supplier Quality & Vendor Audit Engineer",
+    "mandatory_skills": [
+      "Supplier Quality Audit & Corrective Action",
+      "Strategic Sourcing & Procurement"
+    ],
+    "preferred_skills": [
+      "Lead Auditor ISO (9001 / 14001 / 45001)"
+    ],
+    "certifications": [
+      "Strategic Sourcing & Procurement",
+      "Lead Auditor ISO (9001 / 14001 / 45001)"
+    ],
+    "scrape_queries": [
+      "Supplier Quality Engineer"
+    ]
+  },
+  {
+    "id": "role_210",
+    "prodi_label": "S1 Manajemen Logistik",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Material & Sparepart Inventory Controller",
+    "mandatory_skills": [
+      "Material Control & Pengelolaan Sparepart Pabrik",
+      "Warehouse Management System (WMS)",
+      "PPIC & Perencanaan Produksi"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Material Control"
+    ]
+  },
+  {
+    "id": "role_211",
+    "prodi_label": "S1 Manajemen Transportasi",
+    "domain": "supply_chain_logistik_exim",
+    "role_title": "Cold Chain & Fleet Operations Lead",
+    "mandatory_skills": [
+      "Cold Chain Logistics",
+      "Manajemen Armada & Perizinan Operasional",
+      "Freight Forwarding & Transport Management"
+    ],
+    "preferred_skills": [
+      "Warehouse Management System (WMS)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Cold Chain Supervisor",
+      "Fleet Manager"
+    ]
+  },
+  {
+    "id": "role_212",
+    "prodi_label": "S1 Psikologi",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "People Analytics & OD Specialist",
+    "mandatory_skills": [
+      "People Analytics & Turnover Dashboard",
+      "Organization Development (OD)",
+      "KPI & OKR Performance Management"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "People Analytics",
+      "OD Specialist"
+    ]
+  },
+  {
+    "id": "role_213",
+    "prodi_label": "S1 Manajemen SDM",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "HR Operations & Factory Shift Admin",
+    "mandatory_skills": [
+      "Manajemen Shift Kerja, Lembur & Absensi Pabrik",
+      "Administrasi EDABU BPJS & SIPP Online",
+      "Payroll & Kompensasi"
+    ],
+    "preferred_skills": [
+      "Mekari Talenta / SunFish HRIS"
+    ],
+    "certifications": [
+      "Administrasi EDABU BPJS & SIPP Online"
+    ],
+    "scrape_queries": [
+      "HR Payroll Factory",
+      "Timekeeper"
+    ]
+  },
+  {
+    "id": "role_214",
+    "prodi_label": "S1 Semua Jurusan",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Campus Hiring & Employer Branding Officer",
+    "mandatory_skills": [
+      "Employer Branding & Campus Hiring",
+      "Manajemen Program Internship & Management Trainee",
+      "Rekrutmen & Seleksi"
+    ],
+    "preferred_skills": [
+      "Social Media Management"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Campus Recruiter",
+      "Employer Branding"
+    ]
+  },
+  {
+    "id": "role_215",
+    "prodi_label": "S1 Hukum / Manajemen",
+    "domain": "hr_psikologi_admin_ops",
+    "role_title": "Expatriate Affairs & KITAS Coordinator",
+    "mandatory_skills": [
+      "Manajemen TKA (RPTKA / Notifikasi / KITAS)",
+      "Pengurusan IMTA / KITAS TKA",
+      "Administrasi Perkantoran"
+    ],
+    "preferred_skills": [
+      "Bahasa Inggris"
+    ],
+    "certifications": [
+      "Administrasi Perkantoran"
+    ],
+    "scrape_queries": [
+      "Expat Liaison",
+      "Legal Visa Officer"
+    ]
+  },
+  {
+    "id": "role_216",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Startup & Venture Legal Counsel",
+    "mandatory_skills": [
+      "Legal Due Diligence & M&A",
+      "Perlindungan Data Pribadi (UU PDP / GDPR)"
+    ],
+    "preferred_skills": [
+      "Hak Kekayaan Intelektual (HKI / Merek)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Startup Legal",
+      "Venture Counsel"
+    ]
+  },
+  {
+    "id": "role_217",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "Mining & Energy Regulatory Legal",
+    "mandatory_skills": [
+      "Hukum Pertambangan, Kehutanan & Lingkungan",
+      "Perizinan ESDM, SKT Migas & TKDN Hukum",
+      "Perizinan Usaha & OSS/NIB"
+    ],
+    "preferred_skills": [
+      "Legal Drafting & Review Kontrak"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Mining Legal",
+      "Energy Legal"
+    ]
+  },
+  {
+    "id": "role_218",
+    "prodi_label": "S1 Ilmu Hukum",
+    "domain": "hukum_regulasi_kepatuhan",
+    "role_title": "GCG & Anti-Bribery Compliance (ISO 37001)",
+    "mandatory_skills": [
+      "Tata Kelola GCG & Kepatuhan BUMN",
+      "Kepatuhan & Regulasi (Compliance)"
+    ],
+    "preferred_skills": [
+      "Audit Keuangan & Internal"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "GCG Officer",
+      "Compliance Manager"
+    ]
+  },
+  {
+    "id": "role_219",
+    "prodi_label": "S1 Administrasi Negara",
+    "domain": "administrasi_publik_hi_sosial",
+    "role_title": "Public Sector Budget & SAKIP Analyst",
+    "mandatory_skills": [
+      "Penganggaran Sektor Publik (APBN / APBD / RKA)",
+      "Tata Kelola Administrasi Pemerintahan & Arsip Negara",
+      "Analisis Kebijakan Publik (Regulatory Impact)"
+    ],
+    "preferred_skills": [
+      "Monitoring & Evaluasi Program (M&E / MEAL)"
+    ],
+    "certifications": [
+      "Tata Kelola Administrasi Pemerintahan & Arsip Negara"
+    ],
+    "scrape_queries": [
+      "Analis Anggaran Publik"
+    ]
+  },
+  {
+    "id": "role_220",
+    "prodi_label": "S1 Sosiologi / Antropologi",
+    "domain": "administrasi_publik_hi_sosial",
+    "role_title": "Social Impact & Conflict Mediation Specialist",
+    "mandatory_skills": [
+      "Mediasi Konflik Agraria, Sosial & Stakeholder Engagement",
+      "CSR & Community Development",
+      "Metode Riset Sosial & Pengolahan Survey"
+    ],
+    "preferred_skills": [
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "certifications": [
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "scrape_queries": [
+      "Social Specialist",
+      "Comdev Coordinator"
+    ]
+  },
+  {
+    "id": "role_221",
+    "prodi_label": "S1 Komunikasi / Penyiaran",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Commercial Director & Video Producer",
+    "mandatory_skills": [
+      "Penyutradaraan Iklan Komersial & Brand Film",
+      "Scriptwriting & Storytelling",
+      "Adobe Premiere Pro & Video Editing"
+    ],
+    "preferred_skills": [
+      "Fotografi Produk & Commercial Retouching"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Video Producer",
+      "Commercial Director"
+    ]
+  },
+  {
+    "id": "role_222",
+    "prodi_label": "S1 Jurnalistik",
+    "domain": "komunikasi_desain_media",
+    "role_title": "Newsroom & Digital Desk Editor",
+    "mandatory_skills": [
+      "Manajemen Desk Berita & Real-Time Live Reporting",
+      "Jurnalistik & Penulisan Berita",
+      "SEO Long-Form Article & Blog Editorial"
+    ],
+    "preferred_skills": [
+      "Penyuntingan Bahasa & Proofreading (EYD V)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "News Editor",
+      "Digital Journalist"
+    ]
+  },
+  {
+    "id": "role_223",
+    "prodi_label": "S1 DKV / Desain Komunikasi",
+    "domain": "dkv_produk_ux_kreatif",
+    "role_title": "Environmental Graphic & Exhibition Designer",
+    "mandatory_skills": [
+      "Environmental Graphic Design & Wayfinding Signage",
+      "Adobe Illustrator"
+    ],
+    "preferred_skills": [
+      "Desain Interior & FF&E"
+    ],
+    "certifications": [
+      "Adobe Illustrator"
+    ],
+    "scrape_queries": [
+      "Exhibition Designer",
+      "Wayfinding Designer"
+    ]
+  },
+  {
+    "id": "role_224",
+    "prodi_label": "S1 DKV",
+    "domain": "dkv_produk_ux_kreatif",
+    "role_title": "Design Ops & Design System Lead",
+    "mandatory_skills": [
+      "Design System & Tokens Architecture",
+      "Handoff Developer, Figma Variables & Token Sync",
+      "Design Accessibility (WCAG AA/AAA)"
+    ],
+    "preferred_skills": [
+      "Figma"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Design System Designer"
+    ]
+  },
+  {
+    "id": "role_225",
+    "prodi_label": "S1 Teknik Sipil",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Geotechnical & Deep Excavation Engineer",
+    "mandatory_skills": [
+      "Geoteknik & Mekanika Tanah",
+      "Desain Dinding Penahan Tanah & Galian Dalam (Soldier Pile)"
+    ],
+    "preferred_skills": [
+      "ETABS"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Geotechnical Engineer"
+    ]
+  },
+  {
+    "id": "role_226",
+    "prodi_label": "S1 Arsitektur Lanskap",
+    "domain": "teknik_sipil_arsitektur_gis",
+    "role_title": "Landscape Architect & Urban Green Planner",
+    "mandatory_skills": [
+      "Arsitektur Lanskap & Tata Hijau Kawasan",
+      "AutoCAD"
+    ],
+    "preferred_skills": [
+      "Perencanaan Wilayah & Kota (PWK / Urban Planning)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Landscape Architect"
+    ]
+  },
+  {
+    "id": "role_227",
+    "prodi_label": "S1 Teknik Mesin",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "Pressure Vessel & Piping Design Engineer",
+    "mandatory_skills": [
+      "Piping & Pressure Vessel Design",
+      "Desain Tangki Timbun & Pressure Vessel (PV Elite)",
+      "SolidWorks & Mechanical CAD"
+    ],
+    "preferred_skills": [
+      "AutoCAD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Piping Engineer",
+      "Static Equipment"
+    ]
+  },
+  {
+    "id": "role_228",
+    "prodi_label": "S1 Teknik Mesin",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "Power Plant Boiler & Turbine Engineer",
+    "mandatory_skills": [
+      "Operasi Pembangkit (Boiler / Turbin / PLTU / PLTG)",
+      "Overhaul Turbin Uap, Gas & Kompresor Sentrifugal",
+      "Plant Utility (Boiler, Chiller, Compressor)"
+    ],
+    "preferred_skills": [
+      "Maintenance & Reliability"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Turbine Engineer",
+      "Power Plant Engineer"
+    ]
+  },
+  {
+    "id": "role_229",
+    "prodi_label": "S1 Teknik Perkapalan",
+    "domain": "teknik_mesin_elektro_industri",
+    "role_title": "Naval Architect & Shipyard Engineer",
+    "mandatory_skills": [
+      "Teknik Perkapalan & Marine Engineering",
+      "Operasi & Perawatan Mesin Kapal (ATT / Ahli Teknika)",
+      "Welding Inspection (AWS CWI / NDT)"
+    ],
+    "preferred_skills": [
+      "AutoCAD"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Naval Architect",
+      "Shipyard Engineer"
+    ]
+  },
+  {
+    "id": "role_230",
+    "prodi_label": "S1 Teknik Elektro",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "BMS & Smart Building Automation Engineer",
+    "mandatory_skills": [
+      "Building Management System (BMS) & Fire Alarm",
+      "Industrial IoT & MQTT / LoRaWAN",
+      "AutoCAD Electrical & EPLAN"
+    ],
+    "preferred_skills": [
+      "Pemrograman PLC & SCADA (Siemens / Omron / Allen-Bradley)"
+    ],
+    "certifications": [
+      "Industrial IoT & MQTT / LoRaWAN"
+    ],
+    "scrape_queries": [
+      "BMS Engineer",
+      "ELV Engineer"
+    ]
+  },
+  {
+    "id": "role_231",
+    "prodi_label": "S1 Teknik Fisika / Elektro",
+    "domain": "teknik_elektro_otomasi_telko",
+    "role_title": "Instrumentation & DCS Process Engineer",
+    "mandatory_skills": [
+      "Instrumentasi & Kontrol Proses (DCS / PID)",
+      "Pemrograman PLC & SCADA (Siemens / Omron / Allen-Bradley)"
+    ],
+    "preferred_skills": [
+      "Process Simulation (Aspen HYSYS / Flarenet)"
+    ],
+    "certifications": [
+      "Instrumentasi & Kontrol Proses (DCS / PID)"
+    ],
+    "scrape_queries": [
+      "Instrumentation Engineer",
+      "DCS Engineer"
+    ]
+  },
+  {
+    "id": "role_232",
+    "prodi_label": "S1 Teknik Industri",
+    "domain": "teknik_industri_k3_mutu",
+    "role_title": "Manufacturing QA/QC Inspector (IQC/IPQC/OQC)",
+    "mandatory_skills": [
+      "Incoming, In-Process & Final Quality Inspection (IQC / IPQC / OQC)",
+      "Minitab & Statistical Process Control",
+      "Lead Auditor ISO (9001 / 14001 / 45001)"
+    ],
+    "preferred_skills": [
+      "IATF 16949 & PPAP Otomotif"
+    ],
+    "certifications": [
+      "Lead Auditor ISO (9001 / 14001 / 45001)"
+    ],
+    "scrape_queries": [
+      "QC Manufacturing",
+      "IQC Inspector"
+    ]
+  },
+  {
+    "id": "role_233",
+    "prodi_label": "S1 Teknik Industri",
+    "domain": "teknik_industri_k3_mutu",
+    "role_title": "Ergonomics & Cost Value Engineer",
+    "mandatory_skills": [
+      "Evaluasi Ergonomi Kerja (RULA / REBA / NIOSH)",
+      "Cost Engineering & Value Analysis (VAVE)",
+      "Work Study & Time-Motion Analysis"
+    ],
+    "preferred_skills": [
+      "Microsoft Excel"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "IE Cost Engineer",
+      "Ergonomics Specialist"
+    ]
+  },
+  {
+    "id": "role_234",
+    "prodi_label": "S1 Teknik Pertambangan",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Mine Closure & Reclamation Officer",
+    "mandatory_skills": [
+      "Reklamasi Pascatambang & Lingkungan Tambang"
+    ],
+    "preferred_skills": [
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "certifications": [
+      "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)"
+    ],
+    "scrape_queries": [
+      "Mine Reclamation"
+    ]
+  },
+  {
+    "id": "role_235",
+    "prodi_label": "S1 Teknik Pertambangan",
+    "domain": "pertambangan_migas_energi",
+    "role_title": "Coal Quality & Blending Supervisor",
+    "mandatory_skills": [
+      "Coal Quality, Blending & Sampling ASTM",
+      "Mine Survey, Volume Stockpile & Bathimetri Tambang"
+    ],
+    "preferred_skills": [
+      "Pengujian Laboratorium (ISO 17025)"
+    ],
+    "certifications": [
+      "Pengujian Laboratorium (ISO 17025)"
+    ],
+    "scrape_queries": [
+      "Coal Quality Control"
+    ]
+  },
+  {
+    "id": "role_236",
+    "prodi_label": "Profesi Dokter Gigi",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "role_title": "Dokter Gigi & Klinik Dental",
+    "mandatory_skills": [
+      "Kedokteran Gigi & Perawatan Dental",
+      "Keselamatan Pasien & PPI / K3RS"
+    ],
+    "preferred_skills": [
+      "Sistem Informasi Manajemen RS (SIMRS / Rekam Medis Elektronik)"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Dokter Gigi",
+      "Dentist"
+    ]
+  },
+  {
+    "id": "role_237",
+    "prodi_label": "S1 Teknologi Hasil Pertanian",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "Coffee Q-Grader & Commodity QC",
+    "mandatory_skills": [
+      "Agronomi & Pasca Panen Komoditas (Kopi / Kakao / Teh)",
+      "Uji Organoleptik & Formulasi Pangan"
+    ],
+    "preferred_skills": [
+      "Ekspor-Impor & Kepabeanan"
+    ],
+    "certifications": [],
+    "scrape_queries": [
+      "Quality Grader",
+      "Agronomy Commodity"
+    ]
+  },
+  {
+    "id": "role_238",
+    "prodi_label": "S1 Ilmu Lingkungan / Kehutanan",
+    "domain": "pertanian_pangan_lingkungan",
+    "role_title": "Forestry, SVLK & Carbon ESG Officer",
+    "mandatory_skills": [
+      "Kehutanan, SVLK & Perhutanan Sosial",
+      "Agroforestri, Rehabilitasi DAS & Konservasi Lahan",
+      "Inventarisasi Emisi Karbon & ESG Lingkungan"
+    ],
+    "preferred_skills": [],
+    "certifications": [
+      "Agroforestri, Rehabilitasi DAS & Konservasi Lahan"
+    ],
+    "scrape_queries": [
+      "Forestry Specialist",
+      "Carbon Project Officer"
+    ]
+  }
+]

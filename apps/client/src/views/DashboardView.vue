@@ -6,8 +6,10 @@ import { useProfileStore } from "@/stores/profile";
 import { useRoadmapStore } from "@/stores/roadmap";
 import { formatExperienceLevel, formatHours, formatScore, formatWorkMode } from "@/lib/format";
 import PageHeader from "@/components/layout/PageHeader.vue";
+import ScoreRing from "@/components/ui/ScoreRing.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VCard from "@/components/ui/VCard.vue";
+import VIcon from "@/components/ui/VIcon.vue";
 
 const router = useRouter();
 const profileStore = useProfileStore();
@@ -39,6 +41,34 @@ const interviewCount = computed(
   () => jobsStore.jobs.filter((j) => j.application_status === "interview").length,
 );
 
+const actionItems = computed(() => {
+  const items: Array<{ jobId: string; title: string; company: string; kind: "interview" | "followup"; hint: string }> = [];
+  const now = Date.now();
+  for (const job of jobsStore.jobs) {
+    if (job.application_status === "interview") {
+      items.push({
+        jobId: job.job_id,
+        title: job.title,
+        company: job.company,
+        kind: "interview",
+        hint: "Siapkan jawaban STAR & tanya balik HR",
+      });
+    } else if (job.application_status === "applied") {
+      const refTs = Date.parse(job.scraped_at);
+      if (!Number.isNaN(refTs) && now - refTs >= 7 * 24 * 3600_000) {
+        items.push({
+          jobId: job.job_id,
+          title: job.title,
+          company: job.company,
+          kind: "followup",
+          hint: "Sudah >= 7 hari · kirim pesan follow-up",
+        });
+      }
+    }
+  }
+  return items.slice(0, 4);
+});
+
 const activeRoadmapProgress = computed(() => {
   const first = roadmapStore.roadmaps[0];
   return first ? formatScore(first.progress_percentage) : 0;
@@ -65,6 +95,19 @@ const headerSubtitle = computed(() => {
 function openJob(jobId: string) {
   jobsStore.selectedJobId = jobId;
   router.push("/jobs");
+}
+
+function openPipelineJob(jobId: string) {
+  jobsStore.selectedJobId = jobId;
+  router.push({ path: "/jobs", query: { tab: "pipeline", jobId } });
+}
+
+function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string | null {
+  if (minIdr && maxIdr && maxIdr > minIdr) {
+    return `Rp ${(minIdr / 1_000_000).toFixed(0)}-${(maxIdr / 1_000_000).toFixed(0)} jt`;
+  }
+  if (minIdr) return `Rp ${(minIdr / 1_000_000).toFixed(0)} jt+`;
+  return null;
 }
 </script>
 
@@ -166,8 +209,25 @@ function openJob(jobId: string) {
                       {{ job.company }} · {{ job.location || "Indonesia" }} ·
                       {{ formatWorkMode(job.work_mode) }}
                     </div>
+                    <div
+                      v-if="formatSalaryMini(job.salary_min_idr, job.salary_max_idr) || job.opportunity_type !== 'full_time'"
+                      class="v-dash-pills"
+                    >
+                      <span
+                        v-if="formatSalaryMini(job.salary_min_idr, job.salary_max_idr)"
+                        class="v-mini-pill v-mini-pill--salary t-num"
+                      >
+                        {{ formatSalaryMini(job.salary_min_idr, job.salary_max_idr) }}
+                      </span>
+                      <span
+                        v-if="job.opportunity_type !== 'full_time'"
+                        class="v-mini-pill"
+                      >
+                        {{ job.opportunity_type === 'mt_odp' ? 'MT / ODP' : job.opportunity_type }}
+                      </span>
+                    </div>
                   </div>
-                  <span class="t-num v-row-score">{{ formatScore(job.final_score) }}%</span>
+                  <ScoreRing :score="job.final_score" :size="40" />
                 </div>
               </button>
             </div>
@@ -223,6 +283,59 @@ function openJob(jobId: string) {
               </button>
             </div>
           </section>
+        </div>
+
+        <!-- Perlu Tindakan Hari Ini + Mobile Quick Shortcuts -->
+        <div class="v-dash-extra">
+          <VCard>
+            <div class="v-col-head" style="margin-bottom: var(--space-2)">
+              <h2 class="t-section">Perlu Tindakan Hari Ini</h2>
+              <VButton
+                variant="tertiary"
+                size="compact"
+                @click="router.push({ path: '/jobs', query: { tab: 'pipeline' } })"
+              >
+                Buka Pipeline
+              </VButton>
+            </div>
+            <p v-if="actionItems.length === 0" class="t-secondary">
+              Semua lamaranmu terpantau rapi. Tandai lowongan sebagai Dilamar atau Interview untuk pengingat otomatis di sini.
+            </p>
+            <div v-else class="v-action-list">
+              <button
+                v-for="item in actionItems"
+                :key="item.jobId"
+                type="button"
+                class="v-action-row"
+                @click="openPipelineJob(item.jobId)"
+              >
+                <div style="min-width: 0; text-align: left">
+                  <strong class="v-action-title">{{ item.title }}</strong>
+                  <div class="t-meta">{{ item.company }} · {{ item.hint }}</div>
+                </div>
+                <span class="v-action-badge" :data-kind="item.kind">
+                  {{ item.kind === "interview" ? "Interview" : "Follow-up" }}
+                </span>
+              </button>
+            </div>
+          </VCard>
+
+          <div class="v-mobile-shortcuts">
+            <button type="button" class="v-shortcut-card" @click="router.push('/roadmap')">
+              <VIcon name="roadmap" :size="18" />
+              <div style="text-align: left">
+                <strong style="display: block; font-size: 13.5px; color: var(--text-1)">Roadmap Belajar</strong>
+                <span class="t-meta">Lokal 0 Token &amp; AI</span>
+              </div>
+            </button>
+            <button type="button" class="v-shortcut-card" @click="router.push('/cv')">
+              <VIcon name="cv" :size="18" />
+              <div style="text-align: left">
+                <strong style="display: block; font-size: 13.5px; color: var(--text-1)">Studio CV ATS</strong>
+                <span class="t-meta">Live Preview A4</span>
+              </div>
+            </button>
+          </div>
         </div>
       </template>
     </div>
@@ -303,6 +416,87 @@ function openJob(jobId: string) {
   border: 1px solid var(--border-divider);
   background: var(--bg-elevated);
 }
+.v-dash-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.v-mini-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-soft);
+  color: var(--text-1);
+}
+.v-mini-pill--salary {
+  background: var(--success-soft);
+  color: var(--status-success);
+}
+.v-dash-extra {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.v-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--space-2);
+}
+.v-action-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-divider);
+  background: var(--bg-primary);
+}
+.v-action-row:hover {
+  border-color: var(--brand-border);
+  background: var(--bg-hover);
+}
+.v-action-title {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-1);
+}
+.v-action-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--warning-soft);
+  color: var(--status-warning);
+}
+.v-action-badge[data-kind="interview"] {
+  background: var(--brand-soft);
+  color: var(--brand-hover);
+}
+.v-mobile-shortcuts {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.v-shortcut-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-1);
+}
+.v-shortcut-card:hover {
+  border-color: var(--brand-border);
+}
 @media (max-width: 1023px) {
   .v-page-container {
     padding: var(--space-5) var(--space-4) var(--space-10);
@@ -311,6 +505,9 @@ function openJob(jobId: string) {
   .v-dash-columns {
     grid-template-columns: 1fr;
     gap: var(--space-6);
+  }
+  .v-mobile-shortcuts {
+    display: grid;
   }
 }
 </style>

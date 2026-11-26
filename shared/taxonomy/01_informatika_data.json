@@ -1,65 +1,2207 @@
 [
-  {"id":"it.php","canonical_name":"PHP","domain":"informatika_data","category":"core_hard","aliases":["PHP 7","PHP 8","PHP7","PHP8"]},
-  {"id":"it.laravel","canonical_name":"Laravel","domain":"informatika_data","category":"core_hard","parent_id":"it.php","aliases":["Laravel Framework"]},
-  {"id":"it.codeigniter","canonical_name":"CodeIgniter","domain":"informatika_data","category":"core_hard","parent_id":"it.php","aliases":["CI3","CI4"]},
-  {"id":"it.javascript","canonical_name":"JavaScript","domain":"informatika_data","category":"core_hard","aliases":["JS","ES6","ECMAScript"]},
-  {"id":"it.typescript","canonical_name":"TypeScript","domain":"informatika_data","category":"core_hard","parent_id":"it.javascript","aliases":["TS"]},
-  {"id":"it.vue","canonical_name":"Vue.js","domain":"informatika_data","category":"core_hard","parent_id":"it.javascript","aliases":["Vue","VueJS","Vue 3","Nuxt","Nuxt.js"]},
-  {"id":"it.react","canonical_name":"React","domain":"informatika_data","category":"core_hard","parent_id":"it.javascript","aliases":["React.js","ReactJS"]},
-  {"id":"it.nextjs","canonical_name":"Next.js","domain":"informatika_data","category":"core_hard","parent_id":"it.react","aliases":["NextJS"]},
-  {"id":"it.angular","canonical_name":"Angular","domain":"informatika_data","category":"core_hard","parent_id":"it.typescript","aliases":["AngularJS"]},
-  {"id":"it.nodejs","canonical_name":"Node.js","domain":"informatika_data","category":"core_hard","parent_id":"it.javascript","aliases":["NodeJS","Express.js","ExpressJS","NestJS"]},
-  {"id":"it.python","canonical_name":"Python","domain":"informatika_data","category":"core_hard","aliases":["Python 3"]},
-  {"id":"it.fastapi","canonical_name":"FastAPI","domain":"informatika_data","category":"core_hard","parent_id":"it.python","aliases":[]},
-  {"id":"it.django","canonical_name":"Django","domain":"informatika_data","category":"core_hard","parent_id":"it.python","aliases":[]},
-  {"id":"it.flask","canonical_name":"Flask","domain":"informatika_data","category":"core_hard","parent_id":"it.python","aliases":[]},
-  {"id":"it.go","canonical_name":"Go","domain":"informatika_data","category":"core_hard","aliases":["Golang"],"requires_domain_context":true},
-  {"id":"it.rust","canonical_name":"Rust","domain":"informatika_data","category":"core_hard","aliases":["Rustlang"],"requires_domain_context":true},
-  {"id":"it.java","canonical_name":"Java","domain":"informatika_data","category":"core_hard","aliases":["Spring","Spring Boot"]},
-  {"id":"it.csharp","canonical_name":"C#","domain":"informatika_data","category":"core_hard","aliases":[".NET","ASP.NET","DotNet"]},
-  {"id":"it.cpp","canonical_name":"C++","domain":"informatika_data","category":"core_hard","aliases":["CPP"]},
-  {"id":"it.kotlin","canonical_name":"Kotlin","domain":"informatika_data","category":"core_hard","aliases":[]},
-  {"id":"it.swift","canonical_name":"Swift","domain":"informatika_data","category":"core_hard","aliases":["SwiftUI"]},
-  {"id":"it.flutter","canonical_name":"Flutter","domain":"informatika_data","category":"core_hard","aliases":["Dart"]},
-  {"id":"it.react_native","canonical_name":"React Native","domain":"informatika_data","category":"core_hard","parent_id":"it.react","aliases":[]},
-  {"id":"it.html","canonical_name":"HTML","domain":"informatika_data","category":"core_hard","aliases":["HTML5"]},
-  {"id":"it.css","canonical_name":"CSS","domain":"informatika_data","category":"core_hard","aliases":["CSS3","SCSS","Sass"]},
-  {"id":"it.tailwind","canonical_name":"Tailwind CSS","domain":"informatika_data","category":"tools_tech","parent_id":"it.css","aliases":["TailwindCSS","Tailwind"]},
-  {"id":"it.bootstrap","canonical_name":"Bootstrap","domain":"informatika_data","category":"tools_tech","parent_id":"it.css","aliases":[]},
-  {"id":"it.sql","canonical_name":"SQL","domain":"informatika_data","category":"core_hard","aliases":["PL/SQL","T-SQL"]},
-  {"id":"it.mysql","canonical_name":"MySQL","domain":"informatika_data","category":"core_hard","parent_id":"it.sql","aliases":["MariaDB"]},
-  {"id":"it.postgresql","canonical_name":"PostgreSQL","domain":"informatika_data","category":"core_hard","parent_id":"it.sql","aliases":["Postgres","PSQL"]},
-  {"id":"it.oracle","canonical_name":"Oracle","domain":"informatika_data","category":"core_hard","parent_id":"it.sql","aliases":["Oracle DB","Oracle RDBMS","Oracle Database"]},
-  {"id":"it.sqlite","canonical_name":"SQLite","domain":"informatika_data","category":"core_hard","parent_id":"it.sql","aliases":[]},
-  {"id":"it.sqlserver","canonical_name":"SQL Server","domain":"informatika_data","category":"core_hard","parent_id":"it.sql","aliases":["MSSQL","Microsoft SQL Server"]},
-  {"id":"it.mongodb","canonical_name":"MongoDB","domain":"informatika_data","category":"core_hard","aliases":["NoSQL"]},
-  {"id":"it.redis","canonical_name":"Redis","domain":"informatika_data","category":"tools_tech","aliases":[]},
-  {"id":"it.elasticsearch","canonical_name":"Elasticsearch","domain":"informatika_data","category":"tools_tech","aliases":[]},
-  {"id":"it.rest_api","canonical_name":"REST API","domain":"informatika_data","category":"core_hard","aliases":["RESTful","RESTful API","Web API"]},
-  {"id":"it.graphql","canonical_name":"GraphQL","domain":"informatika_data","category":"core_hard","aliases":[]},
-  {"id":"it.grpc","canonical_name":"gRPC","domain":"informatika_data","category":"core_hard","aliases":[]},
-  {"id":"it.microservices","canonical_name":"Microservices","domain":"informatika_data","category":"domain","aliases":["Microservice"]},
-  {"id":"it.git","canonical_name":"Git","domain":"informatika_data","category":"tools_tech","aliases":["GitHub","GitLab","Bitbucket"]},
-  {"id":"it.docker","canonical_name":"Docker","domain":"informatika_data","category":"tools_tech","aliases":["Docker Compose"]},
-  {"id":"it.kubernetes","canonical_name":"Kubernetes","domain":"informatika_data","category":"tools_tech","parent_id":"it.docker","aliases":["K8s"]},
-  {"id":"it.linux","canonical_name":"Linux","domain":"informatika_data","category":"tools_tech","aliases":["Ubuntu","Unix","Bash","Shell Script"]},
-  {"id":"it.aws","canonical_name":"AWS","domain":"informatika_data","category":"tools_tech","aliases":["Amazon Web Services"]},
-  {"id":"it.gcp","canonical_name":"GCP","domain":"informatika_data","category":"tools_tech","aliases":["Google Cloud","Google Cloud Platform"]},
-  {"id":"it.azure","canonical_name":"Azure","domain":"informatika_data","category":"tools_tech","aliases":["Microsoft Azure"]},
-  {"id":"it.cicd","canonical_name":"CI/CD","domain":"informatika_data","category":"tools_tech","aliases":["GitHub Actions","GitLab CI","Jenkins"]},
-  {"id":"it.terraform","canonical_name":"Terraform","domain":"informatika_data","category":"tools_tech","aliases":["Infrastructure as Code"]},
-  {"id":"it.nginx","canonical_name":"Nginx","domain":"informatika_data","category":"tools_tech","aliases":["Apache Server"]},
-  {"id":"it.kafka","canonical_name":"Kafka","domain":"informatika_data","category":"tools_tech","aliases":["RabbitMQ","Message Queue"]},
-  {"id":"it.wordpress","canonical_name":"WordPress","domain":"informatika_data","category":"tools_tech","aliases":[]},
-  {"id":"it.qa_testing","canonical_name":"Software QA Testing","domain":"informatika_data","category":"domain","aliases":["Unit Testing","Automation Testing","Manual Testing","QA Automation","Quality Assurance Software"],"requires_domain_context":true},
-  {"id":"it.playwright","canonical_name":"Playwright","domain":"informatika_data","category":"tools_tech","parent_id":"it.qa_testing","aliases":["Cypress","Selenium"]},
-  {"id":"it.powerbi","canonical_name":"Power BI","domain":"informatika_data","category":"tools_tech","aliases":["PowerBI"]},
-  {"id":"it.tableau","canonical_name":"Tableau","domain":"informatika_data","category":"tools_tech","aliases":["Looker Studio","Google Data Studio"]},
-  {"id":"it.pandas","canonical_name":"Pandas","domain":"informatika_data","category":"core_hard","parent_id":"it.python","aliases":["NumPy","Scikit-learn"]},
-  {"id":"it.data_analysis","canonical_name":"Data Analysis","domain":"informatika_data","category":"domain","aliases":["Data Analytics","Analisis Data","Business Intelligence"]},
-  {"id":"it.machine_learning","canonical_name":"Machine Learning","domain":"informatika_data","category":"core_hard","aliases":["Deep Learning","TensorFlow","PyTorch","LLM","NLP"]},
-  {"id":"it.cybersecurity","canonical_name":"Cybersecurity","domain":"informatika_data","category":"domain","aliases":["Information Security","Penetration Testing","OWASP","SIEM","SOC","Keamanan Siber"]},
-  {"id":"it.networking","canonical_name":"Jaringan Komputer","domain":"informatika_data","category":"core_hard","aliases":["TCP/IP","MikroTik","Cisco","CCNA","Routing","Switching","Firewall","IT Support"]},
-  {"id":"it.system_design","canonical_name":"System Design","domain":"informatika_data","category":"domain","aliases":["Software Architecture","Database Design","Perancangan Database"]},
-  {"id":"it.erp_sap","canonical_name":"SAP ERP","domain":"informatika_data","category":"tools_tech","aliases":["SAP ABAP","SAP S/4HANA","Odoo","ERP"]}
+  {
+    "id": "it.php",
+    "canonical_name": "PHP",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "PHP 7",
+      "PHP 8",
+      "PHP7",
+      "PHP8"
+    ]
+  },
+  {
+    "id": "it.laravel",
+    "canonical_name": "Laravel",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.php",
+    "aliases": [
+      "Laravel Framework"
+    ]
+  },
+  {
+    "id": "it.codeigniter",
+    "canonical_name": "CodeIgniter",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.php",
+    "aliases": [
+      "CI3",
+      "CI4"
+    ]
+  },
+  {
+    "id": "it.javascript",
+    "canonical_name": "JavaScript",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "JS",
+      "ES6",
+      "ECMAScript"
+    ]
+  },
+  {
+    "id": "it.typescript",
+    "canonical_name": "TypeScript",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.javascript",
+    "aliases": [
+      "TS"
+    ]
+  },
+  {
+    "id": "it.vue",
+    "canonical_name": "Vue.js",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.javascript",
+    "aliases": [
+      "Vue",
+      "VueJS",
+      "Vue 3",
+      "Nuxt",
+      "Nuxt.js"
+    ]
+  },
+  {
+    "id": "it.react",
+    "canonical_name": "React",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.javascript",
+    "aliases": [
+      "React.js",
+      "ReactJS"
+    ]
+  },
+  {
+    "id": "it.nextjs",
+    "canonical_name": "Next.js",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.react",
+    "aliases": [
+      "NextJS"
+    ]
+  },
+  {
+    "id": "it.angular",
+    "canonical_name": "Angular",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.typescript",
+    "aliases": [
+      "AngularJS"
+    ]
+  },
+  {
+    "id": "it.nodejs",
+    "canonical_name": "Node.js",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.javascript",
+    "aliases": [
+      "NodeJS",
+      "Express.js",
+      "ExpressJS",
+      "NestJS"
+    ]
+  },
+  {
+    "id": "it.python",
+    "canonical_name": "Python",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Python 3"
+    ]
+  },
+  {
+    "id": "it.fastapi",
+    "canonical_name": "FastAPI",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.python",
+    "aliases": []
+  },
+  {
+    "id": "it.django",
+    "canonical_name": "Django",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.python",
+    "aliases": []
+  },
+  {
+    "id": "it.flask",
+    "canonical_name": "Flask",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.python",
+    "aliases": []
+  },
+  {
+    "id": "it.go",
+    "canonical_name": "Go",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Golang"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.rust",
+    "canonical_name": "Rust",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Rustlang"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.java",
+    "canonical_name": "Java",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Spring",
+      "Spring Boot"
+    ]
+  },
+  {
+    "id": "it.csharp",
+    "canonical_name": "C#",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      ".NET",
+      "ASP.NET",
+      "DotNet"
+    ]
+  },
+  {
+    "id": "it.cpp",
+    "canonical_name": "C++",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "CPP"
+    ]
+  },
+  {
+    "id": "it.kotlin",
+    "canonical_name": "Kotlin",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": []
+  },
+  {
+    "id": "it.swift",
+    "canonical_name": "Swift",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "SwiftUI"
+    ]
+  },
+  {
+    "id": "it.flutter",
+    "canonical_name": "Flutter",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Dart"
+    ]
+  },
+  {
+    "id": "it.react_native",
+    "canonical_name": "React Native",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.react",
+    "aliases": []
+  },
+  {
+    "id": "it.html",
+    "canonical_name": "HTML",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "HTML5"
+    ]
+  },
+  {
+    "id": "it.css",
+    "canonical_name": "CSS",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "CSS3",
+      "SCSS",
+      "Sass"
+    ]
+  },
+  {
+    "id": "it.tailwind",
+    "canonical_name": "Tailwind CSS",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.css",
+    "aliases": [
+      "TailwindCSS",
+      "Tailwind"
+    ]
+  },
+  {
+    "id": "it.bootstrap",
+    "canonical_name": "Bootstrap",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.css",
+    "aliases": []
+  },
+  {
+    "id": "it.sql",
+    "canonical_name": "SQL",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "PL/SQL",
+      "T-SQL"
+    ]
+  },
+  {
+    "id": "it.mysql",
+    "canonical_name": "MySQL",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.sql",
+    "aliases": [
+      "MariaDB"
+    ]
+  },
+  {
+    "id": "it.postgresql",
+    "canonical_name": "PostgreSQL",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.sql",
+    "aliases": [
+      "Postgres",
+      "PSQL"
+    ]
+  },
+  {
+    "id": "it.oracle",
+    "canonical_name": "Oracle",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.sql",
+    "aliases": [
+      "Oracle DB",
+      "Oracle RDBMS",
+      "Oracle Database"
+    ]
+  },
+  {
+    "id": "it.sqlite",
+    "canonical_name": "SQLite",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.sql",
+    "aliases": []
+  },
+  {
+    "id": "it.sqlserver",
+    "canonical_name": "SQL Server",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.sql",
+    "aliases": [
+      "MSSQL",
+      "Microsoft SQL Server"
+    ]
+  },
+  {
+    "id": "it.mongodb",
+    "canonical_name": "MongoDB",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "NoSQL"
+    ]
+  },
+  {
+    "id": "it.redis",
+    "canonical_name": "Redis",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": []
+  },
+  {
+    "id": "it.elasticsearch",
+    "canonical_name": "Elasticsearch",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": []
+  },
+  {
+    "id": "it.rest_api",
+    "canonical_name": "REST API",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "RESTful",
+      "RESTful API",
+      "Web API"
+    ]
+  },
+  {
+    "id": "it.graphql",
+    "canonical_name": "GraphQL",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": []
+  },
+  {
+    "id": "it.grpc",
+    "canonical_name": "gRPC",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": []
+  },
+  {
+    "id": "it.microservices",
+    "canonical_name": "Microservices",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Microservice"
+    ]
+  },
+  {
+    "id": "it.git",
+    "canonical_name": "Git",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "GitHub",
+      "GitLab",
+      "Bitbucket"
+    ]
+  },
+  {
+    "id": "it.docker",
+    "canonical_name": "Docker",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Docker Compose"
+    ]
+  },
+  {
+    "id": "it.kubernetes",
+    "canonical_name": "Kubernetes",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.docker",
+    "aliases": [
+      "K8s"
+    ]
+  },
+  {
+    "id": "it.linux",
+    "canonical_name": "Linux",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Ubuntu",
+      "Unix",
+      "Bash",
+      "Shell Script"
+    ]
+  },
+  {
+    "id": "it.aws",
+    "canonical_name": "AWS",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Amazon Web Services"
+    ]
+  },
+  {
+    "id": "it.gcp",
+    "canonical_name": "GCP",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Google Cloud",
+      "Google Cloud Platform"
+    ]
+  },
+  {
+    "id": "it.azure",
+    "canonical_name": "Azure",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Microsoft Azure"
+    ]
+  },
+  {
+    "id": "it.cicd",
+    "canonical_name": "CI/CD",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "GitHub Actions",
+      "GitLab CI",
+      "Jenkins"
+    ]
+  },
+  {
+    "id": "it.terraform",
+    "canonical_name": "Terraform",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Infrastructure as Code"
+    ]
+  },
+  {
+    "id": "it.nginx",
+    "canonical_name": "Nginx",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Apache Server"
+    ]
+  },
+  {
+    "id": "it.kafka",
+    "canonical_name": "Kafka",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "RabbitMQ",
+      "Message Queue"
+    ]
+  },
+  {
+    "id": "it.wordpress",
+    "canonical_name": "WordPress",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": []
+  },
+  {
+    "id": "it.qa_testing",
+    "canonical_name": "Software QA Testing",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Unit Testing",
+      "Automation Testing",
+      "Manual Testing",
+      "QA Automation",
+      "Quality Assurance Software"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.playwright",
+    "canonical_name": "Playwright",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.qa_testing",
+    "aliases": [
+      "Cypress",
+      "Selenium"
+    ]
+  },
+  {
+    "id": "it.powerbi",
+    "canonical_name": "Power BI",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "PowerBI"
+    ]
+  },
+  {
+    "id": "it.tableau",
+    "canonical_name": "Tableau",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Looker Studio",
+      "Google Data Studio"
+    ]
+  },
+  {
+    "id": "it.pandas",
+    "canonical_name": "Pandas",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.python",
+    "aliases": [
+      "NumPy",
+      "Scikit-learn"
+    ]
+  },
+  {
+    "id": "it.data_analysis",
+    "canonical_name": "Data Analysis",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Data Analytics",
+      "Analisis Data",
+      "Business Intelligence"
+    ]
+  },
+  {
+    "id": "it.machine_learning",
+    "canonical_name": "Machine Learning",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Deep Learning",
+      "TensorFlow",
+      "PyTorch",
+      "LLM",
+      "NLP"
+    ]
+  },
+  {
+    "id": "it.cybersecurity",
+    "canonical_name": "Cybersecurity",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Information Security",
+      "Penetration Testing",
+      "OWASP",
+      "SIEM",
+      "SOC",
+      "Keamanan Siber"
+    ]
+  },
+  {
+    "id": "it.networking",
+    "canonical_name": "Jaringan Komputer",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "TCP/IP",
+      "MikroTik",
+      "Cisco",
+      "CCNA",
+      "Routing",
+      "Switching",
+      "Firewall",
+      "IT Support"
+    ]
+  },
+  {
+    "id": "it.system_design",
+    "canonical_name": "System Design",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Software Architecture",
+      "Database Design",
+      "Perancangan Database"
+    ]
+  },
+  {
+    "id": "it.erp_sap",
+    "canonical_name": "SAP ERP",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "SAP ABAP",
+      "SAP S/4HANA",
+      "Odoo",
+      "ERP"
+    ]
+  },
+  {
+    "id": "it.nextjs_app",
+    "canonical_name": "Next.js App Router",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.nextjs",
+    "aliases": [
+      "App Router",
+      "React Server Components"
+    ]
+  },
+  {
+    "id": "it.svelte",
+    "canonical_name": "Svelte / SvelteKit",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Svelte",
+      "SvelteKit"
+    ]
+  },
+  {
+    "id": "it.ruby_rails",
+    "canonical_name": "Ruby on Rails",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Ruby",
+      "Rails",
+      "RoR"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.elixir",
+    "canonical_name": "Elixir / Phoenix",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Elixir",
+      "Phoenix Framework"
+    ]
+  },
+  {
+    "id": "it.scala",
+    "canonical_name": "Scala",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Scala Play",
+      "Akka"
+    ]
+  },
+  {
+    "id": "it.graphql_apollo",
+    "canonical_name": "Apollo GraphQL",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.graphql",
+    "aliases": [
+      "Apollo Server",
+      "Hasura"
+    ]
+  },
+  {
+    "id": "it.prisma",
+    "canonical_name": "Prisma ORM",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.typescript",
+    "aliases": [
+      "Prisma",
+      "TypeORM",
+      "Drizzle ORM"
+    ]
+  },
+  {
+    "id": "it.supabase",
+    "canonical_name": "Supabase",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Firebase",
+      "Appwrite"
+    ]
+  },
+  {
+    "id": "it.dynamodb",
+    "canonical_name": "DynamoDB",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.aws",
+    "aliases": [
+      "Amazon DynamoDB",
+      "Cassandra",
+      "ScyllaDB"
+    ]
+  },
+  {
+    "id": "it.clickhouse",
+    "canonical_name": "ClickHouse",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.data_analysis",
+    "aliases": [
+      "BigQuery",
+      "Snowflake",
+      "Redshift"
+    ]
+  },
+  {
+    "id": "it.dbt",
+    "canonical_name": "dbt (Data Build Tool)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.data_analysis",
+    "aliases": [
+      "dbt Core",
+      "dbt Cloud",
+      "Data Warehouse"
+    ]
+  },
+  {
+    "id": "it.airflow",
+    "canonical_name": "Apache Airflow",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.python",
+    "aliases": [
+      "Airflow",
+      "Dagster",
+      "Prefect",
+      "ETL Pipeline"
+    ]
+  },
+  {
+    "id": "it.spark",
+    "canonical_name": "Apache Spark",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.python",
+    "aliases": [
+      "PySpark",
+      "Hadoop",
+      "Apache Flink",
+      "Big Data"
+    ]
+  },
+  {
+    "id": "it.powerquery",
+    "canonical_name": "Power Query & DAX",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.powerbi",
+    "aliases": [
+      "DAX",
+      "Power Query",
+      "Power Pivot"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.langchain",
+    "canonical_name": "LLM Engineering & RAG",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.machine_learning",
+    "aliases": [
+      "LangChain",
+      "LlamaIndex",
+      "RAG",
+      "Prompt Engineering",
+      "Vector Database",
+      "AI Agent"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.computer_vision",
+    "canonical_name": "Computer Vision",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.machine_learning",
+    "aliases": [
+      "OpenCV",
+      "YOLO",
+      "Object Detection",
+      "OCR"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.mlops",
+    "canonical_name": "MLOps",
+    "domain": "informatika_data",
+    "category": "domain",
+    "parent_id": "it.machine_learning",
+    "aliases": [
+      "MLflow",
+      "Kubeflow",
+      "Model Serving",
+      "Weights & Biases"
+    ]
+  },
+  {
+    "id": "it.prometheus",
+    "canonical_name": "Prometheus & Grafana",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.docker",
+    "aliases": [
+      "Grafana",
+      "Prometheus",
+      "Datadog",
+      "OpenTelemetry",
+      "ELK Stack"
+    ]
+  },
+  {
+    "id": "it.ansible",
+    "canonical_name": "Ansible",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.linux",
+    "aliases": [
+      "Chef",
+      "Puppet",
+      "Configuration Management"
+    ]
+  },
+  {
+    "id": "it.helm",
+    "canonical_name": "Helm Charts",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.kubernetes",
+    "aliases": [
+      "ArgoCD",
+      "GitOps"
+    ]
+  },
+  {
+    "id": "it.oauth2",
+    "canonical_name": "OAuth 2.0 & OIDC",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "OAuth2",
+      "OpenID Connect",
+      "JWT Authentication",
+      "SSO SAML"
+    ]
+  },
+  {
+    "id": "it.owasp",
+    "canonical_name": "OWASP & AppSec",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "OWASP Top 10",
+      "Penetration Testing",
+      "Burp Suite",
+      "VAPT",
+      "SIEM"
+    ]
+  },
+  {
+    "id": "it.soc_analyst",
+    "canonical_name": "SOC Operations & Incident Response",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "SOC Analyst",
+      "Threat Hunting",
+      "Splunk SIEM",
+      "Wazuh",
+      "ISO 27001"
+    ]
+  },
+  {
+    "id": "it.cissp_ceh",
+    "canonical_name": "CEH / CompTIA Security+",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Certified Ethical Hacker",
+      "CompTIA Security+",
+      "OSCP",
+      "CISSP"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.mikrotik",
+    "canonical_name": "MikroTik & Cisco Networking",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "MikroTik",
+      "CCNA",
+      "BGP",
+      "VLAN",
+      "Routing & Switching",
+      "TCP/IP"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.helpdesk",
+    "canonical_name": "IT Helpdesk & Ticketing",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "ITSM",
+      "Jira Service Management",
+      "ServiceNow",
+      "Troubleshooting Hardware"
+    ]
+  },
+  {
+    "id": "it.sap_abap",
+    "canonical_name": "SAP ABAP",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "ABAP",
+      "SAP S/4HANA Technical",
+      "SAP BTP",
+      "Fiori"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.odoo_dev",
+    "canonical_name": "Odoo Development",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.python",
+    "aliases": [
+      "Odoo ERP",
+      "Odoo Python"
+    ]
+  },
+  {
+    "id": "it.unity_game",
+    "canonical_name": "Unity / Unreal Engine",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.csharp",
+    "aliases": [
+      "Unity 3D",
+      "Unreal Engine",
+      "Game Development"
+    ]
+  },
+  {
+    "id": "it.blockchain",
+    "canonical_name": "Web3 & Smart Contracts",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Solidity",
+      "Ethereum",
+      "Smart Contract"
+    ]
+  },
+  {
+    "id": "it.tauri",
+    "canonical_name": "Tauri / Electron Desktop",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Tauri",
+      "Electron JS"
+    ]
+  },
+  {
+    "id": "it.appium",
+    "canonical_name": "Mobile Test Automation",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.qa_testing",
+    "aliases": [
+      "Appium",
+      "Katalon Studio",
+      "Postman API Testing",
+      "JMeter"
+    ]
+  },
+  {
+    "id": "it.power_apps",
+    "canonical_name": "Power Platform (Power Automate / Power Apps)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Power Automate",
+      "Power Apps",
+      "Microsoft 365 Automation"
+    ]
+  },
+  {
+    "id": "it.graphql_federation",
+    "canonical_name": "API Gateway & Rate Limiting",
+    "domain": "informatika_data",
+    "category": "domain",
+    "parent_id": "it.rest_api",
+    "aliases": [
+      "Kong API Gateway",
+      "AWS API Gateway",
+      "Rate Limiting"
+    ]
+  },
+  {
+    "id": "it.redis_pub",
+    "canonical_name": "Caching & Session Management",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.redis",
+    "aliases": [
+      "In-Memory Caching",
+      "Memcached"
+    ]
+  },
+  {
+    "id": "it.spring_cloud",
+    "canonical_name": "Spring Boot & Hibernate",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.java",
+    "aliases": [
+      "Hibernate JPA",
+      "Spring Security",
+      "Maven",
+      "Gradle"
+    ]
+  },
+  {
+    "id": "it.dotnet_core",
+    "canonical_name": "ASP.NET Core & Entity Framework",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.csharp",
+    "aliases": [
+      "Entity Framework",
+      "EF Core",
+      "Blazor"
+    ]
+  },
+  {
+    "id": "it.k6_perf",
+    "canonical_name": "Performance & Load Testing (k6 / JMeter)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "parent_id": "it.qa_testing",
+    "aliases": [
+      "Apache JMeter",
+      "Grafana k6",
+      "Locust",
+      "Stress Testing"
+    ]
+  },
+  {
+    "id": "it.cloudflare",
+    "canonical_name": "Cloudflare & CDN Security",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Cloudflare Workers",
+      "WAF",
+      "DNS Management"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.product_mgmt",
+    "canonical_name": "Product Management & PRD Writing",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Product Roadmap",
+      "User Stories",
+      "Product Discovery",
+      "A/B Testing"
+    ]
+  },
+  {
+    "id": "it.scrum_agile",
+    "canonical_name": "Software Project Management",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Technical Specification",
+      "System Architecture",
+      "UML & ERD"
+    ]
+  },
+  {
+    "id": "it.flutter_bloc",
+    "canonical_name": "Flutter State Management (BLoC / Riverpod)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.flutter",
+    "aliases": [
+      "Flutter BLoC",
+      "Riverpod",
+      "GetX",
+      "Provider Flutter"
+    ]
+  },
+  {
+    "id": "it.jetpack_compose",
+    "canonical_name": "Jetpack Compose & Android Architecture",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "parent_id": "it.kotlin",
+    "aliases": [
+      "Jetpack Compose",
+      "MVVM Android",
+      "Room Database",
+      "Retrofit"
+    ]
+  },
+  {
+    "id": "it.nextjs_ssr",
+    "canonical_name": "Server-Side Rendering & SEO Web",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "SSR",
+      "SSG",
+      "ISR Web",
+      "Core Web Vitals"
+    ],
+    "parent_id": "it.nextjs",
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.nuxt",
+    "canonical_name": "Nuxt.js Framework",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Nuxt 3",
+      "Nitro Server"
+    ],
+    "parent_id": "it.vue"
+  },
+  {
+    "id": "it.pinia_redux",
+    "canonical_name": "State Management (Pinia / Redux / Zustand)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Pinia",
+      "Redux Toolkit",
+      "Zustand",
+      "Vuex"
+    ],
+    "parent_id": "it.javascript"
+  },
+  {
+    "id": "it.vite_webpack",
+    "canonical_name": "Build Tooling (Vite / Webpack / Turbopack)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Vite",
+      "Webpack",
+      "Rollup",
+      "esbuild"
+    ],
+    "parent_id": "it.javascript"
+  },
+  {
+    "id": "it.bun_deno",
+    "canonical_name": "Bun / Deno Runtime",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Bun JS",
+      "Deno Runtime"
+    ],
+    "parent_id": "it.nodejs"
+  },
+  {
+    "id": "it.websockets",
+    "canonical_name": "WebSockets & Real-Time Streaming",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Socket.IO",
+      "Server-Sent Events",
+      "SSE",
+      "WebRTC"
+    ],
+    "parent_id": "it.rest_api",
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.pwa_service",
+    "canonical_name": "Progressive Web App (PWA)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Service Worker",
+      "IndexedDB",
+      "Web Push"
+    ],
+    "parent_id": "it.javascript"
+  },
+  {
+    "id": "it.wasm",
+    "canonical_name": "WebAssembly (WASM)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "WebAssembly",
+      "wasm-bindgen"
+    ],
+    "parent_id": "it.rust"
+  },
+  {
+    "id": "it.tauri_sqlite",
+    "canonical_name": "Embedded SQLite & Local-First Sync",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "SQLite WAL",
+      "CRDT",
+      "Offline-First Architecture"
+    ],
+    "parent_id": "it.sqlite"
+  },
+  {
+    "id": "it.postgres_perf",
+    "canonical_name": "Query Optimization & Database Indexing",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "EXPLAIN ANALYZE",
+      "Database Indexing",
+      "Partitioning",
+      "Sharding"
+    ],
+    "parent_id": "it.sql"
+  },
+  {
+    "id": "it.snowflake_bq",
+    "canonical_name": "Cloud Data Warehouse (BigQuery / Snowflake)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Google BigQuery",
+      "Snowflake",
+      "Amazon Redshift"
+    ],
+    "parent_id": "it.sql"
+  },
+  {
+    "id": "it.spark_kafka",
+    "canonical_name": "Stream Processing (Flink / Kafka Streams)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Kafka Streams",
+      "Change Data Capture",
+      "Debezium"
+    ],
+    "parent_id": "it.kafka"
+  },
+  {
+    "id": "it.superset_metabase",
+    "canonical_name": "Metabase & Apache Superset",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Metabase",
+      "Apache Superset",
+      "LookML"
+    ],
+    "parent_id": "it.data_analysis"
+  },
+  {
+    "id": "it.ab_experiment",
+    "canonical_name": "Statistical A/B Testing & Experimentation",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Hypothesis Testing",
+      "Cohort Retention",
+      "Funnel Analytics"
+    ],
+    "parent_id": "it.data_analysis"
+  },
+  {
+    "id": "it.pytorch_hf",
+    "canonical_name": "Hugging Face Transformers & Fine-Tuning",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Hugging Face",
+      "LoRA Fine-Tuning",
+      "vLLM",
+      "ONNX Runtime"
+    ],
+    "parent_id": "it.machine_learning"
+  },
+  {
+    "id": "it.recsys",
+    "canonical_name": "Recommender Systems & Ranking",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Collaborative Filtering",
+      "Information Retrieval",
+      "Semantic Search",
+      "BM25"
+    ],
+    "parent_id": "it.machine_learning"
+  },
+  {
+    "id": "it.xgboost",
+    "canonical_name": "Classical ML (XGBoost / LightGBM)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "XGBoost",
+      "LightGBM",
+      "Random Forest",
+      "Time Series Forecasting"
+    ],
+    "parent_id": "it.machine_learning"
+  },
+  {
+    "id": "it.fastapi_celery",
+    "canonical_name": "Asynchronous Task Queues (Celery / BullMQ)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Celery",
+      "BullMQ",
+      "Sidekiq",
+      "Background Workers"
+    ]
+  },
+  {
+    "id": "it.k8s_istio",
+    "canonical_name": "Service Mesh & Ingress (Istio / Envoy)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Istio",
+      "Envoy Proxy",
+      "Traefik",
+      "Cert-Manager"
+    ],
+    "parent_id": "it.kubernetes"
+  },
+  {
+    "id": "it.vault_kms",
+    "canonical_name": "Secrets Management (HashiCorp Vault / KMS)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "HashiCorp Vault",
+      "AWS KMS",
+      "TLS PKI"
+    ]
+  },
+  {
+    "id": "it.sast_dast",
+    "canonical_name": "DevSecOps (SAST / DAST / Container Scanning)",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "SonarQube",
+      "Trivy",
+      "Snyk",
+      "Dependabot"
+    ],
+    "parent_id": "it.cicd"
+  },
+  {
+    "id": "it.redteam_dfir",
+    "canonical_name": "Digital Forensics & Malware Analysis (DFIR)",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "DFIR",
+      "Threat Intelligence",
+      "EDR CrowdStrike",
+      "YARA Rules"
+    ],
+    "parent_id": "it.soc_analyst"
+  },
+  {
+    "id": "it.iso27001_impl",
+    "canonical_name": "ISO/IEC 27001 ISMS Implementation",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "ISMS Auditor",
+      "ISO 27001",
+      "Risk Assessment IT",
+      "NIST CSF"
+    ]
+  },
+  {
+    "id": "it.vmware_proxmox",
+    "canonical_name": "Virtualization (VMware / Proxmox / Hyper-V)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "VMware vSphere",
+      "Proxmox VE",
+      "KVM"
+    ],
+    "parent_id": "it.linux",
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.windows_ad",
+    "canonical_name": "Windows Server & Active Directory",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Active Directory",
+      "Microsoft Entra ID",
+      "Group Policy",
+      "Intune MDM"
+    ],
+    "parent_id": "it.helpdesk"
+  },
+  {
+    "id": "it.erp_functional",
+    "canonical_name": "SAP / Odoo Functional Implementation",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "ERP Implementation",
+      "UAT Coordination",
+      "Business Blueprint",
+      "Gap Fit Analysis"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.rpa_uipath",
+    "canonical_name": "Robotic Process Automation (UiPath / Power Automate)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "UiPath",
+      "Automation Anywhere",
+      "Blue Prism"
+    ]
+  },
+  {
+    "id": "it.ba_system",
+    "canonical_name": "System Analysis & BRD / FSD Documentation",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Business Requirement Document",
+      "FSD",
+      "Use Case Diagram",
+      "BPMN 2.0"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.scrum_po",
+    "canonical_name": "Product Ownership & Backlog Prioritization",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "RICE Scoring",
+      "Sprint Review",
+      "Acceptance Criteria"
+    ],
+    "parent_id": "it.product_mgmt"
+  },
+  {
+    "id": "it.gis_leaflet",
+    "canonical_name": "WebGIS (Mapbox / Leaflet / PostGIS)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "PostGIS",
+      "Leaflet.js",
+      "Mapbox GL",
+      "GeoJSON"
+    ]
+  },
+  {
+    "id": "it.nextjs_trpc",
+    "canonical_name": "tRPC & Full-Stack Type Safety",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "tRPC",
+      "Zod Validation",
+      "Monorepo Turborepo"
+    ],
+    "parent_id": "it.typescript"
+  },
+  {
+    "id": "it.tailwindcss_ui",
+    "canonical_name": "Design Component Systems (Radix / shadcn)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "shadcn/ui",
+      "Radix UI",
+      "Headless UI",
+      "Storybook"
+    ],
+    "parent_id": "it.react"
+  },
+  {
+    "id": "it.go_fiber",
+    "canonical_name": "Go Frameworks (Gin / Fiber / Echo)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Gin Gonic",
+      "Go Fiber",
+      "Echo Framework"
+    ],
+    "parent_id": "it.go"
+  },
+  {
+    "id": "it.rust_tokio",
+    "canonical_name": "Async Rust (Tokio / Axum / Actix)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Tokio Async",
+      "Axum",
+      "Actix Web",
+      "Serde"
+    ],
+    "parent_id": "it.rust"
+  },
+  {
+    "id": "it.graphql_relay",
+    "canonical_name": "Data Fetching (TanStack Query / SWR)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "React Query",
+      "TanStack Query",
+      "Pinia Colada"
+    ],
+    "parent_id": "it.typescript"
+  },
+  {
+    "id": "it.testing_vitest",
+    "canonical_name": "Frontend Unit & Component Testing (Vitest / Jest)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Vitest",
+      "Jest",
+      "Testing Library",
+      "Mock Service Worker"
+    ],
+    "parent_id": "it.qa_testing"
+  },
+  {
+    "id": "it.cicd_docker",
+    "canonical_name": "Container Registry & Multi-Stage Builds",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Docker Hub",
+      "GHCR",
+      "AWS ECR",
+      "BuildKit"
+    ],
+    "parent_id": "it.docker"
+  },
+  {
+    "id": "it.k8s_eks_gke",
+    "canonical_name": "Managed Kubernetes (EKS / GKE / AKS)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Amazon EKS",
+      "Google GKE",
+      "Azure AKS",
+      "Rancher"
+    ],
+    "parent_id": "it.kubernetes"
+  },
+  {
+    "id": "it.linux_hardening",
+    "canonical_name": "Server Hardening & Firewall (UFW / iptables)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "SELinux",
+      "SSH Hardening",
+      "Fail2ban",
+      "WireGuard VPN"
+    ],
+    "parent_id": "it.linux"
+  },
+  {
+    "id": "it.spark_delta",
+    "canonical_name": "Lakehouse Architecture (Delta Lake / Iceberg)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Apache Iceberg",
+      "Delta Lake",
+      "Databricks",
+      "Apache Parquet"
+    ],
+    "parent_id": "it.spark"
+  },
+  {
+    "id": "it.nlp_ner",
+    "canonical_name": "NLP, Topic Modeling & Sentiment Analysis",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Named Entity Recognition",
+      "IndoBERT",
+      "Tokenization",
+      "Text Classification"
+    ],
+    "parent_id": "it.machine_learning"
+  },
+  {
+    "id": "it.bi_sas",
+    "canonical_name": "Enterprise Analytics (SAS / SPSS Modeler / KNIME)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "SAS Enterprise",
+      "KNIME",
+      "Alteryx"
+    ],
+    "parent_id": "it.data_analysis"
+  },
+  {
+    "id": "it.firebase_fcm",
+    "canonical_name": "Push Notification & Crashlytics (FCM / Sentry)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Firebase Cloud Messaging",
+      "Sentry Error Tracking",
+      "OneSignal"
+    ]
+  },
+  {
+    "id": "it.payment_midtrans",
+    "canonical_name": "Integrasi Payment Gateway (Midtrans / Xendit / DOIT)",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Midtrans API",
+      "Xendit Integration",
+      "Webhook Idempotency",
+      "SNAP BI API"
+    ]
+  },
+  {
+    "id": "it.core_banking_it",
+    "canonical_name": "Core Banking & ISO 8583 / SWIFT Switching",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "ISO 8583",
+      "SWIFT MT/MX",
+      "ATM Switching",
+      "Temenos T24"
+    ]
+  },
+  {
+    "id": "it.gis_postgis",
+    "canonical_name": "Spatial SQL & Vector Tiles (PostGIS / Tippecanoe)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "PostGIS Queries",
+      "GeoServer",
+      "QGIS Server"
+    ],
+    "parent_id": "it.sql"
+  },
+  {
+    "id": "it.github_copilot",
+    "canonical_name": "GitHub & Git Workflows (PR / Code Review)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Pull Request",
+      "Branching Strategy",
+      "Code Review"
+    ],
+    "parent_id": "it.git"
+  },
+  {
+    "id": "it.swagger_openapi",
+    "canonical_name": "OpenAPI / Swagger & API Docs",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Swagger",
+      "Postman Collection",
+      "Insomnia"
+    ],
+    "parent_id": "it.rest_api"
+  },
+  {
+    "id": "it.rabbitmq_nats",
+    "canonical_name": "NATS / Amazon SQS & Event-Driven Architecture",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Amazon SQS",
+      "AWS SNS",
+      "Event-Driven"
+    ],
+    "parent_id": "it.kafka"
+  },
+  {
+    "id": "it.pytest_junit",
+    "canonical_name": "Unit & Integration Testing (Pytest / JUnit / Cargo Test)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Pytest",
+      "JUnit",
+      "Mockito",
+      "PHPUnit"
+    ],
+    "parent_id": "it.qa_testing"
+  },
+  {
+    "id": "it.firebase_auth",
+    "canonical_name": "Firebase Firestore & Cloud Functions",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Firestore",
+      "Cloud Functions",
+      "Firebase Hosting"
+    ],
+    "parent_id": "it.supabase"
+  },
+  {
+    "id": "it.looker_bi",
+    "canonical_name": "Google Looker Studio & Spreadsheet Automation",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "AppSheet",
+      "Google Apps Script",
+      "Looker BI"
+    ],
+    "parent_id": "it.tableau"
+  },
+  {
+    "id": "it.elastic_elk",
+    "canonical_name": "Log Aggregation (ELK / Loki / OpenSearch)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Logstash",
+      "Kibana",
+      "Grafana Loki",
+      "OpenSearch"
+    ],
+    "parent_id": "it.elasticsearch"
+  },
+  {
+    "id": "it.ios_xcode",
+    "canonical_name": "iOS Ecosystem (Xcode, CoreData, TestFlight)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Xcode",
+      "TestFlight",
+      "CocoaPods / SPM"
+    ],
+    "parent_id": "it.swift"
+  },
+  {
+    "id": "it.android_play",
+    "canonical_name": "Android Release (Gradle, Play Console, ProGuard)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Play Console",
+      "Gradle Build",
+      "Firebase Crashlytics"
+    ],
+    "parent_id": "it.kotlin"
+  },
+  {
+    "id": "it.sso_ldap",
+    "canonical_name": "IAM, LDAP & Identity Governance",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Keycloak",
+      "Okta",
+      "Auth0",
+      "LDAP"
+    ],
+    "parent_id": "it.oauth2"
+  },
+  {
+    "id": "it.solidjs",
+    "canonical_name": "SolidJS / Qwik",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "SolidJS",
+      "Qwik Framework"
+    ],
+    "parent_id": "it.javascript"
+  },
+  {
+    "id": "it.astro",
+    "canonical_name": "Astro Static & Content Sites",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Astro Build",
+      "MDX"
+    ],
+    "parent_id": "it.javascript",
+    "requires_domain_context": true
+  },
+  {
+    "id": "it.drizzle_sql",
+    "canonical_name": "Drizzle / Knex / SQLx",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "SQLx",
+      "Drizzle",
+      "Kysely"
+    ],
+    "parent_id": "it.sql"
+  },
+  {
+    "id": "it.couchbase_neo4j",
+    "canonical_name": "Graph Database (Neo4j / ArangoDB)",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Neo4j",
+      "Cypher Query",
+      "Knowledge Graph"
+    ]
+  },
+  {
+    "id": "it.duckdb_polars",
+    "canonical_name": "High-Speed Analytics (DuckDB / Polars)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "DuckDB",
+      "Polars",
+      "Apache Arrow"
+    ],
+    "parent_id": "it.python"
+  },
+  {
+    "id": "it.rust_tauri_mobile",
+    "canonical_name": "Cross-Platform Rust Core FFI",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "UniFFI",
+      "JNI Rust",
+      "C ABI FFI"
+    ],
+    "parent_id": "it.rust"
+  },
+  {
+    "id": "it.storybook_a11y",
+    "canonical_name": "Frontend Accessibility & Semantic HTML",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "ARIA Attributes",
+      "Screen Reader Testing",
+      "Keyboard Navigation"
+    ],
+    "parent_id": "it.html"
+  },
+  {
+    "id": "it.seo_core_web",
+    "canonical_name": "Web Performance & Core Web Vitals",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "Lighthouse Audit",
+      "LCP CLS Optimization",
+      "Lazy Loading"
+    ],
+    "parent_id": "it.html"
+  },
+  {
+    "id": "it.redis_streams",
+    "canonical_name": "Distributed Locking & Rate Limiting",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Distributed Lock",
+      "Token Bucket",
+      "Idempotency Key"
+    ],
+    "parent_id": "it.redis"
+  },
+  {
+    "id": "it.grpc_proto",
+    "canonical_name": "Protocol Buffers & Schema Evolution",
+    "domain": "informatika_data",
+    "category": "core_hard",
+    "aliases": [
+      "Protobuf",
+      "Buf Schema",
+      "gRPC Streaming"
+    ],
+    "parent_id": "it.grpc"
+  },
+  {
+    "id": "it.terraform_iac",
+    "canonical_name": "Multi-Cloud IaC (Terraform / Pulumi)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Pulumi",
+      "OpenTofu",
+      "CloudFormation"
+    ],
+    "parent_id": "it.terraform"
+  },
+  {
+    "id": "it.argocd_flux",
+    "canonical_name": "GitOps Deployment (ArgoCD / Flux)",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Argo CD",
+      "FluxCD",
+      "Canary Deployment",
+      "Blue-Green Deploy"
+    ],
+    "parent_id": "it.cicd"
+  },
+  {
+    "id": "it.wireshark_net",
+    "canonical_name": "Packet Inspection & Network Troubleshooting",
+    "domain": "informatika_data",
+    "category": "tools_tech",
+    "aliases": [
+      "Wireshark",
+      "tcpdump",
+      "Traceroute",
+      "DNSSEC"
+    ],
+    "parent_id": "it.mikrotik"
+  },
+  {
+    "id": "it.pentest_mobile",
+    "canonical_name": "Mobile Security Testing (Frida / MobSF)",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "MobSF",
+      "Frida",
+      "OWASP MASVS",
+      "APK Reverse Engineering"
+    ],
+    "parent_id": "it.owasp"
+  },
+  {
+    "id": "it.data_governance",
+    "canonical_name": "Data Governance, Lineage & Catalog",
+    "domain": "informatika_data",
+    "category": "domain",
+    "aliases": [
+      "OpenMetadata",
+      "Apache Atlas",
+      "Data Quality Great Expectations"
+    ],
+    "parent_id": "it.data_analysis"
+  },
+  {
+    "id": "it.spark_etl",
+    "canonical_name": "Apache Spark & PySpark",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "spark",
+      "pyspark",
+      "apache spark",
+      "databricks",
+      "delta lake"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced",
+    "parent_id": "it.python"
+  },
+  {
+    "id": "it.linux_admin",
+    "canonical_name": "Linux System Administration",
+    "domain": "informatika_data",
+    "category": "core",
+    "aliases": [
+      "linux",
+      "ubuntu server",
+      "centos",
+      "rhel",
+      "bash scripting",
+      "systemd"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "it.observability",
+    "canonical_name": "Observability (Prometheus, Grafana, ELK)",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "prometheus",
+      "grafana",
+      "datadog",
+      "elk stack",
+      "opentelemetry",
+      "kibana"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "it.siem_soc",
+    "canonical_name": "SIEM & SOC Operations",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "siem",
+      "splunk",
+      "wazuh",
+      "qradar",
+      "soc analyst",
+      "incident response"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "it.appsec",
+    "canonical_name": "Application Security & OWASP",
+    "domain": "informatika_data",
+    "category": "core",
+    "aliases": [
+      "owasp",
+      "owasp top 10",
+      "sast",
+      "dast",
+      "sonarqube",
+      "devsecops"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "it.erp_sap_abap",
+    "canonical_name": "SAP ABAP & Fiori Development",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "abap",
+      "sap abap",
+      "sap fiori",
+      "sapui5",
+      "sap btp"
+    ],
+    "base_weight": 1.25,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "it.salesforce_dev",
+    "canonical_name": "Salesforce & Apex Development",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "salesforce",
+      "apex",
+      "lightning web components",
+      "crm customization"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "it.k8s_helm",
+    "canonical_name": "Kubernetes, Helm & Container Orchestration",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "kubernetes",
+      "k8s",
+      "helm",
+      "argocd",
+      "openshift",
+      "eks",
+      "gke"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "it.playwright_qa",
+    "canonical_name": "Playwright, Cypress & Automation QA",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "playwright",
+      "cypress",
+      "selenium",
+      "appium",
+      "qa automation",
+      "k6 load test"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "it.llm_rag",
+    "canonical_name": "LLM Integration, RAG & Prompt Engineering",
+    "domain": "informatika_data",
+    "category": "framework",
+    "aliases": [
+      "llm",
+      "rag",
+      "langchain",
+      "llamaindex",
+      "prompt engineering",
+      "vector database",
+      "pgvector"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced"
+  },
+  {
+    "id": "it.powerbi_tableau",
+    "canonical_name": "Power BI, Tableau & Looker Studio",
+    "domain": "informatika_data",
+    "category": "tool",
+    "aliases": [
+      "power bi",
+      "tableau",
+      "looker studio",
+      "metabase",
+      "superset"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  }
 ]

@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use serde::Serialize;
 use typst::foundations::{Dict, IntoValue};
 use typst_as_lib::TypstEngine;
@@ -243,7 +244,7 @@ pub fn export_ats_pdf(
         _ => "_Master_ATS".into(),
     };
     let filename = format!("CV_{name_slug}{suffix}.pdf");
-    let out_path = output_dir.join(filename);
+    let out_path = output_dir.join(&filename);
     std::fs::write(&out_path, &pdf_bytes).map_err(|e| {
         AppError::db_error(format!("Gagal menulis file PDF ATS ke disk: {e}"))
     })?;
@@ -256,11 +257,13 @@ pub fn export_ats_pdf(
     };
 
     Ok(AtsExportResult {
+        file_name: filename,
         file_path: out_path.display().to_string(),
         ats_keyword_score,
         matched_keywords: ctx.matched_skills.clone(),
         missing_keywords: ctx.missing_skills.clone(),
         pdf_size_bytes: pdf_bytes.len() as u32,
+        pdf_base64: BASE64.encode(&pdf_bytes),
     })
 }
 

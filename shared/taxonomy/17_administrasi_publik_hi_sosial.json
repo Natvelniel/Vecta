@@ -1,0 +1,268 @@
+[
+  {
+    "id": "pub.policy_analysis",
+    "canonical_name": "Analisis Kebijakan Publik (Regulatory Impact)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "Public Policy",
+      "Naskah Akademik",
+      "Policy Brief",
+      "Regulatory Impact Assessment"
+    ]
+  },
+  {
+    "id": "pub.monev",
+    "canonical_name": "Monitoring & Evaluasi Program (M&E / MEAL)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "Monitoring Evaluation",
+      "MEAL Framework",
+      "Logframe",
+      "Theory of Change",
+      "Impact Assessment"
+    ]
+  },
+  {
+    "id": "pub.csr_comdev",
+    "canonical_name": "CSR & Community Development",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "Corporate Social Responsibility",
+      "Comdev",
+      "PPM Tambang",
+      "Social Mapping",
+      "SROI"
+    ]
+  },
+  {
+    "id": "pub.grant_ngo",
+    "canonical_name": "Manajemen Hibah & Donor Internasional (NGO)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "Grant Writing",
+      "USAID / UNDP Reporting",
+      "Fundraising NGO",
+      "Program Officer"
+    ]
+  },
+  {
+    "id": "pub.diplomasi_hi",
+    "canonical_name": "Hubungan Internasional & Advokasi Pemerintah",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "Government Relations",
+      "Public Affairs",
+      "Protokoler",
+      "Diplomasi Perdagangan"
+    ]
+  },
+  {
+    "id": "pub.gov_procurement",
+    "canonical_name": "Pengadaan Barang & Jasa Pemerintah (PBJP)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "LKPP Level 1",
+      "SPSE",
+      "SiRUP",
+      "E-Katalog Pemerintah",
+      "Perpres 16/2018"
+    ]
+  },
+  {
+    "id": "pub.riset_sosial",
+    "canonical_name": "Metode Riset Sosial & Pengolahan Survey",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "NVivo",
+      "KoboToolbox",
+      "Qualitative Research",
+      "Ethnography",
+      "Statistik Sosial"
+    ]
+  },
+  {
+    "id": "pub.kependudukan",
+    "canonical_name": "Tata Kelola Administrasi Pemerintahan & Arsip Negara",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "SAKIP",
+      "LAKIP",
+      "Reformasi Birokrasi",
+      "ANRI"
+    ]
+  },
+  {
+    "id": "pub.smart_city",
+    "canonical_name": "E-Government & Layanan Publik Digital (SPBE)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "SPBE Pemerintah",
+      "Satu Data Indonesia",
+      "OSS Layanan Publik"
+    ],
+    "parent_id": "pub.policy_analysis"
+  },
+  {
+    "id": "pub.gender_esg",
+    "canonical_name": "GESI (Gender Equality & Social Inclusion)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "Child Protection",
+      "Safeguarding Policy",
+      "Humanitarian Response"
+    ],
+    "parent_id": "pub.monev"
+  },
+  {
+    "id": "pub.stakeholder_pemda",
+    "canonical_name": "Koordinasi Pemda, Kementerian & DPR",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "Public Policy Advocacy",
+      "Rapat Dengar Pendapat",
+      "Liaison Pemerintah"
+    ],
+    "parent_id": "pub.diplomasi_hi"
+  },
+  {
+    "id": "pub.demografi",
+    "canonical_name": "Analisis Kependudukan, BPS & Indikator Makro",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "Susenas / Sakernas Data",
+      "Demografi Sosial",
+      "GIS Sosial"
+    ],
+    "parent_id": "pub.riset_sosial"
+  },
+  {
+    "id": "pub.perencanaan_daerah",
+    "canonical_name": "Perencanaan Pembangunan (RPJMD / Musrenbang)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "RPJMD",
+      "Renstra OPD",
+      "SIPD Perencanaan"
+    ],
+    "parent_id": "pub.policy_analysis"
+  },
+  {
+    "id": "pub.conflict_mediat",
+    "canonical_name": "Mediasi Konflik Agraria, Sosial & Stakeholder Engagement",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "soft_skill",
+    "aliases": [
+      "FPIC Free Prior Informed Consent",
+      "Grievance Mechanism",
+      "Stakeholder Mapping"
+    ],
+    "parent_id": "pub.csr_comdev"
+  },
+  {
+    "id": "pub.sustainability_ngo",
+    "canonical_name": "Program Iklim, Kehutanan Sosial & Donor ESG",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "REDD+",
+      "Just Transition",
+      "Community Resilience"
+    ],
+    "parent_id": "pub.grant_ngo"
+  },
+  {
+    "id": "pub.public_budget",
+    "canonical_name": "Penganggaran Sektor Publik (APBN / APBD / RKA)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "RKA-KL",
+      "DPA SKPD",
+      "Analisis Belanja Daerah"
+    ],
+    "parent_id": "pub.gov_procurement"
+  },
+  {
+    "id": "pub.diplomacy_doc",
+    "canonical_name": "Penyusunan Nota Diplomatik & Kerja Sama Bilateral",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core_hard",
+    "aliases": [
+      "MoU Internasional",
+      "Briefing Paper Kedutaan"
+    ],
+    "parent_id": "pub.diplomasi_hi"
+  },
+  {
+    "id": "pub.spbe_egov",
+    "canonical_name": "SPBE & Transformasi Digital Pemerintah",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "domain",
+    "aliases": [
+      "spbe",
+      "e-government",
+      "satu data indonesia",
+      "arsitektur spbe"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "pub.monev_program",
+    "canonical_name": "Monitoring & Evaluation (M&E / Logframe)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core",
+    "aliases": [
+      "monev",
+      "monitoring evaluation",
+      "logframe",
+      "theory of change",
+      "baseline survey"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "pub.esg_community",
+    "canonical_name": "Community Development & PPM / CSR",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "core",
+    "aliases": [
+      "csr",
+      "community development",
+      "comdev",
+      "ppm tambang",
+      "sroi"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "pub.spse_pbj",
+    "canonical_name": "Pengadaan Barang/Jasa Pemerintah (PBJ)",
+    "domain": "administrasi_publik_hi_sosial",
+    "category": "compliance",
+    "aliases": [
+      "pbj pemerintah",
+      "perpres 16",
+      "spse",
+      "pokja pemilihan",
+      "ppkom"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  }
+]

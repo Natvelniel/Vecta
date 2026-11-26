@@ -1,7 +1,385 @@
 [
-  {"id":"agr.haccp","canonical_name":"HACCP & Keamanan Pangan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["HACCP","Food Safety","Keamanan Pangan","ISO 22000","FSSC 22000","SJPH","Sertifikasi Halal","GMP Pangan","SSOP"]},
-  {"id":"agr.tekpang","canonical_name":"Teknologi Pangan & R&D Produk","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["Teknologi Pangan","Food Technology","Formulasi Pangan","Pengujian Organoleptik","Shelf Life","Umur Simpan","QC Pangan"]},
-  {"id":"agr.agronomi","canonical_name":"Agronomi & Perkebunan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["Agronomi","Agronomist","Perkebunan","Kelapa Sawit","ISPO","RSPO","Hama Penyakit Tanaman","Budidaya Tanaman","Pemupukan","Kultur Jaringan"]},
-  {"id":"agr.peternakan","canonical_name":"Peternakan & Budidaya Perikanan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["Peternakan","Pakan Ternak","Akuakultur","Budidaya Perikanan","Tambak Udang","Kualitas Air","Kesehatan Hewan"]},
-  {"id":"agr.amdal","canonical_name":"AMDAL & Pengelolaan Lingkungan","domain":"pertanian_pangan_lingkungan","category":"core_hard","aliases":["AMDAL","UKL-UPL","Environmental Management","PROPER","IPAL","Pengolahan Limbah","Limbah B3","Sustainability","ESG","Emisi Karbon"]}
+  {
+    "id": "agr.haccp",
+    "canonical_name": "HACCP & Keamanan Pangan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "HACCP",
+      "Food Safety",
+      "Keamanan Pangan",
+      "ISO 22000",
+      "FSSC 22000",
+      "SJPH",
+      "Sertifikasi Halal",
+      "GMP Pangan",
+      "SSOP"
+    ]
+  },
+  {
+    "id": "agr.tekpang",
+    "canonical_name": "Teknologi Pangan & R&D Produk",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "Teknologi Pangan",
+      "Food Technology",
+      "Formulasi Pangan",
+      "Pengujian Organoleptik",
+      "Shelf Life",
+      "Umur Simpan",
+      "QC Pangan"
+    ]
+  },
+  {
+    "id": "agr.agronomi",
+    "canonical_name": "Agronomi & Perkebunan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "Agronomi",
+      "Agronomist",
+      "Perkebunan",
+      "Kelapa Sawit",
+      "ISPO",
+      "RSPO",
+      "Hama Penyakit Tanaman",
+      "Budidaya Tanaman",
+      "Pemupukan",
+      "Kultur Jaringan"
+    ]
+  },
+  {
+    "id": "agr.peternakan",
+    "canonical_name": "Peternakan & Budidaya Perikanan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "Peternakan",
+      "Pakan Ternak",
+      "Akuakultur",
+      "Budidaya Perikanan",
+      "Tambak Udang",
+      "Kualitas Air",
+      "Kesehatan Hewan"
+    ]
+  },
+  {
+    "id": "agr.amdal",
+    "canonical_name": "AMDAL & Pengelolaan Lingkungan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "AMDAL",
+      "UKL-UPL",
+      "Environmental Management",
+      "PROPER",
+      "IPAL",
+      "Pengolahan Limbah",
+      "Limbah B3",
+      "Sustainability",
+      "ESG",
+      "Emisi Karbon"
+    ]
+  },
+  {
+    "id": "agr.sawit_perkebunan",
+    "canonical_name": "Manajemen Perkebunan Kelapa Sawit / Kehutanan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "ISPO",
+      "RSPO",
+      "Asisten Kebun",
+      "Taksasi Panen",
+      "Estate Agronomy"
+    ]
+  },
+  {
+    "id": "agr.perikanan",
+    "canonical_name": "Akuakultur & Teknologi Hasil Perikanan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "Budidaya Udang Vaname",
+      "Water Quality Tambak",
+      "CPIB",
+      "CBIB"
+    ]
+  },
+  {
+    "id": "agr.sensory_rnd",
+    "canonical_name": "Uji Organoleptik & Formulasi Pangan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "parent_id": "agr.tekpang",
+    "aliases": [
+      "Sensory Evaluation",
+      "Shelf Life Study",
+      "CPPOB",
+      "Nutrition Facts",
+      "NKV"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "agr.halal_sjh",
+    "canonical_name": "Sertifikasi Halal (SJPH / BPJPH / LPPOM)",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "Penyelia Halal",
+      "SJPH",
+      "HAS 23000",
+      "BPJPH",
+      "CEROL"
+    ]
+  },
+  {
+    "id": "agr.waste_water",
+    "canonical_name": "Pengelolaan Limbah (IPAL / WWTP / B3)",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "parent_id": "agr.amdal",
+    "aliases": [
+      "IPAL",
+      "WWTP",
+      "Pengelolaan Limbah B3",
+      "PROPER KLHK",
+      "POPA / PPPA"
+    ]
+  },
+  {
+    "id": "agr.ghg_carbon",
+    "canonical_name": "Inventarisasi Emisi Karbon & ESG Lingkungan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "GHG Accounting",
+      "Carbon Footprint",
+      "Life Cycle Assessment"
+    ]
+  },
+  {
+    "id": "agr.lab_micro",
+    "canonical_name": "Uji Mikrobiologi Pangan (TPC / Coliform)",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "parent_id": "agr.haccp",
+    "aliases": [
+      "TPC",
+      "Salmonella Test",
+      "Swab Test Sanitasi"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "agr.cold_storage_pangan",
+    "canonical_name": "Teknologi Pengolahan Susu, Daging & Seafood",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "UHT Processing",
+      "Cold Storage Pangan",
+      "GMP Pangan",
+      "Retort Sterilization"
+    ],
+    "parent_id": "agr.tekpang"
+  },
+  {
+    "id": "agr.gmp_food",
+    "canonical_name": "GMP, SSOP & Sanitasi Pabrik Pangan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "SSOP",
+      "Pest Control Audit",
+      "Allergen Control",
+      "Food Defense TACCP"
+    ],
+    "parent_id": "agr.haccp"
+  },
+  {
+    "id": "agr.kelautan",
+    "canonical_name": "Ilmu Kelautan, Konservasi & Ekosistem Pesisir",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "Mangrove Restoration",
+      "Coral Reef Survey",
+      "GIS Kelautan"
+    ],
+    "parent_id": "agr.perikanan"
+  },
+  {
+    "id": "agr.kehutanan_svlk",
+    "canonical_name": "Kehutanan, SVLK & Perhutanan Sosial",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "SVLK Kayu",
+      "Inventarisasi Hutan",
+      "Karhutla Prevention"
+    ],
+    "parent_id": "agr.sawit_perkebunan"
+  },
+  {
+    "id": "agr.k3_lingkungan",
+    "canonical_name": "Pemantauan Kualitas Udara, Air & Kebisingan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "tools_tech",
+    "aliases": [
+      "BMKG / KLHK Baku Mutu",
+      "Sampling Emisi Cerobong",
+      "SPARING KLHK"
+    ],
+    "parent_id": "agr.waste_water"
+  },
+  {
+    "id": "agr.smart_farming",
+    "canonical_name": "Smart Farming, Hidroponik & Greenhouse",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "Hydroponics NFT",
+      "Fertigasi Otomatis",
+      "Drone Spraying"
+    ],
+    "parent_id": "agr.agronomi"
+  },
+  {
+    "id": "agr.kopi_kakau",
+    "canonical_name": "Agronomi & Pasca Panen Komoditas (Kopi / Kakao / Teh)",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "Coffee Q-Grader",
+      "Fermentasi Kakao",
+      "Cupping Score"
+    ],
+    "parent_id": "agr.agronomi"
+  },
+  {
+    "id": "agr.cold_fish",
+    "canonical_name": "Pengolahan Hasil Perikanan & Ekspor Udang/Tuna",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "HACCP Perikanan",
+      "IQF Freezing",
+      "Histamine Test"
+    ],
+    "parent_id": "agr.perikanan"
+  },
+  {
+    "id": "agr.seed_breeding",
+    "canonical_name": "Pemuliaan Tanaman & Produksi Benih Bersertifikat",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "Plant Breeding",
+      "Seed QC Germination",
+      "BPSB Sertifikasi Benih"
+    ],
+    "parent_id": "agr.agronomi"
+  },
+  {
+    "id": "agr.amdal_ukl",
+    "canonical_name": "Penyusunan AMDAL, UKL-UPL & RKL-RPL",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "core_hard",
+    "aliases": [
+      "UKL-UPL",
+      "RKL-RPL",
+      "Pertek Emisi / Air Limbah",
+      "KTPA / ATPA AMDAL"
+    ],
+    "parent_id": "agr.amdal"
+  },
+  {
+    "id": "agr.agroforestry",
+    "canonical_name": "Agroforestri, Rehabilitasi DAS & Konservasi Lahan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "Rehabilitasi DAS",
+      "GIS Kehutanan",
+      "Biodiversity Survey"
+    ],
+    "parent_id": "agr.kehutanan_svlk"
+  },
+  {
+    "id": "agr.export_agro",
+    "canonical_name": "Sertifikasi Fitosanitari Ekspor Komoditas Pertanian",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "Phytosanitary Certificate",
+      "Karantina Pertanian",
+      "Fumigasi Ekspor"
+    ],
+    "parent_id": "agr.agronomi"
+  },
+  {
+    "id": "agr.iso22000",
+    "canonical_name": "ISO 22000 & FSSC 22000 Food Safety",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "compliance",
+    "aliases": [
+      "iso 22000",
+      "fssc 22000",
+      "brcgs",
+      "food safety management"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "agr.haccp"
+  },
+  {
+    "id": "agr.rspo_ispo",
+    "canonical_name": "ISPO, RSPO & Sawit Berkelanjutan",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "compliance",
+    "aliases": [
+      "ispo",
+      "rspo",
+      "ndpe",
+      "traceability sawit",
+      "mill audit"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "agr.sawit_perkebunan"
+  },
+  {
+    "id": "agr.ruminant_poultry",
+    "canonical_name": "Nutrisi Pakan & Manajemen Unggas/Ruminansia",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "formulasi pakan",
+      "broiler management",
+      "layer",
+      "feedmill",
+      "fcr"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "agr.peternakan"
+  },
+  {
+    "id": "agr.hydroponic_gh",
+    "canonical_name": "Greenhouse & Irigasi Fertigasi",
+    "domain": "pertanian_pangan_lingkungan",
+    "category": "domain",
+    "aliases": [
+      "hidroponik",
+      "greenhouse",
+      "fertigasi",
+      "drip irrigation"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate",
+    "parent_id": "agr.agronomi"
+  }
 ]

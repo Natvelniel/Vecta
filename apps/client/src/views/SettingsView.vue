@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useJobsStore } from "@/stores/jobs";
+import { useProfileStore } from "@/stores/profile";
 import { useSettingsStore } from "@/stores/settings";
+import { useTheme } from "@/composables/useTheme";
 import { useToast } from "@/composables/useToast";
-import { openExternalUrl } from "@/lib/ipc";
+import { ipc, IpcError, openExternalUrl } from "@/lib/ipc";
 import PageHeader from "@/components/layout/PageHeader.vue";
 import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
@@ -10,11 +13,18 @@ import VCard from "@/components/ui/VCard.vue";
 import VIcon from "@/components/ui/VIcon.vue";
 
 const settingsStore = useSettingsStore();
+const profileStore = useProfileStore();
+const jobsStore = useJobsStore();
+const { theme, setTheme } = useTheme();
 const toast = useToast();
+const isAndroid = typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
 
 const newApiKey = ref("");
 const confirmDelete = ref(false);
 const workerUrlInput = ref(settingsStore.workerUrl);
+const backupInputRef = ref<HTMLInputElement | null>(null);
+const exportingBackup = ref(false);
+const importingBackup = ref(false);
 
 onMounted(async () => {
   await Promise.all([
@@ -22,7 +32,7 @@ onMounted(async () => {
     settingsStore.loadOfflineEngineStatus(),
   ]);
   workerUrlInput.value = settingsStore.workerUrl;
-  if (!settingsStore.workerHealth && !settingsStore.checkingWorker) {
+  if (!isAndroid && !settingsStore.workerHealth && !settingsStore.checkingWorker) {
     void settingsStore.checkWorkerHealth(workerUrlInput.value);
   }
 });
@@ -70,6 +80,53 @@ async function handleCheckWorker() {
     toast.show(settingsStore.workerError, { tone: "warning" });
   }
 }
+
+async function handleExportBackup() {
+  exportingBackup.value = true;
+  try {
+    const rep = await ipc.exportVectaBackup();
+    const blob = new Blob([rep.payload_json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = rep.file_name || "vecta-backup.vecta";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast.show(
+      `Backup siap diunduh (${rep.profiles_count} profil · ${rep.watchlists_count} watchlist · tanpa API key).`,
+      { tone: "success" },
+    );
+  } catch (e) {
+    toast.show(e instanceof IpcError ? e.message : "Gagal mengekspor backup.", { tone: "error" });
+  } finally {
+    exportingBackup.value = false;
+  }
+}
+
+async function handleImportBackupFile(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = "";
+  if (!file) return;
+  importingBackup.value = true;
+  try {
+    const text = await file.text();
+    const rep = await ipc.importVectaBackup(text);
+    await Promise.all([profileStore.loadActiveProfile(), jobsStore.loadSearchPreferences()]);
+    toast.show(
+      `Backup berhasil dipulihkan: ${rep.imported_profiles} profil, ${rep.imported_watchlists} watchlist.`,
+      { tone: "success" },
+    );
+  } catch (e) {
+    toast.show(e instanceof IpcError ? e.message : "Format file .vecta tidak valid.", {
+      tone: "error",
+    });
+  } finally {
+    importingBackup.value = false;
+  }
+}
 </script>
 
 <template>
@@ -77,14 +134,97 @@ async function handleCheckWorker() {
     <PageHeader title="Pengaturan" subtitle="Konfigurasi lokal · Zero secrets di SQLite" />
 
     <div class="v-narrow-container">
+      <!-- Dual Theme Selector -->
+      <VCard>
+        <div class="v-sec-head">
+          <div>
+            <h2 class="t-section">Tema Tampilan Vecta</h2>
+            <p class="t-secondary" style="margin-top: 4px">
+              Pilih antara Obsidian Hitam fokus tinggi atau Putih Swiss kontras editorial.
+            </p>
+          </div>
+          <VBadge tone="neutral">{{ theme === "dark" ? "Obsidian Hitam" : "Putih Swiss" }}</VBadge>
+        </div>
+
+        <div class="v-theme-grid" style="margin-top: var(--space-4)">
+          <button
+            type="button"
+            class="v-theme-card"
+            :class="{ 'v-theme-card--active': theme === 'dark' }"
+            @click="setTheme('dark', { x: $event.clientX, y: $event.clientY })"
+          >
+            <span class="v-theme-swatch v-theme-swatch--dark">
+              <span />
+              <i />
+            </span>
+            <span>
+              <strong style="display: block; color: var(--text-1)">Hitam · Obsidian Studio</strong>
+              <span class="t-meta">Fokus nyaman · Aksen indigo &amp; emerald</span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="v-theme-card"
+            :class="{ 'v-theme-card--active': theme === 'light' }"
+            @click="setTheme('light', { x: $event.clientX, y: $event.clientY })"
+          >
+            <span class="v-theme-swatch v-theme-swatch--light">
+              <span />
+              <i />
+            </span>
+            <span>
+              <strong style="display: block; color: var(--text-1)">Putih · Swiss Alabaster</strong>
+              <span class="t-meta">Bersih &amp; cerah · Hitam pekat &amp; teal</span>
+            </span>
+          </button>
+        </div>
+      </VCard>
+
+      <!-- Portable Backup & Migration (.vecta) -->
+      <VCard>
+        <div class="v-sec-head">
+          <div>
+            <h2 class="t-section">Backup &amp; Migrasi Data (.vecta)</h2>
+            <p class="t-secondary" style="margin-top: 4px">
+              Ekspor profil, skill, CV master, preferensi multi-kota, dan watchlist. Kunci API Gemini
+              tidak pernah disertakan.
+            </p>
+          </div>
+          <VBadge tone="success">Portabel 0-Secret</VBadge>
+        </div>
+
+        <div class="v-sec-foot" style="margin-top: var(--space-4)">
+          <input
+            ref="backupInputRef"
+            type="file"
+            accept=".vecta,.json,application/json"
+            style="display: none"
+            @change="handleImportBackupFile"
+          />
+          <VButton variant="primary" :loading="exportingBackup" @click="handleExportBackup">
+            <VIcon name="download" :size="14" />
+            <span>Ekspor Backup (.vecta)</span>
+          </VButton>
+          <VButton
+            variant="secondary"
+            :loading="importingBackup"
+            @click="backupInputRef?.click()"
+          >
+            <VIcon name="upload" :size="14" />
+            <span>Impor Backup (.vecta)</span>
+          </VButton>
+        </div>
+      </VCard>
+
       <!-- Offline Multilingual AI Engine Status -->
       <VCard>
         <div class="v-sec-head">
           <div>
             <h2 class="t-section">Mesin AI Semantik Offline (Tanpa API Key)</h2>
             <p class="t-secondary" style="margin-top: 4px">
-              Model multilingual 101 bahasa (termasuk Bahasa Indonesia) + taksonomi 14 rumpun prodi
-              berjalan 100% lokal di perangkatmu.
+              Model multilingual 101 bahasa (termasuk Bahasa Indonesia) + taksonomi 23 rumpun prodi
+              (917 skill) berjalan 100% lokal di perangkatmu.
             </p>
           </div>
           <VBadge :tone="settingsStore.localAiStatus.is_ready ? 'success' : 'neutral'" class="t-num">
@@ -101,20 +241,23 @@ async function handleCheckWorker() {
         <div class="v-sec-foot" style="margin-top: var(--space-4)">
           <span class="t-meta">Mode Pengambil Lowongan:</span>
           <div style="display: flex; gap: 8px; flex-wrap: wrap">
-            <VButton
-              :variant="settingsStore.scraperMode === 'native_rust' ? 'primary' : 'secondary'"
-              size="compact"
-              @click="handleSwitchScraperMode('native_rust')"
-            >
-              Native Rust (Bawaan · Tanpa Python)
-            </VButton>
-            <VButton
-              :variant="settingsStore.scraperMode === 'python_worker' ? 'primary' : 'secondary'"
-              size="compact"
-              @click="handleSwitchScraperMode('python_worker')"
-            >
-              Python Worker (Opsional)
-            </VButton>
+            <VBadge v-if="isAndroid" tone="success">Native Rust Scraper Aktif</VBadge>
+            <template v-else>
+              <VButton
+                :variant="settingsStore.scraperMode === 'native_rust' ? 'primary' : 'secondary'"
+                size="compact"
+                @click="handleSwitchScraperMode('native_rust')"
+              >
+                Native Rust (Bawaan · Tanpa Python)
+              </VButton>
+              <VButton
+                :variant="settingsStore.scraperMode === 'python_worker' ? 'primary' : 'secondary'"
+                size="compact"
+                @click="handleSwitchScraperMode('python_worker')"
+              >
+                Python Worker (Opsional)
+              </VButton>
+            </template>
           </div>
         </div>
       </VCard>
@@ -214,8 +357,8 @@ async function handleCheckWorker() {
         </div>
       </VCard>
 
-      <!-- Python Scraper Worker -->
-      <VCard>
+      <!-- Python Scraper Worker (Desktop only) -->
+      <VCard v-if="!isAndroid">
         <div class="v-sec-head">
           <div>
             <h2 class="t-section">Python Scraper Worker</h2>
@@ -311,7 +454,8 @@ async function handleCheckWorker() {
 }
 .v-input {
   flex: 1;
-  min-width: 220px;
+  min-width: 0;
+  width: 100%;
   height: 44px;
   padding: 0 var(--space-4);
   background: var(--bg-primary);
@@ -346,6 +490,79 @@ async function handleCheckWorker() {
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
+}
+.v-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.v-theme-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  text-align: left;
+  transition: border-color 150ms ease, background-color 150ms ease, transform 110ms ease;
+}
+.v-theme-card:active {
+  transform: scale(0.985);
+}
+.v-theme-card--active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+.v-theme-swatch {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border: 1px solid var(--border-strong);
+}
+.v-theme-swatch--dark {
+  background: #09090b;
+}
+.v-theme-swatch--dark span {
+  display: block;
+  width: 100%;
+  height: 7px;
+  border-radius: 4px;
+  background: #5e6ad2;
+}
+.v-theme-swatch--dark i {
+  display: block;
+  width: 65%;
+  height: 5px;
+  border-radius: 3px;
+  background: #10b981;
+}
+.v-theme-swatch--light {
+  background: #f5f6f8;
+}
+.v-theme-swatch--light span {
+  display: block;
+  width: 100%;
+  height: 7px;
+  border-radius: 4px;
+  background: #0d0e12;
+}
+.v-theme-swatch--light i {
+  display: block;
+  width: 65%;
+  height: 5px;
+  border-radius: 3px;
+  background: #0d9488;
+}
+@media (max-width: 640px) {
+  .v-theme-grid {
+    grid-template-columns: 1fr;
+  }
 }
 @media (max-width: 1023px) {
   .v-narrow-container {

@@ -124,14 +124,92 @@ const CASES: &[BenchmarkCase] = &[
         expected_skills: &["Ekspor-Impor & Kepabeanan", "Logistik & Warehouse", "Negosiasi & Kepemimpinan"],
         forbidden_skills: &["PHP", "Go"],
     },
+    BenchmarkCase {
+        name: "15_banking_actuary_underwriting",
+        title: "Actuarial Analyst & Credit Underwriter",
+        description: "Kualifikasi:\n- Menguasai Ilmu Aktuaria PSAK 74 / IFRS 17, Life Underwriting, FX Trading, 5C Credit Analysis, SLIK OJK, dan Asset Liability Management.",
+        expected_domain: "perbankan_aktuaria_asuransi",
+        expected_skills: &["Analisis Kredit Korporasi & UMKM", "Ilmu Aktuaria & Valuasi Liabilitas", "Treasury, Pasar Uang & Devisa", "Underwriting & Aktuaria Klaim Asuransi"],
+        forbidden_skills: &["AutoCAD", "Laravel"],
+    },
+    BenchmarkCase {
+        name: "16_scm_sop_ceisa_kite",
+        title: "Demand Planner & Kawasan Berikat Specialist",
+        description: "Persyaratan:\n- Menguasai S&OP, Demand Forecasting, SAP Ariba, Warehouse Management System, IT Inventory Kawasan Berikat, dan CEISA Bea Cukai.",
+        expected_domain: "supply_chain_logistik_exim",
+        expected_skills: &["Sales & Operations Planning (S&OP)", "Demand Planning & Statistical Forecasting", "SAP MM / SD / Ariba", "Operasional Kawasan Berikat (TPB / KITE)", "Kepabeanan PPJK & Sistem CEISA 4.0"],
+        forbidden_skills: &["React", "BTCLS"],
+    },
+    BenchmarkCase {
+        name: "17_public_policy_ngo",
+        title: "Policy Analyst & MEAL Officer",
+        description: "Kualifikasi:\n- Pengalaman menyusun Policy Brief, Naskah Akademik, MEAL Framework, Logframe, serta program Grant Writing USAID dan Government Relations.",
+        expected_domain: "administrasi_publik_hi_sosial",
+        expected_skills: &["Analisis Kebijakan Publik (Regulatory Impact)", "Monitoring & Evaluasi Program (M&E / MEAL)", "Manajemen Hibah & Donor Internasional (NGO)", "Hubungan Internasional & Advokasi Pemerintah"],
+        forbidden_skills: &["ETABS", "MySQL"],
+    },
+    BenchmarkCase {
+        name: "18_language_localization",
+        title: "Localization Specialist & Translator",
+        description: "Requirements:\n- Mahir SDL Trados, MemoQ, Localization LQA Testing, dan Copy Editing sesuai EYD V.",
+        expected_domain: "bahasa_sastra_penerjemahan",
+        expected_skills: &["CAT Tools & Translation Memory (Trados / MemoQ)", "Software & Game Localization (L10n)", "Penyuntingan Bahasa & Proofreading (EYD V)"],
+        forbidden_skills: &["SAP MM / SD / Ariba", "Docker"],
+    },
+    BenchmarkCase {
+        name: "19_electrical_plc_pcb",
+        title: "Electrical Automation & Power Engineer",
+        description: "Kualifikasi:\n- S1 Teknik Elektro.\n- Berpengalaman TIA Portal, Altium Designer, Load Flow Analysis dengan DIgSILENT, serta EPLAN Electric P8.",
+        expected_domain: "teknik_elektro_otomasi_telko",
+        expected_skills: &["Pemrograman PLC & SCADA (Siemens / Omron / Allen-Bradley)", "Desain PCB & Embedded Systems (STM32 / ESP32)", "Sistem Tenaga Listrik & Gardu Induk (ETAP)", "AutoCAD Electrical & EPLAN"],
+        forbidden_skills: &["Brevet Pajak A & B", "Audit Keuangan & Internal"],
+    },
+    BenchmarkCase {
+        name: "20_mining_surpac_pop",
+        title: "Mine Plan & Drilling Engineer",
+        description: "Kualifikasi:\n- S1 Teknik Pertambangan.\n- Menguasai GEOVIA Surpac, Minescape, Drill & Blast, serta memiliki sertifikat POP Minerba.",
+        expected_domain: "pertambangan_migas_energi",
+        expected_skills: &["Perencanaan Tambang (Surpac / Minescape / Vulcan)", "Sertifikasi Pengawas Operasional (POP / POM / POU Minerba)", "Operasi Peledakan & Pemboran (Drilling & Blasting)"],
+        forbidden_skills: &["Laravel", "Meta Ads & TikTok Ads"],
+    },
+    BenchmarkCase {
+        name: "21_clinical_nurse_nutrition",
+        title: "Dokter Perusahaan Hiperkes & Perawat IGD",
+        description: "Kualifikasi:\n- Memiliki Sertifikat Hiperkes, S1 Keperawatan Ners, sertifikat BTCLS dan ACLS, serta pengalaman Nutritionist NCP / PAGT.",
+        expected_domain: "kedokteran_keperawatan_gizi_kesmas",
+        expected_skills: &["Kedokteran Kerja & Hiperkes Perusahaan", "Asuhan Keperawatan Klinis (Ners / STR Aktif)", "Gawat Darurat (BTCLS / ACLS / ATLS)", "Ilmu Gizi Klinis & Penyelenggaraan Makanan RS"],
+        forbidden_skills: &["ETABS", "Go"],
+    },
+    BenchmarkCase {
+        name: "22_dkv_product_ux",
+        title: "Industrial Product & UX Designer",
+        description: "Persyaratan:\n- Berpengalaman membangun Design Tokens, Component Library, Usability Testing dengan Maze, serta Industrial Design (Rhino 3D, CLO 3D).",
+        expected_domain: "dkv_produk_ux_kreatif",
+        expected_skills: &["Design System & Tokens Architecture", "UX Research & Usability Testing", "Desain Produk Industri & Ergonomi"],
+        forbidden_skills: &["POP Minerba", "Payroll & Kompensasi"],
+    },
+    BenchmarkCase {
+        name: "23_ie_k3_sixsigma",
+        title: "Industrial Engineer & Quality Systems",
+        description: "Kualifikasi:\n- Memiliki sertifikat AK3 Umum, Lean Six Sigma Black Belt, menguasai Minitab, DOE Design of Experiments, dan Line Balancing.",
+        expected_domain: "teknik_industri_k3_mutu",
+        expected_skills: &["Ahli K3 Umum Kemnaker & CSMS", "Lean Six Sigma (Green / Black Belt)", "Work Study & Time-Motion Analysis", "Minitab & Statistical Process Control"],
+        forbidden_skills: &["Flutter", "Brevet Pajak A & B"],
+    },
 ];
 
 #[test]
 fn cross_domain_indonesian_benchmark_meets_precision_and_recall_gates() {
     let engine = TaxonomyEngine::global();
     assert!(
-        engine.all_skills().len() >= 140,
-        "taxonomy must cover rich cross-domain Indonesian skills"
+        engine.all_skills().len() >= 900,
+        "taxonomy must cover >= 900 Indonesian skills across 23 domains, got {}",
+        engine.all_skills().len()
+    );
+    assert!(
+        engine.roles_catalog().len() >= 180,
+        "roles catalog must cover >= 180 prodi-role mappings, got {}",
+        engine.roles_catalog().len()
     );
 
     let mut tp = 0usize;

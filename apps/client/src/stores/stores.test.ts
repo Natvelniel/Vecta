@@ -78,6 +78,39 @@ describe("Vecta end-to-end store logic & cross-store loop", () => {
     vi.spyOn(ipc, "generateGapAnalysis").mockImplementation((u, j, f) =>
       mockCommands.generateGapAnalysis(u, j, f),
     );
+    vi.spyOn(ipc, "listSavedWatchlists").mockImplementation((u) =>
+      mockCommands.listSavedWatchlists(u),
+    );
+    vi.spyOn(ipc, "saveWatchlist").mockImplementation((u, n, f) =>
+      mockCommands.saveWatchlist(u, n, f),
+    );
+    vi.spyOn(ipc, "deleteWatchlist").mockImplementation((id) =>
+      mockCommands.deleteWatchlist(id),
+    );
+    vi.spyOn(ipc, "listProdiRolesCatalog").mockImplementation((q = null) =>
+      mockCommands.listProdiRolesCatalog(q ?? null),
+    );
+    vi.spyOn(ipc, "listUserProfiles").mockImplementation(() => mockCommands.listUserProfiles());
+    vi.spyOn(ipc, "switchActiveProfile").mockImplementation((id) =>
+      mockCommands.switchActiveProfile(id),
+    );
+    vi.spyOn(ipc, "deleteUserProfile").mockImplementation((id) =>
+      mockCommands.deleteUserProfile(id),
+    );
+    vi.spyOn(ipc, "getSalaryBenchmark").mockImplementation((r, c) =>
+      mockCommands.getSalaryBenchmark(r, c),
+    );
+    vi.spyOn(ipc, "getCompanySnapshot").mockImplementation((u, c) =>
+      mockCommands.getCompanySnapshot(u, c),
+    );
+    vi.spyOn(ipc, "generateInterviewPrep").mockImplementation((u, j, l) =>
+      mockCommands.generateInterviewPrep(u, j, l),
+    );
+    vi.spyOn(ipc, "simulateSkillImpact").mockImplementation((u, r, ids) =>
+      mockCommands.simulateSkillImpact(u, r, ids),
+    );
+    vi.spyOn(ipc, "exportVectaBackup").mockImplementation(() => mockCommands.exportVectaBackup());
+    vi.spyOn(ipc, "importVectaBackup").mockImplementation((j) => mockCommands.importVectaBackup(j));
     vi.spyOn(ipc, "listAvailableRoles").mockImplementation(() => mockCommands.listAvailableRoles());
     vi.spyOn(ipc, "getCompetencyMap").mockImplementation(async (u, r) =>
       normalizeCompetencyMap(await mockCommands.getCompetencyMap(u, r)),
@@ -205,7 +238,7 @@ describe("Vecta end-to-end store logic & cross-store loop", () => {
     expect(jobs.jobs[0].title).toContain("Systems");
 
     jobs.searchQuery = "";
-    jobs.workModeFilter = "remote";
+    jobs.toggleWorkMode("remote");
     await jobs.loadJobs(uid);
     expect(jobs.jobs.length).toBeGreaterThanOrEqual(1);
     expect(jobs.jobs.every((j) => j.work_mode === "remote")).toBe(true);
@@ -227,7 +260,8 @@ describe("Vecta end-to-end store logic & cross-store loop", () => {
     const savedOk = await jobs.saveSearchPreferences({
       ...jobs.searchPreferences,
       location: "Bandung",
-      sources: ["jobstreet", "linkedin", "indeed"],
+      locations: ["Bandung"],
+      sources: ["jobstreet", "linkedin", "kalibrr", "dealls"],
       ai_enrich_enabled: false,
       ai_enrich_max_jobs: 10,
       ai_rpm_limit: 10,
@@ -283,5 +317,81 @@ describe("Vecta end-to-end store logic & cross-store loop", () => {
     const pdf = await profile.exportAtsPdf(uid, "job-1", "id");
     expect(pdf?.ats_keyword_score).toBeGreaterThan(0);
     expect(pdf?.file_path).toContain(".pdf");
+  });
+
+  it("enforces multi-filter Semua/manual toggle rules, watchlists, prodi catalog & portable backup", async () => {
+    const profile = useProfileStore();
+    const jobs = useJobsStore();
+    await profile.loadActiveProfile();
+    const uid = profile.userId!;
+
+    // Default state = "Semua" (empty arrays)
+    expect(jobs.workModes).toEqual([]);
+    expect(jobs.locationClusters).toEqual([]);
+    expect(jobs.searchPreferences.locations).toContain("Indonesia");
+
+    // Selecting manual items disables "Semua"; removing the last re-activates "Semua"
+    jobs.toggleWorkMode("remote");
+    jobs.toggleWorkMode("hybrid");
+    expect(jobs.workModes).toEqual(["remote", "hybrid"]);
+    jobs.toggleWorkMode("remote");
+    jobs.toggleWorkMode("hybrid");
+    expect(jobs.workModes).toEqual([]);
+
+    jobs.toggleLocationCluster("jabodetabek");
+    expect(jobs.locationClusters).toEqual(["jabodetabek"]);
+    jobs.clearLocationClusters();
+    expect(jobs.locationClusters).toEqual([]);
+
+    // Watchlist create & apply
+    await jobs.loadWatchlists(uid);
+    const beforeCount = jobs.watchlists.length;
+    jobs.toggleWorkMode("remote");
+    jobs.salaryOnly = true;
+    const ok = await jobs.createWatchlist(uid, "Remote Bergaji");
+    expect(ok).toBe(true);
+    expect(jobs.watchlists.length).toBe(beforeCount + 1);
+
+    // Prodi catalog & impact simulator & zero-secret backup
+    const prodiRoles = await ipc.listProdiRolesCatalog("Akuntansi");
+    expect(prodiRoles.length).toBeGreaterThanOrEqual(1);
+    const sim = await ipc.simulateSkillImpact(uid, "Backend Engineer", [7]);
+    expect(sim.length).toBe(1);
+    expect(sim[0].avg_score_delta).toBeGreaterThan(0);
+    const backup = await ipc.exportVectaBackup();
+    expect(backup.file_name).toBe("vecta-backup.vecta");
+    expect(backup.payload_json).not.toContain("AIza");
+
+    // Wave 2 & 3: Salary Benchmark, Company Snapshot, Interview STAR & Multi-Profile CRUD
+    const bench = await ipc.getSalaryBenchmark("Backend Engineer", null);
+    expect(bench.sample_count).toBeGreaterThanOrEqual(1);
+    const snap = await ipc.getCompanySnapshot(uid, "PT Teknologi Nusantara");
+    expect(snap.total_jobs).toBeGreaterThanOrEqual(1);
+    await jobs.loadJobs(uid);
+    const prep = await ipc.generateInterviewPrep(uid, jobs.jobs[0].job_id, "id");
+    expect(prep.questions.length).toBeGreaterThanOrEqual(2);
+
+    const beforeProfiles = await profile.loadProfiles();
+    profile.startNewProfileDraft();
+    profile.rawStoryDraft = "Saya lulusan Akuntansi yang menguasai PSAK dan pelaporan pajak e-Faktur.";
+    profile.skillsDraft = [
+      { canonical_name: "PSAK", category: "core_hard", proficiency: "intermediate", evidence: null },
+    ];
+    profile.keywordsDraft = [
+      {
+        role_label: "Akuntan Pajak",
+        fit_type: "primary_fit",
+        scrape_queries: ["Akuntan Pajak"],
+        match_reason: "Jalur baru",
+        is_active: true,
+      },
+    ];
+    const createdSecond = await profile.saveProfile();
+    expect(createdSecond).toBe(true);
+    expect(profile.profiles.length).toBe(beforeProfiles.length + 1);
+    const firstId = beforeProfiles[0].id;
+    const switchedBack = await profile.switchProfile(firstId);
+    expect(switchedBack).toBe(true);
+    expect(profile.userId).toBe(firstId);
   });
 });

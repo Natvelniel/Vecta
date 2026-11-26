@@ -7,9 +7,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v0.3.1)"
+        description: "Release tag (e.g. v0.4.0)"
         required: true
-        default: "v0.3.1"
+        default: "v0.4.0"
+      include_windows:
+        description: "Also build Windows desktop installers (NSIS/MSI/Portable)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -17,6 +22,7 @@ permissions:
 jobs:
   build-windows:
     name: Build Windows x64 (NSIS, MSI & Portable ZIP)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_windows == true }}
     runs-on: windows-latest
 
     steps:
@@ -152,6 +158,7 @@ jobs:
           CI: "true"
         run: |
           npx tauri android init --ci --skip-targets-install
+          npx tauri icon src-tauri/icons/app-icon.png
           npx tauri android build --apk --target aarch64 --ci
 
       - name: Align & Sign Android APK for 1-Tap Install
@@ -224,6 +231,7 @@ jobs:
   publish-release:
     name: Publish Unified GitHub Release
     needs: [build-windows, build-android]
+    if: ${{ always() && needs.build-android.result == 'success' && (needs.build-windows.result == 'success' || needs.build-windows.result == 'skipped') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -244,23 +252,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          name: "Vecta ${{ github.event.inputs.tag || github.ref_name }} - Universal Local-First Career OS"
+          name: "Vecta ${{ github.event.inputs.tag || github.ref_name }} - Mobile-First Local Career OS"
           draft: false
           prerelease: false
           generate_release_notes: true
+          fail_on_unmatched_files: false
           body: |
             ## Vecta Universal Local-First Career OS
 
-            Local-first career intelligence across **14 Indonesian academic and industry domains** with **zero-setup Native Rust scraping** (JobStreet, LinkedIn Guest, Kalibrr, Dealls, Indeed), **Red-Flag Scam Detection**, **Instant PDF CV Import**, and **1-Click ATS PDF Export (Typst)**.
+            Local-first career intelligence across **23 Indonesian academic and industry domains** (**917 skills, 238 roles**) with **zero-setup Native Rust scraping** (JobStreet, LinkedIn Guest, Kalibrr, Dealls, Glints, Indeed), **Red-Flag Scam Detection**, **0-Token Local Roadmap & Interview STAR**, **Application Pipeline + Follow-Up Kit**, **Live A4 CV Preview**, **Multi-Profile Switcher**, and **1-Click ATS PDF Export (Typst)**.
 
-            ### Downloads (Ready to Install)
+            ### Android Download (Ready to Install)
             - **Android (`.apk`):** Download `Vecta_*_android_arm64.apk` directly on your phone -> tap the file -> **Install** (no ZIP extraction needed; allow "Install unknown apps" once if prompted).
-            - **Windows Installer (`.exe`):** Recommended NSIS installer (includes bundled 101-language offline multilingual AI model).
-            - **Windows MSI (`.msi`):** Standard Windows MSI package (includes bundled offline AI model).
-            - **Windows Portable (`_portable.zip`):** Extract and run `vecta.exe` without installation.
-            - **Checksums (`SHA256SUMS.txt`):** SHA-256 verification hashes for all release files.
+            - **Checksums (`SHA256SUMS.txt`):** SHA-256 verification hash for release integrity.
 
-            No Python installation and no Gemini API key are required for core discovery, skill matching, PDF CV import, or ATS PDF export.
+            No Python installation and no Gemini API key are required for core discovery, skill matching, PDF CV import, roadmap, interview STAR prep, or ATS PDF export. Windows desktop packages can also be triggered via `workflow_dispatch` (`include_windows: true`).
           files: |
             release-artifacts/*.apk
             release-artifacts/*.exe

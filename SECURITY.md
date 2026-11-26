@@ -4,7 +4,7 @@
 
 Vecta is engineered so that sensitive career data never leaves the user's device without explicit user action:
 
-- **Credential Storage:** Optional Google Gemini API keys are stored via the host OS Credential Manager (`keyring` on Windows, macOS, and Linux) and are never persisted in SQLite, localStorage, or log files.
+- **Credential Storage:** Optional Google Gemini API keys are stored via the host OS Credential Manager (`keyring` on Windows, macOS, and Linux) or an encrypted app-private vault (`0600`) inside the Android/iOS OS sandbox (`FileVaultSecretStore`), and are never persisted in SQLite, localStorage, plaintext files, or logs.
 - **Database Isolation:** All profiles, Master CV records, scraped vacancies, match scores, and personal notes live locally in SQLite (WAL mode) under the OS application data directory.
 - **Anti-SSRF Controls:** Optional local scraper worker URLs are strictly restricted to loopback hosts (`127.0.0.1`, `localhost`, `::1`) with HTTP redirects disabled and credential-bearing URLs rejected.
 - **External Link & File Safety:** Outbound links allow only `http://` and `https://` schemes. Local PDF imports enforce `%PDF-` magic-byte verification and a strict 10 MB size ceiling.

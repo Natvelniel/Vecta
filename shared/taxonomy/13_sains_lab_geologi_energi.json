@@ -1,6 +1,301 @@
 [
-  {"id":"sci.hplc","canonical_name":"HPLC / GC-MS & Analisis Instrumen","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["HPLC","GC-MS","GCMS","AAS","ICP-OES","FTIR","Spektrofotometri UV-Vis","Kromatografi","Titrasi"]},
-  {"id":"sci.lab_iso","canonical_name":"Pengujian Laboratorium (ISO 17025)","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["ISO 17025","ISO/IEC 17025","Good Laboratory Practice","GLP","Analis Kimia","Analis Laboratorium","Mikrobiologi Lab","Validasi Metode"]},
-  {"id":"sci.statistik","canonical_name":"Statistika & SPSS / R","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["SPSS","Minitab","Stata","RStudio","R Programming","Bahasa R","Statistika","Statistics","Ekonometrika","Analisis Regresi","Uji Hipotesis"]},
-  {"id":"sci.geologi","canonical_name":"Geologi, Pertambangan & Energi","domain":"sains_lab_geologi_energi","category":"core_hard","aliases":["Pemetaan Geologi","Geologi Eksplorasi","Mine Plan","Surpac","Minescape","Micromine","Geofisika","Reservoir Engineering","Teknik Perminyakan","Energi Terbarukan","PLTS"]}
+  {
+    "id": "sci.hplc",
+    "canonical_name": "HPLC / GC-MS & Analisis Instrumen",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "HPLC",
+      "GC-MS",
+      "GCMS",
+      "AAS",
+      "ICP-OES",
+      "FTIR",
+      "Spektrofotometri UV-Vis",
+      "Kromatografi",
+      "Titrasi"
+    ]
+  },
+  {
+    "id": "sci.lab_iso",
+    "canonical_name": "Pengujian Laboratorium (ISO 17025)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "ISO 17025",
+      "ISO/IEC 17025",
+      "Good Laboratory Practice",
+      "GLP",
+      "Analis Kimia",
+      "Analis Laboratorium",
+      "Mikrobiologi Lab",
+      "Validasi Metode"
+    ]
+  },
+  {
+    "id": "sci.statistik",
+    "canonical_name": "Statistika & SPSS / R",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "SPSS",
+      "Minitab",
+      "Stata",
+      "RStudio",
+      "R Programming",
+      "Bahasa R",
+      "Statistika",
+      "Statistics",
+      "Ekonometrika",
+      "Analisis Regresi",
+      "Uji Hipotesis"
+    ]
+  },
+  {
+    "id": "sci.geologi",
+    "canonical_name": "Geologi, Pertambangan & Energi",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Pemetaan Geologi",
+      "Geologi Eksplorasi",
+      "Mine Plan",
+      "Surpac",
+      "Minescape",
+      "Micromine",
+      "Geofisika",
+      "Reservoir Engineering",
+      "Teknik Perminyakan",
+      "Energi Terbarukan",
+      "PLTS"
+    ]
+  },
+  {
+    "id": "sci.aas_icp",
+    "canonical_name": "AAS / ICP-OES & Spektroskopi Atom",
+    "domain": "sains_lab_geologi_energi",
+    "category": "tools_tech",
+    "parent_id": "sci.hplc",
+    "aliases": [
+      "Atomic Absorption",
+      "ICP-OES",
+      "FTIR",
+      "Karl Fischer",
+      "XRF"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "sci.titrimetri",
+    "canonical_name": "Analisis Kimia Basah & Gravimetri",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Titrasi",
+      "Gravimetri",
+      "pH & Konduktivitas",
+      "Preparasi Sampel Lab"
+    ]
+  },
+  {
+    "id": "sci.kalibrasi",
+    "canonical_name": "Kalibrasi Instrumen & Metrologi",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "parent_id": "sci.lab_iso",
+    "aliases": [
+      "Ketidakpastian Pengukuran",
+      "Uji Profisiensi",
+      "Validasi Metode Analisis"
+    ]
+  },
+  {
+    "id": "sci.biotek_pcr",
+    "canonical_name": "Bioteknologi, Kultur Jaringan & Biologi Molekuler",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "PCR / qPCR",
+      "Kultur Jaringan",
+      "Fermentasi Bioreaktor",
+      "Sekuensing DNA"
+    ]
+  },
+  {
+    "id": "sci.meteorologi_osean",
+    "canonical_name": "Klimatologi, Meteorologi & Oseanografi",
+    "domain": "sains_lab_geologi_energi",
+    "category": "domain",
+    "aliases": [
+      "Bathymetry",
+      "Hidrografi",
+      "WRF Model",
+      "Pemantauan Kualitas Udara"
+    ]
+  },
+  {
+    "id": "sci.nanomaterial",
+    "canonical_name": "Karakterisasi Material (XRD / SEM / TEM)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "tools_tech",
+    "aliases": [
+      "Scanning Electron Microscopy",
+      "XRD",
+      "TGA / DSC Thermal",
+      "Particle Size Analyzer"
+    ],
+    "parent_id": "sci.aas_icp",
+    "requires_domain_context": true
+  },
+  {
+    "id": "sci.computational_math",
+    "canonical_name": "Pemodelan Matematika & Riset Operasi",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "MATLAB",
+      "Mathematica",
+      "Numerical Methods",
+      "Monte Carlo"
+    ],
+    "parent_id": "sci.statistik"
+  },
+  {
+    "id": "sci.env_lab",
+    "canonical_name": "Analisis Kualitas Air & Limbah Laboratorium",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "BOD / COD Test",
+      "TSS / TDS",
+      "Spektrofotometri Air",
+      "Coliform Air"
+    ],
+    "parent_id": "sci.lab_iso"
+  },
+  {
+    "id": "sci.bioinformatics",
+    "canonical_name": "Bioinformatika & Analisis Genomik",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Sequence Alignment",
+      "RNA-Seq",
+      "Bioconductor R"
+    ],
+    "parent_id": "sci.biotek_pcr"
+  },
+  {
+    "id": "sci.geo_fispeta",
+    "canonical_name": "Survei Geofisika (Geolistrik / Seismik / Magnetik)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Resistivity Survey",
+      "Seismic Interpretation",
+      "Ground Penetrating Radar"
+    ]
+  },
+  {
+    "id": "sci.kimia_tekstil",
+    "canonical_name": "Laboratorium Pengujian Tekstil, Kertas & Polimer",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Color Matching Spectrophotometer",
+      "Tensile Strength Test",
+      "GSM Gramatur"
+    ]
+  },
+  {
+    "id": "sci.nuclear_rad",
+    "canonical_name": "Aplikasi Radiasi Industri & Keselamatan Nuklir (PPR Bapeten)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "domain",
+    "aliases": [
+      "Petugas Proteksi Radiasi",
+      "Bapeten Compliance",
+      "Dosimetri"
+    ]
+  },
+  {
+    "id": "sci.actuarial_stat",
+    "canonical_name": "Biostatistika & Pemodelan Data Eksperimental",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "ANOVA",
+      "Design of Experiments",
+      "Regression Analysis"
+    ]
+  },
+  {
+    "id": "sci.gc_ms_vocab",
+    "canonical_name": "Analisis Residu Pestisida & Kontaminan Pangan (LC-MS/MS)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "tools_tech",
+    "aliases": [
+      "LC-MS/MS",
+      "ICP-MS",
+      "Trace Metal Analysis"
+    ],
+    "parent_id": "sci.hplc"
+  },
+  {
+    "id": "sci.math_fin",
+    "canonical_name": "Pemodelan Stokastik & Matematika Keuangan",
+    "domain": "sains_lab_geologi_energi",
+    "category": "core_hard",
+    "aliases": [
+      "Stochastic Calculus",
+      "Black-Scholes",
+      "Time Series ARIMA"
+    ],
+    "parent_id": "sci.computational_math"
+  },
+  {
+    "id": "sci.well_logging",
+    "canonical_name": "Petrophysics & Well Logging (Geologi)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "tool",
+    "aliases": [
+      "petrophysics",
+      "well logging",
+      "petrel",
+      "techlog",
+      "subsurface"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced",
+    "parent_id": "sci.geologi"
+  },
+  {
+    "id": "sci.solar_pv",
+    "canonical_name": "PVsyst & Perancangan PLTS (Energi Terbarukan)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "tool",
+    "aliases": [
+      "pvsyst",
+      "plts",
+      "solar pv",
+      "renewable energy",
+      "ebtke"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "sci.geothermal",
+    "canonical_name": "Eksplorasi & Operasi Panas Bumi (Geothermal)",
+    "domain": "sains_lab_geologi_energi",
+    "category": "domain",
+    "aliases": [
+      "geothermal",
+      "panas bumi",
+      "pltp",
+      "reservoir geothermal"
+    ],
+    "base_weight": 1.2,
+    "difficulty": "advanced"
+  }
 ]

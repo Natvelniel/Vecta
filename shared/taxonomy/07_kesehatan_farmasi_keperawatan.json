@@ -1,10 +1,485 @@
 [
-  {"id":"hlt.cpob","canonical_name":"CPOB / CPOTB / CDOB","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["CPOB","CPOTB","CDOB","Cara Pembuatan Obat yang Baik","GMP Farmasi","GDP Farmasi"]},
-  {"id":"hlt.bpom","canonical_name":"Registrasi BPOM & Regulatory Affairs","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Registrasi BPOM","BPOM","Regulatory Affairs","NIE","Nomor Izin Edar","Farmakovigilans","Pharmacovigilance"]},
-  {"id":"hlt.farmasi","canonical_name":"Farmasi Klinis & Apoteker","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Apoteker","STRA","SIPA","Farmasi Klinis","Pelayanan Kefarmasian","Peracikan Obat","Dispensing","Formulasi Obat","R&D Farmasi","Farmakologi"]},
-  {"id":"hlt.keperawatan","canonical_name":"Asuhan Keperawatan","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Keperawatan","STR Perawat","BTCLS","BCLS","ICU","IGD","Kamar Operasi","Tindakan Medis","Triase","Kebidanan","Asuhan Kebidanan"]},
-  {"id":"hlt.rekam_medis","canonical_name":"Rekam Medis & SIMRS","domain":"kesehatan_farmasi_keperawatan","category":"tools_tech","aliases":["Rekam Medis","SIMRS","ICD-10","ICD-9","INA-CBG","Klaim BPJS Kesehatan","Coding Medis","RME","Rekam Medis Elektronik"]},
-  {"id":"hlt.gizi","canonical_name":"Gizi Klinis & Dietetik","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["Ahli Gizi","Nutrisionis","Gizi Klinis","Dietetik","NCP","Nutrition Care Process","Penyusunan Menu Rumah Sakit"]},
-  {"id":"hlt.lab_medis","canonical_name":"Analis Kesehatan & Lab Klinik","domain":"kesehatan_farmasi_keperawatan","category":"core_hard","aliases":["ATLM","Analis Kesehatan","Flebotomi","Hematologi","Mikrobiologi Klinik","Kimia Klinik","Patologi Klinik"]},
-  {"id":"hlt.kesmas","canonical_name":"Kesehatan Masyarakat & Epidemiologi","domain":"kesehatan_farmasi_keperawatan","category":"domain","aliases":["Kesehatan Masyarakat","Epidemiologi","Promosi Kesehatan","Kesehatan Lingkungan","Akreditasi Rumah Sakit","K3 Rumah Sakit","PPI"]}
+  {
+    "id": "hlt.cpob",
+    "canonical_name": "CPOB / CPOTB / CDOB",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "CPOB",
+      "CPOTB",
+      "CDOB",
+      "Cara Pembuatan Obat yang Baik",
+      "GMP Farmasi",
+      "GDP Farmasi"
+    ]
+  },
+  {
+    "id": "hlt.bpom",
+    "canonical_name": "Registrasi BPOM & Regulatory Affairs",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Registrasi BPOM",
+      "BPOM",
+      "Regulatory Affairs",
+      "NIE",
+      "Nomor Izin Edar",
+      "Farmakovigilans",
+      "Pharmacovigilance"
+    ]
+  },
+  {
+    "id": "hlt.farmasi",
+    "canonical_name": "Farmasi Klinis & Apoteker",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Apoteker",
+      "STRA",
+      "SIPA",
+      "Farmasi Klinis",
+      "Pelayanan Kefarmasian",
+      "Peracikan Obat",
+      "Dispensing",
+      "Formulasi Obat",
+      "R&D Farmasi",
+      "Farmakologi"
+    ]
+  },
+  {
+    "id": "hlt.keperawatan",
+    "canonical_name": "Asuhan Keperawatan",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Keperawatan",
+      "STR Perawat",
+      "BTCLS",
+      "BCLS",
+      "ICU",
+      "IGD",
+      "Kamar Operasi",
+      "Tindakan Medis",
+      "Triase",
+      "Kebidanan",
+      "Asuhan Kebidanan"
+    ]
+  },
+  {
+    "id": "hlt.rekam_medis",
+    "canonical_name": "Rekam Medis & SIMRS",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "tools_tech",
+    "aliases": [
+      "Rekam Medis",
+      "SIMRS",
+      "ICD-10",
+      "ICD-9",
+      "INA-CBG",
+      "Klaim BPJS Kesehatan",
+      "Coding Medis",
+      "RME",
+      "Rekam Medis Elektronik"
+    ]
+  },
+  {
+    "id": "hlt.gizi",
+    "canonical_name": "Gizi Klinis & Dietetik",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Ahli Gizi",
+      "Nutrisionis",
+      "Gizi Klinis",
+      "Dietetik",
+      "NCP",
+      "Nutrition Care Process",
+      "Penyusunan Menu Rumah Sakit"
+    ]
+  },
+  {
+    "id": "hlt.lab_medis",
+    "canonical_name": "Analis Kesehatan & Lab Klinik",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "ATLM",
+      "Analis Kesehatan",
+      "Flebotomi",
+      "Hematologi",
+      "Mikrobiologi Klinik",
+      "Kimia Klinik",
+      "Patologi Klinik"
+    ]
+  },
+  {
+    "id": "hlt.kesmas",
+    "canonical_name": "Kesehatan Masyarakat & Epidemiologi",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "Kesehatan Masyarakat",
+      "Epidemiologi",
+      "Promosi Kesehatan",
+      "Kesehatan Lingkungan",
+      "Akreditasi Rumah Sakit",
+      "K3 Rumah Sakit",
+      "PPI"
+    ]
+  },
+  {
+    "id": "hlth.farmakovigilans",
+    "canonical_name": "Farmakovigilans & Medical Affairs",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "parent_id": "hlt.bpom",
+    "aliases": [
+      "Pharmacovigilance",
+      "MESO",
+      "Drug Safety",
+      "Medical Representative"
+    ]
+  },
+  {
+    "id": "hlth.dispensing",
+    "canonical_name": "Pelayanan Resep & Konseling Obat",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "parent_id": "hlt.farmasi",
+    "aliases": [
+      "Swamedikasi",
+      "PIO",
+      "KIE Pasien",
+      "Rekonsiliasi Obat",
+      "SIPA Aktif"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "hlth.validasi_farma",
+    "canonical_name": "Validasi Proses & Kualifikasi Farmasi",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "parent_id": "hlt.cpob",
+    "aliases": [
+      "Process Validation",
+      "Cleaning Validation",
+      "IQ OQ PQ",
+      "Stability Testing"
+    ]
+  },
+  {
+    "id": "hlth.qc_mikro",
+    "canonical_name": "Mikrobiologi Farmasi & Uji Sterilitas",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "parent_id": "hlt.cpob",
+    "aliases": [
+      "LAL Test",
+      "Uji Endotoksin",
+      "Environmental Monitoring",
+      "Bioburden"
+    ]
+  },
+  {
+    "id": "hlth.gdvp",
+    "canonical_name": "GDP / CDOB Distribusi Farmasi",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "parent_id": "hlt.cpob",
+    "aliases": [
+      "Cold Chain Management",
+      "CDOB",
+      "PBF Apoteker"
+    ]
+  },
+  {
+    "id": "hlth.bpjs_kes_klaim",
+    "canonical_name": "Verifikasi Klaim JKN / INA-CBGs",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "parent_id": "hlt.rekam_medis",
+    "aliases": [
+      "INA-CBGs",
+      "VClaim BPJS",
+      "Casemix",
+      "Klaim Asuransi Kesehatan"
+    ]
+  },
+  {
+    "id": "hlth.k3rs",
+    "canonical_name": "Keselamatan Pasien & PPI / K3RS",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "Akreditasi Rumah Sakit SNARS",
+      "STARKES",
+      "Pencegahan Pengendalian Infeksi",
+      "Patient Safety"
+    ]
+  },
+  {
+    "id": "hlth.analis_kes",
+    "canonical_name": "Teknologi Laboratorium Medik (ATLM)",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Phlebotomy",
+      "Hematologi",
+      "Kimia Klinik",
+      "ELISA",
+      "PCR Diagnostik"
+    ]
+  },
+  {
+    "id": "hlth.rnd_cosmetic",
+    "canonical_name": "Formulasi Kosmetik & CPKB",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "CPKB",
+      "Skincare Formulation",
+      "Stability Kosmetik",
+      "Notifikasi Kosmetik BPOM"
+    ],
+    "parent_id": "hlt.bpom"
+  },
+  {
+    "id": "hlth.rnd_herbal",
+    "canonical_name": "Formulasi Obat Tradisional / Herbal (CPOTB)",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Ekstraksi Fitokimia",
+      "Standarisasi Simplisia",
+      "Jamu / OHT / Fitofarmaka"
+    ],
+    "parent_id": "hlt.cpob"
+  },
+  {
+    "id": "hlth.alkes_id",
+    "canonical_name": "Registrasi Alat Kesehatan (CDAKB / Kemenkes)",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "CDAKB",
+      "Izin Edar Alkes",
+      "Regalkes Kemenkes",
+      "ISO 13485"
+    ],
+    "parent_id": "hlt.bpom"
+  },
+  {
+    "id": "hlth.qa_kappa",
+    "canonical_name": "CAPA, Deviasi & Change Control Farmasi",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "CAPA",
+      "OOS Investigation",
+      "Batch Record Review",
+      "Annual Product Review"
+    ],
+    "parent_id": "hlt.cpob"
+  },
+  {
+    "id": "hlth.clinical_trial",
+    "canonical_name": "Uji Klinis & Good Clinical Practice (GCP)",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "Clinical Research Associate",
+      "CRA",
+      "ICH-GCP",
+      "Bioekivalensi BE"
+    ],
+    "parent_id": "hlt.farmasi",
+    "requires_domain_context": true
+  },
+  {
+    "id": "hlth.radiologi",
+    "canonical_name": "Radiografi & Pencitraan Medis",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "CT Scan",
+      "MRI",
+      "X-Ray",
+      "PACS",
+      "Proteksi Radiasi PPR"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "hlth.elektromedis",
+    "canonical_name": "Teknik Elektromedis & Kalibrasi Alat RS",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "tools_tech",
+    "aliases": [
+      "Kalibrasi Alkes",
+      "Ventilator Maintenance",
+      "Patient Monitor"
+    ]
+  },
+  {
+    "id": "hlth.compounding",
+    "canonical_name": "Compounding Steril & Sitostatika RS",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Aseptic Dispensing",
+      "IV Admixture",
+      "TPN Nutrisi Parenteral"
+    ],
+    "parent_id": "hlth.dispensing"
+  },
+  {
+    "id": "hlth.pharma_pkg",
+    "canonical_name": "Validasi Kemasan Farmasi & Blister Line",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "Primary Packaging Pharma",
+      "Leak Test Blister",
+      "Serialisasi Obat BPOM"
+    ],
+    "parent_id": "hlth.validasi_farma"
+  },
+  {
+    "id": "hlth.dental_hygiene",
+    "canonical_name": "Terapis Gigi & Mulut (Asisten Dokter Gigi)",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Dental Assistant",
+      "Sterilisasi Instrumen Dental",
+      "Charting Odontogram"
+    ]
+  },
+  {
+    "id": "hlth.optik_ref",
+    "canonical_name": "Refraksionis Optisien & Fitter Optik",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "Pemeriksaan Visus",
+      "Lensa Progresif",
+      "STR Optik"
+    ]
+  },
+  {
+    "id": "hlth.pbf_logistik",
+    "canonical_name": "Operasional Gudang Farmasi & Cold Chain Vaksin",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "core_hard",
+    "aliases": [
+      "Suhu 2-8 Derajat",
+      "Data Logger Kalibrasi",
+      "FEFO Obat"
+    ],
+    "parent_id": "hlth.gdvp"
+  },
+  {
+    "id": "hlth.homecare_med",
+    "canonical_name": "Pelayanan Farmasi Homecare & Telefarmasi",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "Telepharmacy",
+      "Swamedikasi Online",
+      "Drug Interaction Check"
+    ],
+    "parent_id": "hlth.dispensing"
+  },
+  {
+    "id": "hlth.biosafety",
+    "canonical_name": "Biosafety Level (BSL-2/3) & Penanganan Limbah Infeksius",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "domain",
+    "aliases": [
+      "BSL-2 Lab",
+      "Autoclave Sterilisasi",
+      "Safety Cabinet BSC"
+    ],
+    "parent_id": "hlth.qc_mikro"
+  },
+  {
+    "id": "hlt.icu_emergency",
+    "canonical_name": "Keperawatan ICU, IGD & BTCLS",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "clinical",
+    "aliases": [
+      "btcls",
+      "ppgd",
+      "acls",
+      "icu nurse",
+      "igd",
+      "hemodialisis"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "hlt.keperawatan"
+  },
+  {
+    "id": "hlt.kebidanan",
+    "canonical_name": "Kebidanan, APN & Kesehatan Maternal",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "clinical",
+    "aliases": [
+      "kebidanan",
+      "bidan",
+      "apn",
+      "kia",
+      "anc",
+      "midwifery"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "hlt.fisioterapi",
+    "canonical_name": "Fisioterapi & Rehabilitasi Medik",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "clinical",
+    "aliases": [
+      "fisioterapi",
+      "physiotherapy",
+      "rehabilitasi medik",
+      "dry needling"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "hlt.hospital_accred",
+    "canonical_name": "Akreditasi RS (SNARS / Starkes Kemenkes)",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "compliance",
+    "aliases": [
+      "starkes",
+      "snars",
+      "kars",
+      "mutu rumah sakit",
+      "pmkp"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "hlt.kesmas"
+  },
+  {
+    "id": "hlt.simrs_satusehat",
+    "canonical_name": "SIMRS & Integrasi SATUSEHAT / FHIR",
+    "domain": "kesehatan_farmasi_keperawatan",
+    "category": "tool",
+    "aliases": [
+      "simrs",
+      "satusehat",
+      "hl7 fhir",
+      "khanza",
+      "rekam medis elektronik"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "hlt.rekam_medis"
+  }
 ]

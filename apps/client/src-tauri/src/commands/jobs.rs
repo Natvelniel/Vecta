@@ -28,6 +28,7 @@ use crate::core::db::NewJobRecord;
 use crate::core::gemini::{
     ApplyKitPromptInput, BatchJobInput, EmbeddingTaskType, GapAnalysisPromptInput,
 };
+use crate::core::interview_prep::build_local_interview_prep;
 use crate::core::local_embedder::LOCAL_EMBEDDING_MODEL_ID;
 use crate::core::local_matcher::{
     compute_local_keyword_relevance, extract_universal_job_metadata, infer_experience_level,
@@ -42,8 +43,9 @@ use crate::core::worker::WorkerScrapeRequest;
 use crate::error::{AppError, ErrorCode};
 use crate::models::job::{
     AiMatchRunReport, ApplicationStatus, ApplyKitResult, EnrichmentStatus, GapAnalysis,
-    JobExtractionResult, JobFilterInput, JobMatchDetail, JobMatchSummary, JobSource,
-    RequirementType, ScrapeProgressEvent, ScrapeRunReport, ScrapeWarningItem, SearchPreferences,
+    InterviewPrepKit, JobExtractionResult, JobFilterInput, JobMatchDetail, JobMatchSummary,
+    JobSource, RequirementType, ScrapeProgressEvent, ScrapeRunReport, ScrapeWarningItem,
+    SearchPreferences,
 };
 use crate::state::AppState;
 
@@ -459,11 +461,21 @@ pub async fn scrape_and_store_jobs_impl(
         ));
     }
 
-    let location = if prefs.location.trim().is_empty() {
-        "Indonesia".to_string()
-    } else {
-        prefs.location.trim().chars().take(80).collect()
-    };
+    let mut locations: Vec<String> = prefs
+        .locations
+        .iter()
+        .map(|l| l.trim().chars().take(60).collect::<String>())
+        .filter(|l| !l.is_empty())
+        .collect();
+    if locations.is_empty() {
+        locations.push(if prefs.location.trim().is_empty() {
+            "Indonesia".to_string()
+        } else {
+            prefs.location.trim().chars().take(60).collect()
+        });
+    }
+    locations.truncate(5);
+    let location = locations[0].clone();
 
     let _scrape_guard = state.try_acquire_scrape_guard()?;
     let worker_url = state.get_worker_url();
@@ -474,28 +486,33 @@ pub async fn scrape_and_store_jobs_impl(
         format!(
             "Menarik lowongan dari {} ({}, {} halaman/query)...",
             clean_sources.join(", "),
-            location,
+            locations.join(", "),
             prefs.max_pages.clamp(1, 5)
         ),
         0,
-        queries.len() as u32,
+        (queries.len() * locations.len()) as u32,
     );
 
-    let worker_req = WorkerScrapeRequest {
-        queries: queries.clone(),
-        sources: clean_sources,
-        location: location.clone(),
-        limit_per_query: prefs.limit_per_query.clamp(5, 50),
-        max_pages: prefs.max_pages.clamp(1, 5),
-        posted_within_days: prefs.posted_within_days.map(|d| d.clamp(1, 90)),
-        work_mode: prefs.work_mode.clone(),
-    };
-
-    let worker_resp = state.active_scraper().scrape(&worker_url, &worker_req).await?;
+    let mut all_scraped_jobs = Vec::new();
+    let mut all_warnings = Vec::new();
+    for loc in &locations {
+        let worker_req = WorkerScrapeRequest {
+            queries: queries.clone(),
+            sources: clean_sources.clone(),
+            location: loc.clone(),
+            limit_per_query: prefs.limit_per_query.clamp(5, 50),
+            max_pages: prefs.max_pages.clamp(1, 5),
+            posted_within_days: prefs.posted_within_days.map(|d| d.clamp(1, 90)),
+            work_mode: prefs.work_mode.clone(),
+        };
+        let resp = state.active_scraper().scrape(&worker_url, &worker_req).await?;
+        all_warnings.extend(resp.warnings);
+        all_scraped_jobs.extend(resp.jobs);
+    }
 
     // Cross-portal deduplication (e.g. same PT + title on JobStreet & LinkedIn -> merged card with alternate links)
-    let raw_fetched = worker_resp.jobs.len() as u32;
-    let merged_jobs = deduplicate_cross_portal(worker_resp.jobs, |j| {
+    let raw_fetched = all_scraped_jobs.len() as u32;
+    let merged_jobs = deduplicate_cross_portal(all_scraped_jobs, |j| {
         (
             j.company.clone(),
             j.title.clone(),
@@ -507,7 +524,7 @@ pub async fn scrape_and_store_jobs_impl(
     });
     let cross_portal_dupes = raw_fetched.saturating_sub(merged_jobs.len() as u32);
 
-    // Ensure 14-domain Indonesian skill taxonomy exists in SQLite for 0-token local extraction
+    // Ensure 23-domain Indonesian skill taxonomy exists in SQLite for 0-token local extraction
     state.db.ensure_seed_skills()?;
     let skill_catalog = state.db.list_all_skills_for_local_matching()?;
     let user_skill_names: Vec<String> = profile_detail
@@ -541,12 +558,12 @@ pub async fn scrape_and_store_jobs_impl(
         "local_matching",
         if local_profile_vec.is_some() {
             format!(
-                "Menyimpan & menilai {} lowongan dengan AI Semantik Offline + Taksonomi 14 Prodi (0 token)...",
+                "Menyimpan & menilai {} lowongan dengan AI Semantik Offline + Taksonomi 23 Bidang (0 token)...",
                 merged_jobs.len()
             )
         } else {
             format!(
-                "Menyimpan & menilai {} lowongan dengan Taksonomi 14 Prodi lokal (0 token)...",
+                "Menyimpan & menilai {} lowongan dengan Taksonomi 23 Bidang lokal (0 token)...",
                 merged_jobs.len()
             )
         },
@@ -699,7 +716,7 @@ pub async fn scrape_and_store_jobs_impl(
         skipped_duplicates,
         failed_extractions: 0,
         pending_local_count,
-        warnings: worker_resp.warnings,
+        warnings: all_warnings,
     })
 }
 
@@ -1116,6 +1133,26 @@ pub fn toggle_save_job_impl(
     state.db.toggle_save_job(&user_id, &job_id)
 }
 
+pub fn list_saved_watchlists_impl(
+    state: &AppState,
+    user_id: String,
+) -> Result<Vec<crate::models::job::SavedWatchlistItem>, AppError> {
+    state.db.list_saved_watchlists(&user_id)
+}
+
+pub fn save_watchlist_impl(
+    state: &AppState,
+    user_id: String,
+    name: String,
+    filter: JobFilterInput,
+) -> Result<crate::models::job::SavedWatchlistItem, AppError> {
+    state.db.save_watchlist(&user_id, &name, &filter)
+}
+
+pub fn delete_watchlist_impl(state: &AppState, id: String) -> Result<(), AppError> {
+    state.db.delete_watchlist(&id)
+}
+
 pub async fn generate_gap_analysis_impl(
     state: &AppState,
     user_id: String,
@@ -1285,6 +1322,71 @@ pub async fn generate_apply_kit(
     force_refresh: bool,
 ) -> Result<ApplyKitResult, AppError> {
     generate_apply_kit_impl(&state, user_id, job_id, language, force_refresh).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn list_saved_watchlists(
+    state: State<'_, AppState>,
+    user_id: String,
+) -> Result<Vec<crate::models::job::SavedWatchlistItem>, AppError> {
+    list_saved_watchlists_impl(&state, user_id)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn save_watchlist(
+    state: State<'_, AppState>,
+    user_id: String,
+    name: String,
+    filter: JobFilterInput,
+) -> Result<crate::models::job::SavedWatchlistItem, AppError> {
+    save_watchlist_impl(&state, user_id, name, filter)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn delete_watchlist(state: State<'_, AppState>, id: String) -> Result<(), AppError> {
+    delete_watchlist_impl(&state, id)
+}
+
+pub fn generate_interview_prep_impl(
+    state: &AppState,
+    user_id: String,
+    job_id: String,
+    language: Option<String>,
+) -> Result<InterviewPrepKit, AppError> {
+    let detail = state.db.get_job_detail(&user_id, &job_id)?;
+    let matched: Vec<String> = detail
+        .matched_skills
+        .iter()
+        .map(|s| s.canonical_name.clone())
+        .collect();
+    let missing: Vec<String> = detail
+        .missing_skills
+        .iter()
+        .map(|s| s.canonical_name.clone())
+        .collect();
+    let lang = language.as_deref().unwrap_or("id");
+    Ok(build_local_interview_prep(
+        &detail.job_id,
+        &detail.title,
+        &detail.company,
+        &matched,
+        &missing,
+        lang,
+    ))
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn generate_interview_prep(
+    state: State<'_, AppState>,
+    user_id: String,
+    job_id: String,
+    language: Option<String>,
+) -> Result<InterviewPrepKit, AppError> {
+    generate_interview_prep_impl(&state, user_id, job_id, language)
 }
 
 #[cfg(test)]
@@ -1738,6 +1840,7 @@ mod tests {
 
         let prefs = SearchPreferences {
             location: "Bandung".into(),
+            locations: vec!["Bandung".into()],
             sources: vec!["jobstreet".into(), "indeed".into()],
             limit_per_query: 20,
             max_pages: 2,

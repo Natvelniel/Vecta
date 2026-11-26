@@ -8,6 +8,7 @@ import type {
   ImportedCvDraft,
   MasterCvProfile,
   Proficiency,
+  ProfileSummaryItem,
   SkillCategory,
   UserProfileDetail_Serialize,
 } from "@/lib/bindings";
@@ -31,6 +32,8 @@ export interface DraftKeywordItem {
 
 export const useProfileStore = defineStore("profile", () => {
   const activeProfile = ref<UserProfileDetail_Serialize | null>(null);
+  const profiles = ref<ProfileSummaryItem[]>([]);
+  const creatingNewProfile = ref(false);
   const rawStoryDraft = ref<string>("");
   const summaryDraft = ref<string>("");
   const experienceLevelDraft = ref<ExperienceLevel>("junior");
@@ -81,8 +84,65 @@ export const useProfileStore = defineStore("profile", () => {
       if (profile) {
         hydrateDraftFromProfile(profile);
       }
+      await loadProfiles();
     } catch (e) {
       error.value = e instanceof IpcError ? e.message : "Gagal memuat profil aktif.";
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function loadProfiles(): Promise<ProfileSummaryItem[]> {
+    try {
+      profiles.value = await ipc.listUserProfiles();
+    } catch {
+      profiles.value = [];
+    }
+    return profiles.value;
+  }
+
+  function startNewProfileDraft() {
+    creatingNewProfile.value = true;
+    rawStoryDraft.value = "";
+    summaryDraft.value = "";
+    experienceLevelDraft.value = "junior";
+    skillsDraft.value = [];
+    keywordsDraft.value = [];
+    pendingImportedCv.value = null;
+    hasStructuredDraft.value = false;
+  }
+
+  async function switchProfile(profileId: string): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+    try {
+      const next = await ipc.switchActiveProfile(profileId);
+      creatingNewProfile.value = false;
+      activeProfile.value = next;
+      hydrateDraftFromProfile(next);
+      await loadProfiles();
+      return true;
+    } catch (e) {
+      error.value = e instanceof IpcError ? e.message : "Gagal mengganti profil aktif.";
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function deleteProfile(profileId: string): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+    try {
+      const next = await ipc.deleteUserProfile(profileId);
+      creatingNewProfile.value = false;
+      activeProfile.value = next;
+      hydrateDraftFromProfile(next);
+      await loadProfiles();
+      return true;
+    } catch (e) {
+      error.value = e instanceof IpcError ? e.message : "Gagal menghapus profil.";
+      return false;
     } finally {
       loading.value = false;
     }
@@ -150,8 +210,8 @@ export const useProfileStore = defineStore("profile", () => {
         is_active: k.is_active,
       }));
       const saved = await ipc.saveConfirmedProfile({
-        id: activeProfile.value?.id ?? null,
-        profile_name: pendingImportedCv.value?.full_name || activeProfile.value?.profile_name || "Profil Utama",
+        id: creatingNewProfile.value ? null : (activeProfile.value?.id ?? null),
+        profile_name: pendingImportedCv.value?.full_name || (creatingNewProfile.value ? (targetRoles[0] || "Jalur Baru") : activeProfile.value?.profile_name) || "Profil Utama",
         target_roles: targetRoles.length > 0 ? targetRoles : ["Profesional Umum"],
         raw_story_text: rawStoryDraft.value.trim(),
         summary: summaryDraft.value.trim(),
@@ -159,6 +219,7 @@ export const useProfileStore = defineStore("profile", () => {
         skills,
         keywords,
       });
+      creatingNewProfile.value = false;
       activeProfile.value = saved;
       hydrateDraftFromProfile(saved);
       if (pendingImportedCv.value) {
@@ -166,6 +227,7 @@ export const useProfileStore = defineStore("profile", () => {
         masterCv.value = await ipc.saveMasterCv(cvToSave);
         pendingImportedCv.value = null;
       }
+      await loadProfiles();
       return true;
     } catch (e) {
       error.value = e instanceof IpcError ? e.message : "Gagal menyimpan profil.";
@@ -326,6 +388,8 @@ export const useProfileStore = defineStore("profile", () => {
 
   return {
     activeProfile,
+    profiles,
+    creatingNewProfile,
     userId,
     activeKeywordsCount,
     rawStoryDraft,
@@ -341,6 +405,10 @@ export const useProfileStore = defineStore("profile", () => {
     saving,
     error,
     loadActiveProfile,
+    loadProfiles,
+    switchProfile,
+    deleteProfile,
+    startNewProfileDraft,
     parseStory,
     parseStoryLocal,
     importCvPdf,

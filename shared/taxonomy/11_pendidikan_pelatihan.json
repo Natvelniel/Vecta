@@ -1,6 +1,305 @@
 [
-  {"id":"edu.kurikulum","canonical_name":"Kurikulum Merdeka & Perencanaan Ajar","domain":"pendidikan_pelatihan","category":"core_hard","aliases":["Kurikulum Merdeka","Modul Ajar","Penyusunan RPP","Silabus","Curriculum Development","Pengembangan Kurikulum","Cambridge Curriculum","IB Curriculum"]},
-  {"id":"edu.pengajaran","canonical_name":"Pengajaran & Manajemen Kelas","domain":"pendidikan_pelatihan","category":"core_hard","aliases":["Teaching","Mengajar","Classroom Management","Manajemen Kelas","Pedagogi","Asesmen Pembelajaran","Evaluasi Belajar","Dapodik"]},
-  {"id":"edu.instructional","canonical_name":"Instructional Design & E-Learning","domain":"pendidikan_pelatihan","category":"core_hard","aliases":["Instructional Design","E-Learning","LMS","Moodle","Google Classroom","SCORM","Articulate Storyline","Corporate Trainer"]},
-  {"id":"edu.bk","canonical_name":"Bimbingan Konseling & Anak Berkebutuhan Khusus","domain":"pendidikan_pelatihan","category":"domain","aliases":["Bimbingan Konseling","Konseling Pendidikan","Pendidikan Khusus","PAUD","Montessori","Psikologi Perkembangan"]}
+  {
+    "id": "edu.kurikulum",
+    "canonical_name": "Kurikulum Merdeka & Perencanaan Ajar",
+    "domain": "pendidikan_pelatihan",
+    "category": "core_hard",
+    "aliases": [
+      "Kurikulum Merdeka",
+      "Modul Ajar",
+      "Penyusunan RPP",
+      "Silabus",
+      "Curriculum Development",
+      "Pengembangan Kurikulum",
+      "Cambridge Curriculum",
+      "IB Curriculum"
+    ]
+  },
+  {
+    "id": "edu.pengajaran",
+    "canonical_name": "Pengajaran & Manajemen Kelas",
+    "domain": "pendidikan_pelatihan",
+    "category": "core_hard",
+    "aliases": [
+      "Teaching",
+      "Mengajar",
+      "Classroom Management",
+      "Manajemen Kelas",
+      "Pedagogi",
+      "Asesmen Pembelajaran",
+      "Evaluasi Belajar",
+      "Dapodik"
+    ]
+  },
+  {
+    "id": "edu.instructional",
+    "canonical_name": "Instructional Design & E-Learning",
+    "domain": "pendidikan_pelatihan",
+    "category": "core_hard",
+    "aliases": [
+      "Instructional Design",
+      "E-Learning",
+      "LMS",
+      "Moodle",
+      "Google Classroom",
+      "SCORM",
+      "Articulate Storyline",
+      "Corporate Trainer"
+    ]
+  },
+  {
+    "id": "edu.bk",
+    "canonical_name": "Bimbingan Konseling & Anak Berkebutuhan Khusus",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Bimbingan Konseling",
+      "Konseling Pendidikan",
+      "Pendidikan Khusus",
+      "PAUD",
+      "Montessori",
+      "Psikologi Perkembangan",
+      "Konselor Sekolah",
+      "Asesmen Minat Bakat",
+      "Child Development"
+    ]
+  },
+  {
+    "id": "edu.paud_inklusi",
+    "canonical_name": "Pendidikan Anak Usia Dini & Inklusif (ABK)",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Montessori",
+      "Pendidikan Khusus",
+      "Shadow Teacher",
+      "Terapi Wicara Dasar"
+    ]
+  },
+  {
+    "id": "edu.steam_edtech",
+    "canonical_name": "Pembelajaran STEM / STEAM & Coding Anak",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Scratch Programming",
+      "Robotics Edu",
+      "Gamifikasi Kelas"
+    ]
+  },
+  {
+    "id": "edu.cambridge_ib",
+    "canonical_name": "Kurikulum Internasional (Cambridge / IB)",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Cambridge IGCSE",
+      "IB PYP / MYP / DP",
+      "Bilingual Teaching"
+    ]
+  },
+  {
+    "id": "edu.authoring_tools",
+    "canonical_name": "Authoring Tools (Articulate Storyline / SCORM)",
+    "domain": "pendidikan_pelatihan",
+    "category": "tools_tech",
+    "parent_id": "edu.steam_edtech",
+    "aliases": [
+      "Articulate Storyline",
+      "Articulate Rise",
+      "SCORM",
+      "Captivate",
+      "Canva Education"
+    ]
+  },
+  {
+    "id": "edu.ujian_asesmen",
+    "canonical_name": "Asesmen Diagnostik & Bank Soal (AKM)",
+    "domain": "pendidikan_pelatihan",
+    "category": "core_hard",
+    "parent_id": "edu.kurikulum",
+    "aliases": [
+      "Asesmen Nasional",
+      "Rubrik Penilaian",
+      "Evaluasi Pembelajaran"
+    ]
+  },
+  {
+    "id": "edu.akreditasi",
+    "canonical_name": "Penjaminan Mutu Pendidikan (SPMI / BAN-PT)",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Akreditasi Sekolah",
+      "SPMI",
+      "Tata Usaha Akademik",
+      "PDDIKTI Operator"
+    ]
+  },
+  {
+    "id": "edu.toefl_ielts_teach",
+    "canonical_name": "Pengajaran Bahasa Inggris (TOEFL / IELTS / ESP)",
+    "domain": "pendidikan_pelatihan",
+    "category": "core_hard",
+    "aliases": [
+      "TEFL",
+      "Business English Trainer",
+      "Speaking Assessment"
+    ],
+    "parent_id": "edu.pengajaran"
+  },
+  {
+    "id": "edu.math_olympiad",
+    "canonical_name": "Pembinaan Olimpiade Sains (OSN / KSN)",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "OSN Matematika",
+      "OSN Fisika",
+      "OSN Kimia",
+      "Problem Solving Lomba"
+    ],
+    "parent_id": "edu.pengajaran"
+  },
+  {
+    "id": "edu.corporate_trainer",
+    "canonical_name": "Soft Skill & Sales Training Fasilitator",
+    "domain": "pendidikan_pelatihan",
+    "category": "soft_skill",
+    "aliases": [
+      "BNSP Trainer Metodologi",
+      "TOT Training of Trainers",
+      "Roleplay Coaching"
+    ],
+    "parent_id": "edu.steam_edtech"
+  },
+  {
+    "id": "edu.school_admin",
+    "canonical_name": "Manajemen Sekolah & Hubungan Orang Tua",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "PPDB Management",
+      "Dapodik Operator",
+      "Tata Kelola Yayasan"
+    ],
+    "parent_id": "edu.akreditasi"
+  },
+  {
+    "id": "edu.mandarin_teach",
+    "canonical_name": "Pengajaran Bahasa Mandarin (Sekolah / Kursus)",
+    "domain": "pendidikan_pelatihan",
+    "category": "core_hard",
+    "aliases": [
+      "Guru Mandarin",
+      "Laoshi Mandarin",
+      "HSK Prep Teacher"
+    ]
+  },
+  {
+    "id": "edu.quran_tahfidz",
+    "canonical_name": "Pendidikan Agama Islam & Tahfidz",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Guru PAI",
+      "Tahfidz Al-Quran",
+      "Manajemen Madrasah"
+    ]
+  },
+  {
+    "id": "edu.vocational_smk",
+    "canonical_name": "Instruktur Pelatihan Vokasi / LPK & Balai Latihan Kerja",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Instruktur BLK",
+      "Kurikulum Berbasis Kompetensi",
+      "Uji Kompetensi LSP"
+    ],
+    "parent_id": "edu.corporate_trainer"
+  },
+  {
+    "id": "edu.student_affairs",
+    "canonical_name": "Kemahasiswaan, Layanan Konseling & Career Center",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "Campus Career Center",
+      "Tracer Study",
+      "Student Engagement"
+    ],
+    "parent_id": "edu.bk"
+  },
+  {
+    "id": "edu.lms_moodle",
+    "canonical_name": "Administrasi LMS (Moodle / Canvas / Google Classroom)",
+    "domain": "pendidikan_pelatihan",
+    "category": "tools_tech",
+    "aliases": [
+      "Moodle Admin",
+      "Canvas LMS",
+      "Gamification Quizizz"
+    ]
+  },
+  {
+    "id": "edu.literacy_num",
+    "canonical_name": "Pembelajaran Literasi, Numerasi & Profil Pelajar Pancasila",
+    "domain": "pendidikan_pelatihan",
+    "category": "core_hard",
+    "aliases": [
+      "Projek Penguatan P5",
+      "Diferensiasi Belajar"
+    ],
+    "parent_id": "edu.kurikulum"
+  },
+  {
+    "id": "edu.spada_merdeka",
+    "canonical_name": "Kurikulum Merdeka & Modul Ajar P5",
+    "domain": "pendidikan_pelatihan",
+    "category": "core",
+    "aliases": [
+      "kurikulum merdeka",
+      "modul ajar",
+      "p5",
+      "asesmen diagnostik",
+      "capaian pembelajaran"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate",
+    "parent_id": "edu.kurikulum"
+  },
+  {
+    "id": "edu.bimbel_utbk",
+    "canonical_name": "Tutor UTBK SNBT & Persiapan Kedinasan",
+    "domain": "pendidikan_pelatihan",
+    "category": "domain",
+    "aliases": [
+      "utbk",
+      "snbt",
+      "tps",
+      "tutor bimbel",
+      "cpns",
+      "kedinasan"
+    ],
+    "base_weight": 1.0,
+    "difficulty": "intermediate",
+    "parent_id": "edu.pengajaran"
+  },
+  {
+    "id": "edu.special_needs",
+    "canonical_name": "Pendidikan Luar Biasa & Shadow Teacher",
+    "domain": "pendidikan_pelatihan",
+    "category": "clinical",
+    "aliases": [
+      "plb",
+      "anak berkebutuhan khusus",
+      "abk",
+      "shadow teacher",
+      "aba therapy"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "edu.paud_inklusi"
+  }
 ]

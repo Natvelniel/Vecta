@@ -1,0 +1,248 @@
+[
+  {
+    "id": "med.keperawatan",
+    "canonical_name": "Asuhan Keperawatan Klinis (Ners / STR Aktif)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "S1 Keperawatan Ners",
+      "D3 Keperawatan",
+      "Pemasangan Infus",
+      "Triage Pasien",
+      "ASKEP"
+    ]
+  },
+  {
+    "id": "med.btcls_acls",
+    "canonical_name": "Gawat Darurat (BTCLS / ACLS / ATLS)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "BTCLS",
+      "ACLS",
+      "ATLS",
+      "BCLS",
+      "PPGDO",
+      "IGD / ICU"
+    ]
+  },
+  {
+    "id": "med.hiperkes",
+    "canonical_name": "Kedokteran Kerja & Hiperkes Perusahaan",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "Dokter Perusahaan",
+      "Sertifikat Hiperkes",
+      "Medical Check Up",
+      "Audiometri & Spirometri"
+    ]
+  },
+  {
+    "id": "med.kebidanan",
+    "canonical_name": "Kebidanan & Kesehatan Ibu Anak (MU / APN)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "Midwifery",
+      "Asuhan Persalinan Normal",
+      "NICU / PICU",
+      "Imunisasi"
+    ]
+  },
+  {
+    "id": "med.gizi_klinis",
+    "canonical_name": "Ilmu Gizi Klinis & Penyelenggaraan Makanan RS",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "Ahli Gizi",
+      "Nutritionist",
+      "NCP / PAGT",
+      "Dietetik Rumah Sakit",
+      "Konseling Gizi"
+    ]
+  },
+  {
+    "id": "med.kesmas_epid",
+    "canonical_name": "Kesehatan Masyarakat, Epidemiologi & Promkes",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "Surveilans Epidemiologi",
+      "Biostatistik",
+      "Epi Info",
+      "Program Promosi Kesehatan"
+    ]
+  },
+  {
+    "id": "med.simrs",
+    "canonical_name": "Sistem Informasi Manajemen RS (SIMRS / Rekam Medis Elektronik)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "tools_tech",
+    "aliases": [
+      "SIMRS Khanza",
+      "RME SatuSehat",
+      "HL7 FHIR",
+      "SIRS Online"
+    ]
+  },
+  {
+    "id": "med.ok_bedah",
+    "canonical_name": "Keperawatan Kamar Bedah & Sterilisasi (CSSD)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "parent_id": "med.keperawatan",
+    "aliases": [
+      "Perawat OK",
+      "CSSD Sterilisasi",
+      "Hemodialisa (HD)"
+    ]
+  },
+  {
+    "id": "med.dokter_umum",
+    "canonical_name": "Praktik Klinis Dokter Umum (STR & SIP Aktif)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "General Practitioner",
+      "Poli Umum",
+      "Resep Klinis",
+      "Rujukan BPJS"
+    ],
+    "parent_id": "med.btcls_acls"
+  },
+  {
+    "id": "med.dokter_gigi",
+    "canonical_name": "Kedokteran Gigi & Perawatan Dental",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "Dentist",
+      "Endodontik Dasar",
+      "Scaling & Tambal"
+    ]
+  },
+  {
+    "id": "med.keselamatan_pangan_rs",
+    "canonical_name": "Dietetik Penyakit Kronis & Konseling Gizi Pasien",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "Diet Diabetes",
+      "Diet Ginjal",
+      "Enteral Nutrition"
+    ],
+    "parent_id": "med.gizi_klinis"
+  },
+  {
+    "id": "med.sanitarian",
+    "canonical_name": "Kesehatan Lingkungan (Sanitarian) & Limbah Medis",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "Pengelolaan Limbah B3 Medis",
+      "Kualitas Air RS",
+      "Higiene Sanitasi RS"
+    ],
+    "parent_id": "med.kesmas_epid"
+  },
+  {
+    "id": "med.optometri_audi",
+    "canonical_name": "Optometri / Audiologi / Okupasi Terapi",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "Refraksi Mata",
+      "Audiometri Klinis",
+      "Okupasi Terapi"
+    ]
+  },
+  {
+    "id": "med.icu_nicuhd",
+    "canonical_name": "Keperawatan Intensif (ICU / NICU / PICU / HD)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "Pelatihan ICU",
+      "Sertifikat Hemodialisa",
+      "Ventilator Nursing"
+    ],
+    "parent_id": "med.btcls_acls"
+  },
+  {
+    "id": "med.k3_klinik",
+    "canonical_name": "Perawat Perusahaan / Site Paramedic (Hiperkes Perawat)",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "Paramedic Site Tambang",
+      "Sertifikat Hiperkes Perawat",
+      "Emergency Evacuation"
+    ],
+    "parent_id": "med.btcls_acls"
+  },
+  {
+    "id": "med.bidan_delima",
+    "canonical_name": "Pelayanan KIA, KB & Konseling Laktasi",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "Konselor Laktasi",
+      "Pemasangan IUD Implan",
+      "ANC Terpadu"
+    ],
+    "parent_id": "med.kebidanan"
+  },
+  {
+    "id": "med.fisioterapi_anak",
+    "canonical_name": "Okupasi Terapi & Terapi Wicara Klinis",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "Sensory Integration",
+      "Speech Therapy",
+      "Pediatrik Rehab"
+    ],
+    "parent_id": "med.fisioterapi"
+  },
+  {
+    "id": "med.medical_coding",
+    "canonical_name": "Koding Klinis ICD-10 & ICD-9-CM Akurat",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "core_hard",
+    "aliases": [
+      "ICD-9-CM",
+      "Audit Rekam Medis",
+      "Resume Medis"
+    ],
+    "parent_id": "med.simrs"
+  },
+  {
+    "id": "med.telemedicine",
+    "canonical_name": "Konsultasi Telemedisin & Triage Digital",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "domain",
+    "aliases": [
+      "Telemedicine Doctor",
+      "E-Prescription Klinis"
+    ],
+    "parent_id": "med.dokter_umum"
+  },
+  {
+    "id": "med.icu_emergency",
+    "canonical_name": "Keperawatan ICU, IGD & BTCLS/ACLS",
+    "domain": "kedokteran_keperawatan_gizi_kesmas",
+    "category": "clinical",
+    "aliases": [
+      "btcls",
+      "ppgd",
+      "acls",
+      "icu nurse",
+      "igd",
+      "hemodialisis"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  }
+]

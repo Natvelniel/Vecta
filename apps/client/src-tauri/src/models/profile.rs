@@ -214,6 +214,17 @@ pub struct ScrapeKeywordItem {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct ProfileSummaryItem {
+    pub id: String,
+    pub profile_name: String,
+    pub target_roles: Vec<String>,
+    pub experience_level: ExperienceLevel,
+    pub skill_count: i64,
+    pub is_active: bool,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 pub struct UserProfileDetail {
     pub id: String,
     pub profile_name: String,
@@ -227,4 +238,35 @@ pub struct UserProfileDetail {
     pub keywords: Vec<ScrapeKeywordItem>,
     pub created_at: String,
     pub updated_at: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct ProdiRoleItem {
+    pub id: String,
+    pub prodi_label: String,
+    pub domain: String,
+    pub role_title: String,
+    pub mandatory_skills: Vec<String>,
+    pub preferred_skills: Vec<String>,
+    pub certifications: Vec<String>,
+    pub scrape_queries: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct VectaBackupReport {
+    pub schema_version: u32,
+    pub exported_at: String,
+    pub file_name: String,
+    pub payload_json: String,
+    pub profiles_count: u32,
+    pub watchlists_count: u32,
+    pub tracked_jobs_count: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct VectaImportReport {
+    pub imported_profiles: u32,
+    pub imported_watchlists: u32,
+    pub imported_preferences: bool,
+    pub warnings: Vec<String>,
 }

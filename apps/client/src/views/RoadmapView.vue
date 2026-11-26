@@ -92,15 +92,19 @@ async function handleSelectRoadmap(e: Event) {
   const id = (e.target as HTMLSelectElement).value;
   if (id) await roadmapStore.selectRoadmap(id);
 }
+const isLocalRoadmap = computed(() => {
+  const title = roadmapStore.activeDetail?.title ?? "";
+  return title.includes("Lokal") || title.includes("0 Token");
+});
 </script>
 
 <template>
   <div class="v-rm-root">
     <PageHeader :title="roadmapStore.activeDetail?.title ?? 'Roadmap Belajar'">
       <template #title-extra>
-        <VBadge v-if="roadmapStore.activeDetail" tone="ai">
-          <VIcon name="aiNode" :size="13" />
-          <span>AI-Generated</span>
+        <VBadge v-if="roadmapStore.activeDetail" :tone="isLocalRoadmap ? 'success' : 'ai'">
+          <VIcon v-if="!isLocalRoadmap" name="aiNode" :size="13" />
+          <span>{{ isLocalRoadmap ? "Lokal · 0 Token" : "AI-Generated" }}</span>
         </VBadge>
       </template>
       <template #actions>

@@ -75,17 +75,18 @@ withDefaults(
 }
 
 .v-btn--primary {
-  background: var(--brand-primary);
-  color: #ffffff;
+  background: var(--brand);
+  color: var(--brand-fg);
   font-weight: 600;
 }
 .v-btn--primary:hover:not(:disabled) {
   background: var(--brand-hover);
-  color: #0b1120;
+  color: var(--brand-fg);
 }
 .v-btn--primary:active:not(:disabled) {
   background: var(--brand-active);
-  color: #ffffff;
+  color: var(--brand-fg);
+  transform: scale(0.975);
 }
 
 .v-btn--secondary {

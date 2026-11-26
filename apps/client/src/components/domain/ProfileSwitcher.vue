@@ -1,0 +1,271 @@
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useProfileStore } from "@/stores/profile";
+import { useJobsStore } from "@/stores/jobs";
+import { useCompetencyStore } from "@/stores/competency";
+import { useRoadmapStore } from "@/stores/roadmap";
+import { useToast } from "@/composables/useToast";
+import { formatExperienceLevel } from "@/lib/format";
+import VIcon from "@/components/ui/VIcon.vue";
+
+const props = defineProps<{
+  compact?: boolean;
+}>();
+
+const router = useRouter();
+const profileStore = useProfileStore();
+const jobsStore = useJobsStore();
+const competencyStore = useCompetencyStore();
+const roadmapStore = useRoadmapStore();
+const toast = useToast();
+
+const open = ref(false);
+
+const activeLabel = computed(
+  () => profileStore.activeProfile?.profile_name || "Profil Utama",
+);
+
+async function refreshWorkspaceForUser(uid: string) {
+  await Promise.all([
+    jobsStore.loadJobs(uid),
+    jobsStore.loadWatchlists(uid),
+    competencyStore.loadRolesAndMap(uid),
+    roadmapStore.loadRoadmaps(uid),
+    profileStore.loadMasterCv(uid),
+  ]);
+}
+
+async function handleSwitch(profileId: string) {
+  open.value = false;
+  if (profileId === profileStore.userId) return;
+  const ok = await profileStore.switchProfile(profileId);
+  if (ok && profileStore.userId) {
+    await refreshWorkspaceForUser(profileStore.userId);
+    toast.show(`Beralih ke jalur profil ${profileStore.activeProfile?.profile_name ?? ""}.`, {
+      tone: "success",
+    });
+  } else if (profileStore.error) {
+    toast.show(profileStore.error, { tone: "error" });
+  }
+}
+
+async function handleDelete(profileId: string, name: string) {
+  const ok = await profileStore.deleteProfile(profileId);
+  if (ok && profileStore.userId) {
+    await refreshWorkspaceForUser(profileStore.userId);
+    toast.show(`Profil "${name}" dihapus.`, { tone: "info" });
+  } else if (profileStore.error) {
+    toast.show(profileStore.error, { tone: "error" });
+  }
+}
+
+function handleNewProfile() {
+  open.value = false;
+  profileStore.startNewProfileDraft();
+  router.push("/onboarding");
+}
+</script>
+
+<template>
+  <div class="v-ps-wrap">
+    <button
+      type="button"
+      class="v-ps-trigger"
+      :class="{ 'v-ps-trigger--compact': compact }"
+      :aria-expanded="open"
+      aria-label="Pilih atau kelola profil jalur karier"
+      @click="open = !open"
+    >
+      <span class="v-ps-dot" aria-hidden="true" />
+      <span class="v-ps-name">{{ activeLabel }}</span>
+      <span v-if="!compact && profileStore.profiles.length > 1" class="v-ps-count t-num">
+        {{ profileStore.profiles.length }}
+      </span>
+      <VIcon name="chevronDown" :size="13" />
+    </button>
+
+    <div v-if="open" class="v-ps-backdrop" @click="open = false" />
+
+    <div v-if="open" class="v-ps-menu liquid-glass" role="menu" aria-label="Daftar jalur profil">
+      <div class="v-ps-menu-head t-meta">Jalur Profil Tersimpan</div>
+      <div class="v-ps-list">
+        <div
+          v-for="p in profileStore.profiles"
+          :key="p.id"
+          class="v-ps-item"
+          :class="{ 'v-ps-item--active': p.is_active }"
+        >
+          <button type="button" class="v-ps-item-btn" @click="handleSwitch(p.id)">
+            <strong class="v-ps-item-title">{{ p.profile_name }}</strong>
+            <span class="t-meta">
+              {{ p.target_roles[0] || formatExperienceLevel(p.experience_level) }} · {{ p.skill_count }} skill
+            </span>
+          </button>
+          <button
+            v-if="profileStore.profiles.length > 1"
+            type="button"
+            class="v-ps-del"
+            :aria-label="`Hapus profil ${p.profile_name}`"
+            @click.stop="handleDelete(p.id, p.profile_name)"
+          >
+            <VIcon name="close" :size="12" />
+          </button>
+        </div>
+      </div>
+
+      <button type="button" class="v-ps-new" @click="handleNewProfile">
+        <VIcon name="plus" :size="14" />
+        <span>Buat Profil Jalur Baru</span>
+      </button>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.v-ps-wrap {
+  position: relative;
+}
+.v-ps-trigger {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.v-ps-trigger--compact {
+  width: auto;
+  max-width: 132px;
+  height: 32px;
+  padding: 0 8px;
+  gap: 6px;
+  font-size: 12px;
+}
+.v-ps-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-success);
+  flex-shrink: 0;
+}
+.v-ps-name {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v-ps-count {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  background: var(--brand-soft);
+  color: var(--text-1);
+}
+.v-ps-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+}
+.v-ps-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 230px;
+  max-width: 280px;
+  z-index: 55;
+  padding: 8px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--glass-border);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-overlay);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.v-ps-trigger--compact + .v-ps-backdrop + .v-ps-menu {
+  left: auto;
+  right: 0;
+}
+.v-ps-menu-head {
+  padding: 2px 6px;
+  font-weight: 700;
+}
+.v-ps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.v-ps-item {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  background: var(--bg-primary);
+}
+.v-ps-item--active {
+  border-color: var(--brand-border);
+  background: var(--brand-soft);
+}
+.v-ps-item-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.v-ps-item-title {
+  font-size: 12.5px;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v-ps-del {
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.v-ps-del:hover {
+  color: var(--status-error);
+  background: var(--error-soft);
+}
+.v-ps-new {
+  width: 100%;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: var(--radius-control);
+  border: 1px dashed var(--border-strong);
+  background: transparent;
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.v-ps-new:hover {
+  border-color: var(--brand);
+}
+</style>

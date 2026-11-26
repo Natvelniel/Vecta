@@ -5,21 +5,30 @@ use std::sync::Mutex;
 use rusqlite::{params, params_from_iter, Connection, OptionalExtension, ToSql, Transaction};
 use uuid::Uuid;
 
+use crate::core::analytics::{
+    build_company_snapshot, compute_salary_benchmark, CompanyJobRow, SalarySampleRow,
+};
 use crate::core::local_matcher::{taxonomy_seed_skills, LocalSkillEntry};
+use crate::core::matching::compute_hybrid_match;
 use crate::core::native_scraper::quality::{JobRedFlag, PortalLinkRef};
+use crate::core::opportunity::extract_opportunity_metadata;
 use crate::error::AppError;
-use crate::models::competency::{CompetencyMapResponse, CompetencySkillItem, RoleJobCount};
+use crate::models::competency::{
+    CompanySnapshot, CompetencyMapResponse, CompetencySkillItem, RoleJobCount,
+    SalaryBenchmarkSummary, SkillImpactItem,
+};
 use crate::models::cv::{
     CvEducationItem, CvExperienceItem, CvProjectItem, MasterCvProfile,
 };
 use crate::models::job::{
     ApplicationStatus, ApplyKitResult, EnrichmentStatus, ExtractedJobSkill, GapAnalysis,
     JobExtractionResult, JobFilterInput, JobMatchDetail, JobMatchSkillRef, JobMatchSummary,
-    JobSource, RequirementType, WorkMode,
+    JobSource, RequirementType, SavedWatchlistItem, WorkMode,
 };
 use crate::models::profile::{
-    ConfirmedProfileInput, ExperienceLevel, FitType, Proficiency, ScrapeKeywordItem, SkillCategory,
-    UserProfileDetail, UserSkillItem,
+    ConfirmedKeywordInput, ConfirmedProfileInput, ConfirmedSkillInput, ExperienceLevel, FitType,
+    Proficiency, ProfileSummaryItem, ScrapeKeywordItem, SkillCategory, UserProfileDetail,
+    UserSkillItem, VectaBackupReport, VectaImportReport,
 };
 use crate::models::roadmap::{
     GeneratedRoadmap, RoadmapDetail, RoadmapStepItem, RoadmapSummary, SkillRef, StepStatus,
@@ -34,6 +43,8 @@ const WORKFLOW_MIGRATION_SQL: &str =
     include_str!("../../../../../shared/migrations/003_job_workflow_and_preferences.sql");
 const V3_MIGRATION_SQL: &str =
     include_str!("../../../../../shared/migrations/004_v3_taxonomy_offline_ai_and_cv.sql");
+const V5_MIGRATION_SQL: &str =
+    include_str!("../../../../../shared/migrations/005_opportunity_intelligence.sql");
 
 const PRAGMAS_SQL: &str = "
 PRAGMA foreign_keys = ON;
@@ -282,6 +293,90 @@ impl Database {
             let fk_restore = guard
                 .execute_batch("PRAGMA foreign_keys = ON;")
                 .map_err(|e| db_err("Gagal mengaktifkan kembali FK pasca migrasi 004", e));
+
+            mig_result?;
+            fk_restore?;
+        }
+
+        let has_v5: bool = self.with_conn(|conn| {
+            conn.query_row(
+                "SELECT 1 FROM schema_migrations WHERE version = 5",
+                [],
+                |_| Ok(true),
+            )
+            .optional()
+            .map(|o| o.unwrap_or(false))
+            .map_err(|e| db_err("Gagal memeriksa versi migrasi 5", e))
+        })?;
+
+        if !has_v5 {
+            let mut guard = self
+                .conn
+                .lock()
+                .map_err(|_| AppError::db_error("Database mutex poisoned"))?;
+            guard
+                .execute_batch("PRAGMA foreign_keys = OFF;")
+                .map_err(|e| db_err("Gagal menonaktifkan FK sementara untuk migrasi 005", e))?;
+
+            let mig_result = (|| -> Result<(), AppError> {
+                let tx = guard
+                    .transaction()
+                    .map_err(|e| db_err("Gagal memulai transaksi migrasi 005", e))?;
+                tx.execute_batch(V5_MIGRATION_SQL).map_err(|e| {
+                    db_err("Gagal menjalankan migrasi 005_opportunity_intelligence", e)
+                })?;
+
+                // Backfill location_cluster, salary range, and opportunity_type on existing jobs
+                let existing: Vec<(String, String, Option<String>, String, Option<String>, String)> = {
+                    let mut stmt = tx
+                        .prepare("SELECT id, title, location, work_mode, salary_text, raw_description FROM jobs")
+                        .map_err(|e| db_err("Gagal membaca jobs untuk backfill v5", e))?;
+                    let rows = stmt
+                        .query_map([], |r| {
+                            Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?, r.get(5)?))
+                        })
+                        .map_err(|e| db_err("Gagal iterasi backfill v5", e))?;
+                    let mut buf = Vec::new();
+                    for row in rows {
+                        buf.push(row.map_err(|e| db_err("Gagal parse baris backfill v5", e))?);
+                    }
+                    buf
+                };
+
+                for (id, title, loc, wm_str, sal, desc) in existing {
+                    let meta = extract_opportunity_metadata(
+                        &title,
+                        loc.as_deref(),
+                        WorkMode::from_db_str(&wm_str),
+                        sal.as_deref(),
+                        &desc,
+                    );
+                    tx.execute(
+                        "UPDATE jobs SET location_cluster = ?1, salary_min_idr = ?2, salary_max_idr = ?3, opportunity_type = ?4 WHERE id = ?5",
+                        params![
+                            meta.location_cluster,
+                            meta.salary_min_idr,
+                            meta.salary_max_idr,
+                            meta.opportunity_type,
+                            id
+                        ],
+                    )
+                    .map_err(|e| db_err("Gagal update backfill v5", e))?;
+                }
+
+                tx.execute(
+                    "INSERT OR IGNORE INTO schema_migrations (version, name) VALUES (?1, ?2)",
+                    params![5i64, "005_opportunity_intelligence"],
+                )
+                .map_err(|e| db_err("Gagal mencatat versi migrasi 5", e))?;
+                tx.commit()
+                    .map_err(|e| db_err("Gagal commit migrasi 005", e))?;
+                Ok(())
+            })();
+
+            let fk_restore = guard
+                .execute_batch("PRAGMA foreign_keys = ON;")
+                .map_err(|e| db_err("Gagal mengaktifkan kembali FK pasca migrasi 005", e));
 
             mig_result?;
             fk_restore?;
@@ -816,14 +911,22 @@ impl Database {
         job: &NewJobRecord,
         extracted_skills: &[ExtractedJobSkill],
     ) -> Result<JobMatchRecord, AppError> {
+        let meta = extract_opportunity_metadata(
+            &job.title,
+            job.location.as_deref(),
+            job.work_mode,
+            job.salary_text.as_deref(),
+            &job.raw_description,
+        );
         self.with_tx(|tx| {
             tx.execute(
                 "INSERT INTO jobs (
                     id, source, external_id, url, title, normalized_role, company,
                     location, work_mode, experience_level, raw_description,
                     extracted_summary_json, embedding, enrichment_status, posted_at, salary_text,
-                    domain_slug, quality_score, red_flags_json, also_available_on_json, embedding_model
-                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)",
+                    domain_slug, quality_score, red_flags_json, also_available_on_json, embedding_model,
+                    location_cluster, salary_min_idr, salary_max_idr, opportunity_type
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)",
                 params![
                     job.id,
                     job.source.as_str(),
@@ -846,6 +949,10 @@ impl Database {
                     if job.red_flags_json.is_empty() { "[]" } else { &job.red_flags_json },
                     if job.also_available_on_json.is_empty() { "[]" } else { &job.also_available_on_json },
                     job.embedding_model,
+                    meta.location_cluster,
+                    meta.salary_min_idr,
+                    meta.salary_max_idr,
+                    meta.opportunity_type,
                 ],
             )
             .map_err(|e| db_err("Gagal menyimpan lowongan", e))?;
@@ -894,14 +1001,22 @@ impl Database {
         job: &NewJobRecord,
         skill_pairs: &[(i64, RequirementType)],
     ) -> Result<JobMatchRecord, AppError> {
+        let meta = extract_opportunity_metadata(
+            &job.title,
+            job.location.as_deref(),
+            job.work_mode,
+            job.salary_text.as_deref(),
+            &job.raw_description,
+        );
         self.with_tx(|tx| {
             tx.execute(
                 "INSERT INTO jobs (
                     id, source, external_id, url, title, normalized_role, company,
                     location, work_mode, experience_level, raw_description,
                     extracted_summary_json, embedding, enrichment_status, posted_at, salary_text,
-                    domain_slug, quality_score, red_flags_json, also_available_on_json, embedding_model
-                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)",
+                    domain_slug, quality_score, red_flags_json, also_available_on_json, embedding_model,
+                    location_cluster, salary_min_idr, salary_max_idr, opportunity_type
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)",
                 params![
                     job.id,
                     job.source.as_str(),
@@ -924,6 +1039,10 @@ impl Database {
                     if job.red_flags_json.is_empty() { "[]" } else { &job.red_flags_json },
                     if job.also_available_on_json.is_empty() { "[]" } else { &job.also_available_on_json },
                     job.embedding_model,
+                    meta.location_cluster,
+                    meta.salary_min_idr,
+                    meta.salary_max_idr,
+                    meta.opportunity_type,
                 ],
             )
             .map_err(|e| db_err("Gagal menyimpan lowongan lokal", e))?;
@@ -1275,14 +1394,21 @@ impl Database {
                     jm.ai_gap_analysis_json, jm.is_saved, j.scraped_at,
                     j.enrichment_status, j.posted_at, j.salary_text,
                     jm.application_status, jm.applied_at,
-                    j.domain_slug, j.quality_score, j.red_flags_json, j.also_available_on_json
+                    j.domain_slug, j.quality_score, j.red_flags_json, j.also_available_on_json,
+                    j.location_cluster, j.salary_min_idr, j.salary_max_idr, j.opportunity_type
                  FROM job_matches jm
                  JOIN jobs j ON j.id = jm.job_id
                  WHERE jm.user_id = ?",
             );
             let mut bind: Vec<Box<dyn ToSql>> = vec![Box::new(user_id.to_string())];
 
-            if let Some(app_status) = filter.application_status {
+            if let Some(statuses) = filter.application_statuses.as_ref().filter(|v| !v.is_empty()) {
+                let placeholders = vec!["?"; statuses.len()].join(", ");
+                sql.push_str(&format!(" AND jm.application_status IN ({placeholders})"));
+                for st in statuses {
+                    bind.push(Box::new(st.as_str().to_string()));
+                }
+            } else if let Some(app_status) = filter.application_status {
                 sql.push_str(" AND jm.application_status = ?");
                 bind.push(Box::new(app_status.as_str().to_string()));
             } else if filter.include_dismissed != Some(true) {
@@ -1293,13 +1419,42 @@ impl Database {
                 sql.push_str(" AND j.normalized_role = ?");
                 bind.push(Box::new(role.to_string()));
             }
-            if let Some(work_mode) = filter.work_mode {
+            if let Some(modes) = filter.work_modes.as_ref().filter(|v| !v.is_empty()) {
+                let placeholders = vec!["?"; modes.len()].join(", ");
+                sql.push_str(&format!(" AND j.work_mode IN ({placeholders})"));
+                for wm in modes {
+                    bind.push(Box::new(wm.as_str().to_string()));
+                }
+            } else if let Some(work_mode) = filter.work_mode {
                 sql.push_str(" AND j.work_mode = ?");
                 bind.push(Box::new(work_mode.as_str().to_string()));
             }
-            if let Some(source) = filter.source {
+            if let Some(sources) = filter.sources.as_ref().filter(|v| !v.is_empty()) {
+                let placeholders = vec!["?"; sources.len()].join(", ");
+                sql.push_str(&format!(" AND j.source IN ({placeholders})"));
+                for src in sources {
+                    bind.push(Box::new(src.as_str().to_string()));
+                }
+            } else if let Some(source) = filter.source {
                 sql.push_str(" AND j.source = ?");
                 bind.push(Box::new(source.as_str().to_string()));
+            }
+            if let Some(clusters) = filter.location_clusters.as_ref().filter(|v| !v.is_empty()) {
+                let placeholders = vec!["?"; clusters.len()].join(", ");
+                sql.push_str(&format!(" AND j.location_cluster IN ({placeholders})"));
+                for cl in clusters {
+                    bind.push(Box::new(cl.trim().to_lowercase()));
+                }
+            }
+            if let Some(types) = filter.opportunity_types.as_ref().filter(|v| !v.is_empty()) {
+                let placeholders = vec!["?"; types.len()].join(", ");
+                sql.push_str(&format!(" AND j.opportunity_type IN ({placeholders})"));
+                for ot in types {
+                    bind.push(Box::new(ot.trim().to_lowercase()));
+                }
+            }
+            if filter.salary_only == Some(true) {
+                sql.push_str(" AND (j.salary_min_idr IS NOT NULL OR TRIM(COALESCE(j.salary_text, '')) != '')");
             }
             if let Some(enrich) = filter.enrichment_status {
                 sql.push_str(" AND j.enrichment_status = ?");
@@ -1326,7 +1481,17 @@ impl Database {
                 bind.push(Box::new(pattern));
             }
 
-            sql.push_str(" ORDER BY jm.final_score DESC, j.scraped_at DESC");
+            match filter.sort_by.as_deref() {
+                Some("newest") => {
+                    sql.push_str(" ORDER BY COALESCE(j.posted_at, j.scraped_at) DESC, jm.final_score DESC");
+                }
+                Some("salary_desc") => {
+                    sql.push_str(" ORDER BY COALESCE(j.salary_max_idr, j.salary_min_idr, 0) DESC, jm.final_score DESC");
+                }
+                _ => {
+                    sql.push_str(" ORDER BY jm.final_score DESC, j.scraped_at DESC");
+                }
+            }
 
             if let Some(limit) = filter.limit {
                 sql.push_str(" LIMIT ?");
@@ -1355,6 +1520,10 @@ impl Database {
                     let quality_score: f64 = r.get(24)?;
                     let red_flags_json: String = r.get(25)?;
                     let also_json: String = r.get(26)?;
+                    let location_cluster: String = r.get(27)?;
+                    let salary_min_idr: Option<i64> = r.get(28)?;
+                    let salary_max_idr: Option<i64> = r.get(29)?;
+                    let opportunity_type: String = r.get(30)?;
 
                     let matched: Vec<JobMatchSkillRef> =
                         serde_json::from_str(&matched_json).unwrap_or_default();
@@ -1373,11 +1542,15 @@ impl Database {
                         normalized_role: r.get(4)?,
                         company: r.get(5)?,
                         location: r.get(6)?,
+                        location_cluster,
                         work_mode: WorkMode::from_db_str(&work_mode_str),
                         experience_level: ExperienceLevel::from_db_str(&level_str),
                         enrichment_status: EnrichmentStatus::from_db_str(&enrich_str),
                         posted_at: r.get(19)?,
                         salary_text: r.get(20)?,
+                        salary_min_idr,
+                        salary_max_idr,
+                        opportunity_type,
                         domain_slug,
                         quality_score,
                         red_flags_count: red_flags.len() as u32,
@@ -1422,7 +1595,8 @@ impl Database {
                         jm.ai_gap_analysis_json, jm.is_saved, j.scraped_at,
                         j.enrichment_status, j.posted_at, j.salary_text,
                         jm.ai_apply_kit_json, jm.application_status, jm.applied_at, jm.user_notes,
-                        j.domain_slug, j.quality_score, j.red_flags_json, j.also_available_on_json
+                        j.domain_slug, j.quality_score, j.red_flags_json, j.also_available_on_json,
+                        j.location_cluster, j.salary_min_idr, j.salary_max_idr, j.opportunity_type
                      FROM jobs j
                      JOIN job_matches jm ON jm.job_id = j.id AND jm.user_id = ?1
                      WHERE j.id = ?2",
@@ -1443,6 +1617,10 @@ impl Database {
                         let quality_score: f64 = r.get(29)?;
                         let red_flags_json: String = r.get(30)?;
                         let also_json: String = r.get(31)?;
+                        let location_cluster: String = r.get(32)?;
+                        let salary_min_idr: Option<i64> = r.get(33)?;
+                        let salary_max_idr: Option<i64> = r.get(34)?;
+                        let opportunity_type: String = r.get(35)?;
 
                         let role_summary = extracted_json.as_deref().and_then(|s| {
                             serde_json::from_str::<serde_json::Value>(s)
@@ -1477,11 +1655,15 @@ impl Database {
                             normalized_role: r.get(5)?,
                             company: r.get(6)?,
                             location: r.get(7)?,
+                            location_cluster,
                             work_mode: WorkMode::from_db_str(&work_mode_str),
                             experience_level: ExperienceLevel::from_db_str(&level_str),
                             enrichment_status: EnrichmentStatus::from_db_str(&enrich_str),
                             posted_at: r.get(22)?,
                             salary_text: r.get(23)?,
+                            salary_min_idr,
+                            salary_max_idr,
+                            opportunity_type,
                             domain_slug,
                             quality_score,
                             red_flags,
@@ -2533,6 +2715,616 @@ fn load_roadmap_detail_conn(
     })
 }
 
+impl Database {
+    pub fn list_saved_watchlists(&self, user_id: &str) -> Result<Vec<SavedWatchlistItem>, AppError> {
+        self.with_conn(|conn| {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT id, user_id, name, filter_json, created_at
+                     FROM saved_watchlists
+                     WHERE user_id = ?1
+                     ORDER BY created_at DESC",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan query watchlist", e))?;
+            let rows = stmt
+                .query_map([user_id], |r| {
+                    let filter_json: String = r.get(3)?;
+                    let filter: JobFilterInput =
+                        serde_json::from_str(&filter_json).unwrap_or_default();
+                    Ok(SavedWatchlistItem {
+                        id: r.get(0)?,
+                        user_id: r.get(1)?,
+                        name: r.get(2)?,
+                        filter,
+                        created_at: r.get(4)?,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca daftar watchlist", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal parsing baris watchlist", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn save_watchlist(
+        &self,
+        user_id: &str,
+        name: &str,
+        filter: &JobFilterInput,
+    ) -> Result<SavedWatchlistItem, AppError> {
+        let clean_name = name.trim();
+        if clean_name.is_empty() {
+            return Err(AppError::validation_error("Nama watchlist tidak boleh kosong."));
+        }
+        let id = Uuid::new_v4().to_string();
+        let filter_json = serde_json::to_string(filter)
+            .map_err(|_| AppError::validation_error("Filter watchlist tidak valid."))?;
+
+        self.with_tx(|tx| {
+            tx.execute(
+                "INSERT INTO saved_watchlists (id, user_id, name, filter_json)
+                 VALUES (?1, ?2, ?3, ?4)",
+                params![id, user_id, clean_name, filter_json],
+            )
+            .map_err(|e| db_err("Gagal menyimpan watchlist", e))?;
+
+            let created_at: String = tx
+                .query_row(
+                    "SELECT created_at FROM saved_watchlists WHERE id = ?1",
+                    [&id],
+                    |r| r.get(0),
+                )
+                .unwrap_or_default();
+
+            Ok(SavedWatchlistItem {
+                id,
+                user_id: user_id.to_string(),
+                name: clean_name.to_string(),
+                filter: filter.clone(),
+                created_at,
+            })
+        })
+    }
+
+    pub fn delete_watchlist(&self, id: &str) -> Result<(), AppError> {
+        self.with_tx(|tx| {
+            tx.execute("DELETE FROM saved_watchlists WHERE id = ?1", [id])
+                .map_err(|e| db_err("Gagal menghapus watchlist", e))?;
+            Ok(())
+        })
+    }
+
+    pub fn simulate_skill_impact(
+        &self,
+        user_id: &str,
+        target_role: &str,
+        candidate_skill_ids: &[i64],
+    ) -> Result<Vec<SkillImpactItem>, AppError> {
+        if candidate_skill_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+        let profile = self
+            .get_profile_for_matching(user_id)?
+            .ok_or_else(|| AppError::validation_error("Profil pengguna tidak ditemukan."))?;
+
+        let all_jobs = self.load_all_jobs_for_matching()?;
+        let role_filter = target_role.trim();
+
+        let (scoped_jobs, baseline_scores): (Vec<JobMatchRecord>, std::collections::HashMap<String, f64>) =
+            self.with_conn(|conn| {
+                let mut role_job_ids: Option<HashSet<String>> = None;
+                if !role_filter.is_empty() && !role_filter.eq_ignore_ascii_case("semua") {
+                    let mut stmt = conn
+                        .prepare("SELECT id FROM jobs WHERE normalized_role = ?1")
+                        .map_err(|e| db_err("Gagal memfilter lowongan simulator", e))?;
+                    let rows = stmt
+                        .query_map([role_filter], |r| r.get::<_, String>(0))
+                        .map_err(|e| db_err("Gagal membaca lowongan simulator", e))?;
+                    let mut set = HashSet::new();
+                    for r in rows {
+                        if let Ok(id) = r {
+                            set.insert(id);
+                        }
+                    }
+                    role_job_ids = Some(set);
+                }
+
+                let mut base_stmt = conn
+                    .prepare("SELECT job_id, final_score FROM job_matches WHERE user_id = ?1")
+                    .map_err(|e| db_err("Gagal membaca baseline skor", e))?;
+                let base_rows = base_stmt
+                    .query_map([user_id], |r| Ok((r.get::<_, String>(0)?, r.get::<_, f64>(1)?)))
+                    .map_err(|e| db_err("Gagal iterasi baseline skor", e))?;
+                let mut scores = std::collections::HashMap::new();
+                for row in base_rows.flatten() {
+                    scores.insert(row.0, row.1);
+                }
+
+                let scoped: Vec<JobMatchRecord> = all_jobs
+                    .into_iter()
+                    .filter(|j| {
+                        role_job_ids
+                            .as_ref()
+                            .map(|s| s.contains(&j.job_id))
+                            .unwrap_or(true)
+                    })
+                    .collect();
+                Ok((scoped, scores))
+            })?;
+
+        let mut results = Vec::new();
+        for &cand_id in candidate_skill_ids.iter().take(10) {
+            let cand_name: Option<String> = self.with_conn(|conn| {
+                conn.query_row(
+                    "SELECT canonical_name FROM skills WHERE id = ?1",
+                    [cand_id],
+                    |r| r.get(0),
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal membaca nama skill simulator", e))
+            })?;
+            let Some(canonical_name) = cand_name else {
+                continue;
+            };
+
+            let mut sim_profile = profile.clone();
+            sim_profile.skill_ids.insert(cand_id);
+            sim_profile
+                .skill_names_lower
+                .insert(canonical_name.to_lowercase());
+
+            let mut affected_jobs = 0u32;
+            let mut delta_sum = 0.0f64;
+            let mut crossing_75 = 0u32;
+
+            for job in &scoped_jobs {
+                let base_score = baseline_scores
+                    .get(&job.job_id)
+                    .copied()
+                    .map(|v| if v > 1.0 { v / 100.0 } else { v })
+                    .unwrap_or_else(|| compute_hybrid_match(&profile, job).final_score);
+                let sim_score = compute_hybrid_match(&sim_profile, job).final_score;
+                let delta = (sim_score - base_score).max(0.0);
+                if delta > 0.005 {
+                    affected_jobs += 1;
+                    delta_sum += delta * 100.0;
+                    if base_score < 0.75 && sim_score >= 0.75 {
+                        crossing_75 += 1;
+                    }
+                }
+            }
+
+            results.push(SkillImpactItem {
+                skill_id: cand_id,
+                canonical_name,
+                affected_jobs_count: affected_jobs,
+                avg_score_delta: if affected_jobs > 0 {
+                    (delta_sum / affected_jobs as f64 * 10.0).round() / 10.0
+                } else {
+                    0.0
+                },
+                jobs_crossing_75_count: crossing_75,
+            });
+        }
+
+        Ok(results)
+    }
+
+    pub fn export_backup_json(&self) -> Result<VectaBackupReport, AppError> {
+        #[derive(serde::Serialize)]
+        struct BackupPayload {
+            schema_version: u32,
+            exported_at: String,
+            active_profile: Option<UserProfileDetail>,
+            master_cv: Option<MasterCvProfile>,
+            search_preferences_json: Option<String>,
+            watchlists: Vec<SavedWatchlistItem>,
+        }
+
+        let active_profile = self.get_active_profile()?;
+        let (master_cv, watchlists, profiles_count, tracked_jobs_count) =
+            if let Some(ref p) = active_profile {
+                let cv = self.get_master_cv(&p.id).ok();
+                let wl = self.list_saved_watchlists(&p.id)?;
+                let tracked: i64 = self.with_conn(|conn| {
+                    conn.query_row(
+                        "SELECT COUNT(*) FROM job_matches WHERE user_id = ?1 AND application_status != 'new'",
+                        [&p.id],
+                        |r| r.get(0),
+                    )
+                    .map_err(|e| db_err("Gagal menghitung lamaran aktif backup", e))
+                })?;
+                (cv, wl, 1u32, tracked as u32)
+            } else {
+                (None, Vec::new(), 0u32, 0u32)
+            };
+
+        let search_preferences_json = self.get_app_setting("search_preferences")?;
+        let exported_at: String = self.with_conn(|conn| {
+            conn.query_row("SELECT datetime('now')", [], |r| r.get(0))
+                .map_err(|e| db_err("Gagal membaca timestamp backup", e))
+        })?;
+        let watchlists_count = watchlists.len() as u32;
+
+        let payload = BackupPayload {
+            schema_version: 1,
+            exported_at: exported_at.clone(),
+            active_profile,
+            master_cv,
+            search_preferences_json,
+            watchlists,
+        };
+        let payload_json = serde_json::to_string_pretty(&payload)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi backup Vecta: {e}")))?;
+
+        Ok(VectaBackupReport {
+            schema_version: 1,
+            exported_at,
+            file_name: "vecta-backup.vecta".into(),
+            payload_json,
+            profiles_count,
+            watchlists_count,
+            tracked_jobs_count,
+        })
+    }
+
+    pub fn import_backup_json(&self, backup_json: &str) -> Result<VectaImportReport, AppError> {
+        #[derive(serde::Deserialize)]
+        struct BackupPayloadIn {
+            #[serde(default)]
+            schema_version: u32,
+            active_profile: Option<UserProfileDetail>,
+            master_cv: Option<MasterCvProfile>,
+            search_preferences_json: Option<String>,
+            #[serde(default)]
+            watchlists: Vec<SavedWatchlistItem>,
+        }
+
+        let parsed: BackupPayloadIn = serde_json::from_str(backup_json)
+            .map_err(|e| AppError::validation_error(format!("Format file .vecta tidak valid: {e}")))?;
+        if parsed.schema_version == 0 {
+            return Err(AppError::validation_error(
+                "Versi skema backup .vecta tidak dikenali.",
+            ));
+        }
+
+        let mut imported_profiles = 0u32;
+        let mut imported_watchlists = 0u32;
+        let mut imported_preferences = false;
+        let mut warnings = Vec::new();
+        let mut restored_user_id: Option<String> = None;
+
+        if let Some(prof) = parsed.active_profile {
+            let input = ConfirmedProfileInput {
+                id: Some(prof.id.clone()),
+                profile_name: prof.profile_name,
+                target_roles: prof.target_roles,
+                raw_story_text: prof.raw_story_text.unwrap_or_default(),
+                summary: prof.summary.unwrap_or_default(),
+                experience_level: prof.experience_level,
+                skills: prof
+                    .skills
+                    .into_iter()
+                    .map(|s| ConfirmedSkillInput {
+                        canonical_name: s.canonical_name,
+                        category: s.category,
+                        proficiency: s.proficiency,
+                        evidence: s.evidence,
+                    })
+                    .collect(),
+                keywords: prof
+                    .keywords
+                    .into_iter()
+                    .map(|k| ConfirmedKeywordInput {
+                        role_label: k.role_label,
+                        fit_type: k.fit_type,
+                        scrape_queries: k.scrape_queries,
+                        match_reason: k.match_reason,
+                        is_active: k.is_active,
+                    })
+                    .collect(),
+            };
+            let saved = self.save_profile_atomic(&input, None)?;
+            restored_user_id = Some(saved.id);
+            imported_profiles += 1;
+        } else {
+            warnings.push("Backup tidak berisi profil aktif.".into());
+        }
+
+        if let Some(mut cv) = parsed.master_cv {
+            if let Some(ref uid) = restored_user_id {
+                cv.user_id = uid.clone();
+            }
+            self.save_master_cv(&cv)?;
+        }
+
+        if let Some(prefs_json) = parsed.search_preferences_json {
+            self.set_app_setting("search_preferences", &prefs_json)?;
+            imported_preferences = true;
+        }
+
+        if let Some(ref uid) = restored_user_id {
+            for wl in parsed.watchlists {
+                if self.save_watchlist(uid, &wl.name, &wl.filter).is_ok() {
+                    imported_watchlists += 1;
+                }
+            }
+        }
+
+        Ok(VectaImportReport {
+            imported_profiles,
+            imported_watchlists,
+            imported_preferences,
+            warnings,
+        })
+    }
+
+    pub fn get_salary_benchmark(
+        &self,
+        role_filter: Option<&str>,
+        cluster_filter: Option<&str>,
+    ) -> Result<SalaryBenchmarkSummary, AppError> {
+        let clean_role = role_filter.map(str::trim).filter(|s| !s.is_empty());
+        let clean_cluster = cluster_filter.map(str::trim).filter(|s| !s.is_empty());
+
+        self.with_conn(|conn| {
+            let mut sql = String::from(
+                "SELECT location_cluster, salary_min_idr, salary_max_idr
+                 FROM jobs
+                 WHERE (salary_min_idr IS NOT NULL OR salary_max_idr IS NOT NULL)",
+            );
+            let mut params_vec: Vec<Box<dyn ToSql>> = Vec::new();
+            let mut p_idx = 1usize;
+
+            if let Some(role) = clean_role {
+                sql.push_str(&format!(" AND lower(normalized_role) = lower(?{p_idx})"));
+                params_vec.push(Box::new(role.to_string()));
+                p_idx += 1;
+            }
+            if let Some(cluster) = clean_cluster {
+                sql.push_str(&format!(" AND location_cluster = ?{p_idx}"));
+                params_vec.push(Box::new(cluster.to_string()));
+            }
+
+            let mut stmt = conn
+                .prepare(&sql)
+                .map_err(|e| db_err("Gagal menyiapkan query benchmark gaji", e))?;
+            let param_refs: Vec<&dyn ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+            let rows = stmt
+                .query_map(param_refs.as_slice(), |r| {
+                    Ok(SalarySampleRow {
+                        location_cluster: r
+                            .get::<_, Option<String>>(0)?
+                            .unwrap_or_else(|| "indonesia".into()),
+                        salary_min_idr: r.get(1)?,
+                        salary_max_idr: r.get(2)?,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca sampel gaji", e))?;
+
+            let mut samples = Vec::new();
+            for row in rows {
+                samples.push(row.map_err(|e| db_err("Gagal parsing sampel gaji", e))?);
+            }
+            Ok(compute_salary_benchmark(clean_role, clean_cluster, &samples))
+        })
+    }
+
+    pub fn get_company_snapshot(
+        &self,
+        user_id: &str,
+        company_name: &str,
+    ) -> Result<CompanySnapshot, AppError> {
+        let needle = company_name.trim();
+        self.with_conn(|conn| {
+            let mut user_stmt = conn
+                .prepare(
+                    "SELECT s.canonical_name
+                     FROM user_skills us
+                     JOIN skills s ON s.id = us.skill_id
+                     WHERE us.user_id = ?1",
+                )
+                .map_err(|e| db_err("Gagal membaca skill pengguna", e))?;
+            let user_skill_rows = user_stmt
+                .query_map([user_id], |r| r.get::<_, String>(0))
+                .map_err(|e| db_err("Gagal iterasi skill pengguna", e))?;
+            let mut user_skills = Vec::new();
+            for r in user_skill_rows {
+                user_skills.push(r.map_err(|e| db_err("Gagal parsing skill", e))?);
+            }
+
+            let mut job_stmt = conn
+                .prepare(
+                    "SELECT
+                        j.id, j.title, j.work_mode, j.salary_min_idr, j.salary_max_idr,
+                        j.quality_score, COALESCE(jm.final_score, 0.0)
+                     FROM jobs j
+                     LEFT JOIN job_matches jm ON jm.job_id = j.id AND jm.user_id = ?1
+                     WHERE lower(j.company) = lower(?2)
+                     ORDER BY j.scraped_at DESC
+                     LIMIT 60",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan snapshot perusahaan", e))?;
+            let job_rows = job_stmt
+                .query_map(params![user_id, needle], |r| {
+                    Ok((
+                        r.get::<_, String>(0)?,
+                        r.get::<_, String>(1)?,
+                        r.get::<_, String>(2)?,
+                        r.get::<_, Option<i64>>(3)?,
+                        r.get::<_, Option<i64>>(4)?,
+                        r.get::<_, f64>(5)?,
+                        r.get::<_, f64>(6)?,
+                    ))
+                })
+                .map_err(|e| db_err("Gagal membaca lowongan perusahaan", e))?;
+
+            let mut skill_stmt = conn
+                .prepare(
+                    "SELECT s.canonical_name
+                     FROM job_skills js
+                     JOIN skills s ON s.id = js.skill_id
+                     WHERE js.job_id = ?1",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan skill perusahaan", e))?;
+
+            let mut records = Vec::new();
+            for row in job_rows {
+                let (jid, title, mode_str, smin, smax, qscore, fscore) =
+                    row.map_err(|e| db_err("Gagal parsing lowongan perusahaan", e))?;
+                let req_rows = skill_stmt
+                    .query_map([&jid], |r| r.get::<_, String>(0))
+                    .map_err(|e| db_err("Gagal membaca skill lowongan", e))?;
+                let mut required_skills = Vec::new();
+                for sr in req_rows {
+                    required_skills.push(sr.map_err(|e| db_err("Gagal parsing skill", e))?);
+                }
+                records.push(CompanyJobRow {
+                    title,
+                    work_mode: WorkMode::from_db_str(&mode_str),
+                    salary_min_idr: smin,
+                    salary_max_idr: smax,
+                    quality_score: qscore,
+                    final_score: fscore,
+                    required_skills,
+                });
+            }
+
+            Ok(build_company_snapshot(needle, &records, &user_skills))
+        })
+    }
+
+    pub fn list_user_profiles(&self) -> Result<Vec<ProfileSummaryItem>, AppError> {
+        self.with_conn(|conn| {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT
+                        p.id, p.profile_name, p.target_roles_json, p.experience_level,
+                        p.is_active, p.updated_at, COUNT(us.skill_id) AS skill_count
+                     FROM user_profiles p
+                     LEFT JOIN user_skills us ON us.user_id = p.id
+                     GROUP BY p.id
+                     ORDER BY p.is_active DESC, p.updated_at DESC",
+                )
+                .map_err(|e| db_err("Gagal menyiapkan daftar profil", e))?;
+
+            let rows = stmt
+                .query_map([], |r| {
+                    let roles_json: String = r.get(2)?;
+                    let target_roles: Vec<String> =
+                        serde_json::from_str(&roles_json).unwrap_or_default();
+                    let lvl_str: String = r.get(3)?;
+                    Ok(ProfileSummaryItem {
+                        id: r.get(0)?,
+                        profile_name: r.get(1)?,
+                        target_roles,
+                        experience_level: ExperienceLevel::from_db_str(&lvl_str),
+                        skill_count: r.get(6)?,
+                        is_active: r.get::<_, i64>(4)? != 0,
+                        updated_at: r.get(5)?,
+                    })
+                })
+                .map_err(|e| db_err("Gagal membaca daftar profil", e))?;
+
+            let mut out = Vec::new();
+            for row in rows {
+                out.push(row.map_err(|e| db_err("Gagal parsing profil summary", e))?);
+            }
+            Ok(out)
+        })
+    }
+
+    pub fn switch_active_profile(&self, profile_id: &str) -> Result<UserProfileDetail, AppError> {
+        self.with_tx(|tx| {
+            let exists: bool = tx
+                .query_row(
+                    "SELECT 1 FROM user_profiles WHERE id = ?1",
+                    [profile_id],
+                    |_| Ok(true),
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal memeriksa profil tujuan", e))?
+                .unwrap_or(false);
+            if !exists {
+                return Err(AppError::validation_error(format!(
+                    "Profil '{profile_id}' tidak ditemukan."
+                )));
+            }
+
+            tx.execute("UPDATE user_profiles SET is_active = 0", [])
+                .map_err(|e| db_err("Gagal menonaktifkan profil lain", e))?;
+            tx.execute(
+                "UPDATE user_profiles SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?1",
+                [profile_id],
+            )
+            .map_err(|e| db_err("Gagal mengaktifkan profil terpilih", e))?;
+
+            load_profile_by_id_conn(tx, profile_id)?
+                .ok_or_else(|| AppError::db_error("Profil tidak ditemukan setelah diaktifkan"))
+        })
+    }
+
+    pub fn delete_user_profile(&self, profile_id: &str) -> Result<UserProfileDetail, AppError> {
+        self.with_tx(|tx| {
+            let total: i64 = tx
+                .query_row("SELECT COUNT(*) FROM user_profiles", [], |r| r.get(0))
+                .map_err(|e| db_err("Gagal menghitung jumlah profil", e))?;
+            if total <= 1 {
+                return Err(AppError::validation_error(
+                    "Minimal harus tersisa satu profil aktif.",
+                ));
+            }
+
+            let was_active: Option<i64> = tx
+                .query_row(
+                    "SELECT is_active FROM user_profiles WHERE id = ?1",
+                    [profile_id],
+                    |r| r.get(0),
+                )
+                .optional()
+                .map_err(|e| db_err("Gagal memeriksa status profil", e))?;
+
+            let Some(active_flag) = was_active else {
+                return Err(AppError::validation_error(format!(
+                    "Profil '{profile_id}' tidak ditemukan."
+                )));
+            };
+
+            tx.execute("DELETE FROM user_profiles WHERE id = ?1", [profile_id])
+                .map_err(|e| db_err("Gagal menghapus profil", e))?;
+
+            let next_active_id: String = if active_flag != 0 {
+                let fallback_id: String = tx
+                    .query_row(
+                        "SELECT id FROM user_profiles ORDER BY updated_at DESC LIMIT 1",
+                        [],
+                        |r| r.get(0),
+                    )
+                    .map_err(|e| db_err("Gagal mencari profil pengganti", e))?;
+                tx.execute(
+                    "UPDATE user_profiles SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?1",
+                    [&fallback_id],
+                )
+                .map_err(|e| db_err("Gagal mengaktifkan profil pengganti", e))?;
+                fallback_id
+            } else {
+                tx.query_row(
+                    "SELECT id FROM user_profiles ORDER BY is_active DESC, updated_at DESC LIMIT 1",
+                    [],
+                    |r| r.get(0),
+                )
+                .map_err(|e| db_err("Gagal membaca profil aktif tersisa", e))?
+            };
+
+            load_profile_by_id_conn(tx, &next_active_id)?
+                .ok_or_else(|| AppError::db_error("Profil pengganti gagal dimuat"))
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2610,7 +3402,7 @@ mod tests {
             .expect("query pragmas");
 
         assert_eq!(fk, 1);
-        assert_eq!(mig_count, 4);
+        assert_eq!(mig_count, 5);
     }
 
     #[test]
@@ -3051,5 +3843,177 @@ mod tests {
             .expect("search");
         assert_eq!(found.len(), 1);
         assert_eq!(found[0].job_id, "j-pct");
+    }
+
+    #[test]
+    fn phase_b_multi_filters_watchlists_simulator_and_backup_roundtrip() {
+        let db = Database::open_in_memory().expect("db");
+        let profile = db
+            .save_profile_atomic(&sample_profile_input(), None)
+            .expect("profile");
+
+        let mut j1 = sample_job("job-jkt", "jkt-1", "Backend Engineer");
+        j1.location = Some("Jakarta Selatan".into());
+        j1.work_mode = WorkMode::Hybrid;
+        j1.salary_text = Some("Rp 10.000.000 - Rp 15.000.000".into());
+        let mut j2 = sample_job("job-bdg", "bdg-1", "Backend Engineer");
+        j2.title = "Management Trainee Engineering 2026".into();
+        j2.location = Some("Bandung".into());
+        j2.work_mode = WorkMode::Onsite;
+        j2.salary_text = None;
+        j2.raw_description = "Program MT unggulan. Requires Docker and PostgreSQL.".into();
+
+        db.insert_job_with_skills(
+            &j1,
+            &[ExtractedJobSkill {
+                canonical_name: "Rust".into(),
+                category: SkillCategory::CoreHard,
+                requirement_type: RequirementType::Mandatory,
+                matched_aliases: vec![],
+            }],
+        )
+        .expect("j1");
+        db.insert_job_with_skills(
+            &j2,
+            &[ExtractedJobSkill {
+                canonical_name: "Docker".into(),
+                category: SkillCategory::ToolsTech,
+                requirement_type: RequirementType::Mandatory,
+                matched_aliases: vec![],
+            }],
+        )
+        .expect("j2");
+
+        db.upsert_job_matches(&[
+            JobMatchUpsert {
+                user_id: profile.id.clone(),
+                job_id: "job-jkt".into(),
+                vector_score: 0.70,
+                skill_overlap_score: 1.0,
+                level_score: 1.0,
+                final_score: 0.88,
+                matched_skills_json: "[]".into(),
+                missing_skills_json: "[]".into(),
+            },
+            JobMatchUpsert {
+                user_id: profile.id.clone(),
+                job_id: "job-bdg".into(),
+                vector_score: 0.60,
+                skill_overlap_score: 0.0,
+                level_score: 1.0,
+                final_score: 0.48,
+                matched_skills_json: "[]".into(),
+                missing_skills_json: "[]".into(),
+            },
+        ])
+        .expect("matches");
+
+        // Multi-filter on location_clusters + salary_only
+        let filtered = db
+            .list_ranked_jobs(
+                &profile.id,
+                &JobFilterInput {
+                    location_clusters: Some(vec!["jabodetabek".into()]),
+                    salary_only: Some(true),
+                    ..Default::default()
+                },
+            )
+            .expect("filtered");
+        assert_eq!(filtered.len(), 1);
+        assert_eq!(filtered[0].job_id, "job-jkt");
+        assert_eq!(filtered[0].salary_min_idr, Some(10_000_000));
+        assert_eq!(filtered[0].salary_max_idr, Some(15_000_000));
+
+        // Watchlist save/list/delete
+        let wl = db
+            .save_watchlist(
+                &profile.id,
+                "JKT Bergaji",
+                &JobFilterInput {
+                    location_clusters: Some(vec!["jabodetabek".into()]),
+                    salary_only: Some(true),
+                    ..Default::default()
+                },
+            )
+            .expect("save wl");
+        assert_eq!(db.list_saved_watchlists(&profile.id).expect("list wl").len(), 1);
+
+        // What-If simulator on Docker skill
+        let docker_id: i64 = db
+            .with_conn(|c| c.query_row("SELECT id FROM skills WHERE canonical_name='Docker'", [], |r| r.get(0)).map_err(|e| AppError::db_error(e.to_string())))
+            .expect("docker id");
+        let sim = db
+            .simulate_skill_impact(&profile.id, "Backend Engineer", &[docker_id])
+            .expect("sim");
+        assert_eq!(sim.len(), 1);
+        assert!(sim[0].affected_jobs_count >= 1);
+        assert!(sim[0].avg_score_delta > 10.0);
+
+        // Portable .vecta backup roundtrip into fresh DB
+        let backup = db.export_backup_json().expect("export");
+        assert_eq!(backup.watchlists_count, 1);
+        let db2 = Database::open_in_memory().expect("db2");
+        let rep = db2.import_backup_json(&backup.payload_json).expect("import");
+        assert_eq!(rep.imported_profiles, 1);
+        assert_eq!(rep.imported_watchlists, 1);
+        assert!(db2.get_active_profile().expect("p2").is_some());
+
+        db.delete_watchlist(&wl.id).expect("del wl");
+        assert!(db.list_saved_watchlists(&profile.id).expect("empty wl").is_empty());
+    }
+
+    #[test]
+    fn analytics_and_multi_profile_crud_work_atomically() {
+        let db = Database::open_in_memory().expect("db");
+        let mut p1 = sample_profile_input();
+        p1.id = Some("prof-1".into());
+        p1.profile_name = "Jalur IT".into();
+        let saved1 = db.save_profile_atomic(&p1, None).expect("save p1");
+
+        let mut p2 = sample_profile_input();
+        p2.id = Some("prof-2".into());
+        p2.profile_name = "Jalur Pajak".into();
+        p2.target_roles = vec!["Akuntan Pajak".into()];
+        let saved2 = db.save_profile_atomic(&p2, None).expect("save p2");
+
+        // p2 became active upon save; verify both appear and switch back to p1
+        let list = db.list_user_profiles().expect("list profiles");
+        assert_eq!(list.len(), 2);
+        assert!(list.iter().any(|x| x.id == saved2.id && x.is_active));
+
+        let switched = db.switch_active_profile(&saved1.id).expect("switch to p1");
+        assert_eq!(switched.id, saved1.id);
+        assert!(switched.is_active);
+
+        let after_del = db.delete_user_profile(&saved1.id).expect("delete active p1");
+        assert_eq!(after_del.id, saved2.id);
+        assert!(after_del.is_active);
+
+        // Cannot delete the last remaining profile
+        let err = db
+            .delete_user_profile(&saved2.id)
+            .expect_err("must reject deleting final profile");
+        assert_eq!(err.code, crate::error::ErrorCode::ValidationError);
+
+        // Seed 2 salaried jobs & test salary benchmark + company snapshot
+        let mut j1 = sample_job("jb-1", "ext-b1", "Backend Engineer");
+        j1.salary_text = Some("Rp 10 jt - 14 jt".into());
+        db.insert_job_with_skills(&j1, &[]).expect("ins j1");
+        let mut j2 = sample_job("jb-2", "ext-b2", "Backend Engineer");
+        j2.salary_text = Some("Rp 12 jt - 16 jt".into());
+        db.insert_job_with_skills(&j2, &[]).expect("ins j2");
+
+        let bench = db
+            .get_salary_benchmark(Some("Backend Engineer"), None)
+            .expect("bench");
+        assert_eq!(bench.sample_count, 2);
+        assert!(bench.is_small_sample);
+        assert_eq!(bench.min_idr, Some(12_000_000));
+
+        let snap = db
+            .get_company_snapshot(&saved2.id, "PT Vecta")
+            .expect("snapshot");
+        assert_eq!(snap.total_jobs, 2);
+        assert_eq!(snap.hybrid_count, 2);
     }
 }

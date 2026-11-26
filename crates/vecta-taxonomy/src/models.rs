@@ -47,3 +47,19 @@ pub struct ExtractionResult {
     pub normalized_role: String,
     pub skills: Vec<ExtractedSkill>,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProdiRoleCatalogEntry {
+    pub id: String,
+    pub prodi_label: String,
+    pub domain: String,
+    pub role_title: String,
+    #[serde(default)]
+    pub mandatory_skills: Vec<String>,
+    #[serde(default)]
+    pub preferred_skills: Vec<String>,
+    #[serde(default)]
+    pub certifications: Vec<String>,
+    #[serde(default)]
+    pub scrape_queries: Vec<String>,
+}

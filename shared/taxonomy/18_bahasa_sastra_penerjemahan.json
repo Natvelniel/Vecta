@@ -1,0 +1,241 @@
+[
+  {
+    "id": "lng.cat_tools",
+    "canonical_name": "CAT Tools & Translation Memory (Trados / MemoQ)",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "tools_tech",
+    "aliases": [
+      "SDL Trados",
+      "MemoQ",
+      "Smartcat",
+      "Phrase TMS",
+      "Crowdin"
+    ]
+  },
+  {
+    "id": "lng.localization",
+    "canonical_name": "Software & Game Localization (L10n)",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Localization",
+      "LQA Testing",
+      "Transcreation",
+      "UX Microcopy"
+    ]
+  },
+  {
+    "id": "lng.interpreter",
+    "canonical_name": "Simultaneous & Consecutive Interpreting",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Juru Bahasa",
+      "Interpreter Mandarin",
+      "Interpreter Jepang",
+      "HPI Penerjemah Tersumpah"
+    ]
+  },
+  {
+    "id": "lng.subtitling",
+    "canonical_name": "Subtitling, Dubbing & Audiovisual Translation",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Subtitle Edit",
+      "Aegisub",
+      "Closed Captioning",
+      "Dubbing Script"
+    ]
+  },
+  {
+    "id": "lng.editorial_proof",
+    "canonical_name": "Penyuntingan Bahasa & Proofreading (EYD V)",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Copy Editing",
+      "Proofreading",
+      "EYD V",
+      "KBBI",
+      "Academic Editing"
+    ]
+  },
+  {
+    "id": "lng.technical_writing",
+    "canonical_name": "Technical Writing & Documentation",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Technical Writer",
+      "API Documentation",
+      "Manual Pengguna",
+      "Markdown Docs"
+    ]
+  },
+  {
+    "id": "lng.bipa",
+    "canonical_name": "Pengajaran Bahasa Indonesia (BIPA / TESOL)",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "domain",
+    "aliases": [
+      "BIPA",
+      "TESOL",
+      "CELTA",
+      "IELTS Instructor",
+      "TOEFL Trainer"
+    ]
+  },
+  {
+    "id": "lng.sworn_trans",
+    "canonical_name": "Penerjemahan Tersumpah & Dokumen Legal",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Sworn Translator",
+      "Terjemahan Akta & Kontrak"
+    ],
+    "parent_id": "lng.interpreter"
+  },
+  {
+    "id": "lng.mtpe",
+    "canonical_name": "Machine Translation Post-Editing (MTPE)",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "tools_tech",
+    "aliases": [
+      "MTPE",
+      "Linguistic QA",
+      "Glossary Management"
+    ],
+    "parent_id": "lng.cat_tools"
+  },
+  {
+    "id": "lng.copy_transcreate",
+    "canonical_name": "Transcreation Iklan & Brand Multibahasa",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Creative Translation",
+      "Tagline Adaptation",
+      "Brand Voice Localization"
+    ],
+    "parent_id": "lng.localization"
+  },
+  {
+    "id": "lng.sastrapub",
+    "canonical_name": "Penulisan Fiksi, Naskah Buku & Editorial Penerbit",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "domain",
+    "aliases": [
+      "Acquisition Editor",
+      "ISBN & Penerbitan",
+      "Book Editing"
+    ],
+    "parent_id": "lng.editorial_proof"
+  },
+  {
+    "id": "lng.linguistics",
+    "canonical_name": "Korpus Linguistik & Data Anotasi Bahasa AI",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core_hard",
+    "aliases": [
+      "Linguistic Annotation",
+      "NLP Data Labeling",
+      "Phonetic Transcription"
+    ],
+    "parent_id": "lng.localization"
+  },
+  {
+    "id": "lng.bahasa_perancis_de",
+    "canonical_name": "Bahasa Asing Eropa (Prancis / Jerman / Spanyol)",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "soft_skill",
+    "aliases": [
+      "DELF / DALF",
+      "Goethe Zertifikat",
+      "DELE"
+    ]
+  },
+  {
+    "id": "lng.voice_talent",
+    "canonical_name": "Voice Over (VO) & Sulih Suara Multibahasa",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "domain",
+    "aliases": [
+      "Voice Over Artist",
+      "Commercial Narration",
+      "Lip-Sync Dubbing"
+    ],
+    "parent_id": "lng.subtitling"
+  },
+  {
+    "id": "lng.toeic_corp",
+    "canonical_name": "Pelatihan & Penilaian Bahasa Korporat",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "domain",
+    "aliases": [
+      "Corporate Language Audit",
+      "TOEIC Prep"
+    ],
+    "parent_id": "lng.bipa"
+  },
+  {
+    "id": "lang.subtitle_loc",
+    "canonical_name": "Subtitling, Dubbing & Media Localization",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "tool",
+    "aliases": [
+      "subtitling",
+      "aegisub",
+      "localization",
+      "media translation",
+      "transcreation"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "lang.simultaneous_int",
+    "canonical_name": "Consecutive & Simultaneous Interpreting",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core",
+    "aliases": [
+      "interpreter",
+      "penerjemah lisan",
+      "sworn translator",
+      "penerjemah tersumpah",
+      "hpi"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "lang.bipa_teach",
+    "canonical_name": "Pengajaran BIPA & Penyuntingan EYD V",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "domain",
+    "aliases": [
+      "bipa",
+      "ukbi",
+      "tata bahasa indonesia",
+      "penyunting bahasa",
+      "puebi eyd"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "lang.technical_writer",
+    "canonical_name": "Technical Documentation & SOP Writing",
+    "domain": "bahasa_sastra_penerjemahan",
+    "category": "core",
+    "aliases": [
+      "technical writer",
+      "api documentation",
+      "sop writer",
+      "knowledge base"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  }
+]

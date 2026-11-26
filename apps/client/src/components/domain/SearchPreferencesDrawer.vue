@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from "vue";
-import type { SearchPreferences } from "@/lib/bindings";
+import { computed, reactive, ref, watch } from "vue";
+import type { SearchPreferences_Serialize } from "@/lib/bindings";
 import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VDialog from "@/components/ui/VDialog.vue";
@@ -9,16 +9,26 @@ import VSwitch from "@/components/ui/VSwitch.vue";
 
 const props = defineProps<{
   open: boolean;
-  preferences: SearchPreferences;
+  preferences: SearchPreferences_Serialize;
   saving?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "save", prefs: SearchPreferences, runImmediately: boolean): void;
+  (e: "save", prefs: SearchPreferences_Serialize, runImmediately: boolean): void;
 }>();
 
-const QUICK_CITIES = ["Indonesia", "Jakarta", "Bandung", "Surabaya", "Yogyakarta", "Remote"];
+const QUICK_CITIES = [
+  "Indonesia",
+  "Jakarta",
+  "Bandung",
+  "Surabaya",
+  "Yogyakarta",
+  "Bali",
+  "Medan",
+  "Makassar",
+  "Remote",
+];
 const PORTALS = [
   { id: "jobstreet", label: "JobStreet", hint: "Multi-halaman" },
   { id: "linkedin", label: "LinkedIn", hint: "Guest" },
@@ -28,9 +38,10 @@ const PORTALS = [
   { id: "glints", label: "Glints", hint: "Worker Opsional" },
 ];
 
-const draft = reactive<SearchPreferences>({
+const draft = reactive<SearchPreferences_Serialize>({
   location: "Indonesia",
-  sources: ["jobstreet", "linkedin", "indeed"],
+  locations: ["Indonesia"],
+  sources: ["jobstreet", "linkedin", "kalibrr", "dealls"],
   limit_per_query: 25,
   max_pages: 2,
   posted_within_days: 14,
@@ -41,13 +52,19 @@ const draft = reactive<SearchPreferences>({
   ai_rpm_limit: 10,
 });
 
+const customCityInput = ref("");
 const customQueriesText = reactive({ value: "" });
 
 watch(
   () => [props.open, props.preferences] as const,
   ([isOpen, prefs]) => {
     if (isOpen && prefs) {
-      draft.location = prefs.location;
+      const locs =
+        prefs.locations && prefs.locations.length > 0
+          ? [...prefs.locations]
+          : [prefs.location || "Indonesia"];
+      draft.location = locs[0];
+      draft.locations = locs;
       draft.sources = [...prefs.sources];
       draft.limit_per_query = prefs.limit_per_query;
       draft.max_pages = prefs.max_pages;
@@ -62,6 +79,28 @@ watch(
   },
   { immediate: true },
 );
+
+function toggleCity(city: string) {
+  const exists = draft.locations.some((c) => c.toLowerCase() === city.toLowerCase());
+  if (exists) {
+    if (draft.locations.length === 1) return;
+    draft.locations = draft.locations.filter((c) => c.toLowerCase() !== city.toLowerCase());
+  } else {
+    if (draft.locations.length >= 5) return;
+    draft.locations = [...draft.locations, city];
+  }
+  draft.location = draft.locations[0] ?? "Indonesia";
+}
+
+function addCustomCity() {
+  const clean = customCityInput.value.trim();
+  if (!clean || draft.locations.length >= 5) return;
+  if (!draft.locations.some((c) => c.toLowerCase() === clean.toLowerCase())) {
+    draft.locations = [...draft.locations, clean];
+    draft.location = draft.locations[0];
+  }
+  customCityInput.value = "";
+}
 
 function togglePortal(id: string) {
   if (draft.sources.includes(id)) {
@@ -78,14 +117,16 @@ const estimatedApiCalls = computed(() => {
   return batches * 2;
 });
 
-function buildPayload(): SearchPreferences {
+function buildPayload(): SearchPreferences_Serialize {
   const parsedQueries = customQueriesText.value
     .split(/[,\n]/)
     .map((q) => q.trim())
     .filter((q) => q.length > 0)
     .slice(0, 15);
+  const locs = draft.locations.length > 0 ? draft.locations : ["Indonesia"];
   return {
-    location: draft.location.trim() || "Indonesia",
+    location: locs[0],
+    locations: [...locs],
     sources: [...draft.sources],
     limit_per_query: draft.limit_per_query,
     max_pages: draft.max_pages,
@@ -100,29 +141,40 @@ function buildPayload(): SearchPreferences {
 </script>
 
 <template>
-  <VDialog :open="open" title="Atur Pencarian & Hemat Token" @close="emit('close')">
+  <VDialog :open="open" title="Atur Pencarian Multi-Kota & Hemat Token" @close="emit('close')">
     <form class="v-pref-form" @submit.prevent="emit('save', buildPayload(), true)">
-      <!-- Location -->
+      <!-- Multi-City Location Picker -->
       <div class="v-pref-group">
-        <label for="pref-location" class="v-pref-label">Kota / Lokasi Target</label>
-        <input
-          id="pref-location"
-          v-model="draft.location"
-          type="text"
-          class="v-pref-input"
-          placeholder="Contoh: Bandung, Jakarta, atau Indonesia"
-        />
+        <label for="pref-location" class="v-pref-label">
+          Kota / Lokasi Target (pilih hingga 5 lokasi untuk scraping serentak)
+        </label>
         <div class="v-city-chips">
           <button
             v-for="city in QUICK_CITIES"
             :key="city"
             type="button"
             class="v-chip-btn"
-            :aria-pressed="draft.location.toLowerCase() === city.toLowerCase()"
-            @click="draft.location = city"
+            :aria-pressed="draft.locations.some((c) => c.toLowerCase() === city.toLowerCase())"
+            @click="toggleCity(city)"
           >
             {{ city }}
           </button>
+        </div>
+        <div class="v-city-add">
+          <input
+            id="pref-location"
+            v-model="customCityInput"
+            type="text"
+            class="v-pref-input"
+            placeholder="Tambah kota lain (mis. Semarang, Balikpapan, Batam)..."
+            @keydown.enter.prevent="addCustomCity"
+          />
+          <VButton type="button" variant="secondary" size="compact" @click="addCustomCity">
+            Tambah
+          </VButton>
+        </div>
+        <div class="t-meta">
+          Aktif ({{ draft.locations.length }}/5): {{ draft.locations.join(" · ") }}
         </div>
       </div>
 
@@ -311,20 +363,27 @@ function buildPayload(): SearchPreferences {
   gap: 6px;
   margin-top: 2px;
 }
+.v-city-add {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
 .v-chip-btn {
-  height: 28px;
-  padding: 0 10px;
+  height: 30px;
+  padding: 0 11px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-default);
   background: var(--bg-primary);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
 }
 .v-chip-btn[aria-pressed="true"] {
-  background: var(--brand-soft);
-  border-color: var(--brand-border);
-  color: var(--text-primary);
+  background: var(--filter-active-bg);
+  border-color: var(--filter-active-border);
+  color: var(--filter-active-fg);
+  font-weight: 600;
 }
 .v-portal-grid {
   display: grid;

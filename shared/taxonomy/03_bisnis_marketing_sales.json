@@ -1,16 +1,860 @@
 [
-  {"id":"mkt.digital_marketing","canonical_name":"Digital Marketing","domain":"bisnis_marketing_sales","category":"domain","aliases":["Pemasaran Digital","Online Marketing","Performance Marketing","Growth Marketing"]},
-  {"id":"mkt.seo","canonical_name":"SEO","domain":"bisnis_marketing_sales","category":"core_hard","parent_id":"mkt.digital_marketing","aliases":["Search Engine Optimization","On-Page SEO","Off-Page SEO","Ahrefs","SEMrush"]},
-  {"id":"mkt.sem","canonical_name":"SEM & Google Ads","domain":"bisnis_marketing_sales","category":"tools_tech","parent_id":"mkt.digital_marketing","aliases":["SEM","Google Ads","Google AdWords","Google Analytics","GA4"]},
-  {"id":"mkt.meta_ads","canonical_name":"Meta Ads & TikTok Ads","domain":"bisnis_marketing_sales","category":"tools_tech","parent_id":"mkt.digital_marketing","aliases":["Meta Ads","Facebook Ads","FB Ads","Instagram Ads","IG Ads","TikTok Ads","TikTok Shop","Shopee Ads"]},
-  {"id":"mkt.social_media","canonical_name":"Social Media Management","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["Social Media Marketing","Social Media Specialist","Manajemen Media Sosial","Content Calendar","Community Management"]},
-  {"id":"mkt.copywriting","canonical_name":"Copywriting","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["Content Writing","Penulisan Konten","UX Writing","Scriptwriting"]},
-  {"id":"mkt.brand_management","canonical_name":"Brand Management","domain":"bisnis_marketing_sales","category":"domain","aliases":["Brand Strategy","Marketing Campaign","Campaign Management","Brand Activation"]},
-  {"id":"mkt.ecommerce","canonical_name":"E-Commerce & Marketplace","domain":"bisnis_marketing_sales","category":"domain","aliases":["Marketplace Management","Shopee","Tokopedia","Lazada","Live Streaming Commerce","E-Commerce Operations"]},
-  {"id":"mkt.market_research","canonical_name":"Riset Pasar","domain":"bisnis_marketing_sales","category":"domain","aliases":["Market Research","Consumer Insight","Competitor Analysis","Riset Pemasaran"]},
-  {"id":"mkt.b2b_sales","canonical_name":"B2B Sales & Akuisisi Klien","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["B2B Sales","Sales Executive","Account Executive","Lead Generation","Cold Calling","Canvassing","Penjualan"]},
-  {"id":"mkt.business_dev","canonical_name":"Business Development","domain":"bisnis_marketing_sales","category":"domain","aliases":["Pengembangan Bisnis","Partnership","Kemitraan Strategis","Pitching"]},
-  {"id":"mkt.account_mgmt","canonical_name":"Account Management","domain":"bisnis_marketing_sales","category":"core_hard","aliases":["Key Account Management","Client Relationship","Customer Retention","After Sales"]},
-  {"id":"mkt.crm","canonical_name":"CRM","domain":"bisnis_marketing_sales","category":"tools_tech","aliases":["Salesforce","HubSpot","Zoho CRM","Customer Relationship Management"],"requires_domain_context":true},
-  {"id":"mkt.merchandiser","canonical_name":"Merchandising & Retail","domain":"bisnis_marketing_sales","category":"domain","aliases":["Visual Merchandising","Retail Management","Store Operations","Trade Marketing"]}
+  {
+    "id": "mkt.digital_marketing",
+    "canonical_name": "Digital Marketing",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Pemasaran Digital",
+      "Online Marketing",
+      "Performance Marketing",
+      "Growth Marketing"
+    ]
+  },
+  {
+    "id": "mkt.seo",
+    "canonical_name": "SEO",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "parent_id": "mkt.digital_marketing",
+    "aliases": [
+      "Search Engine Optimization",
+      "On-Page SEO",
+      "Off-Page SEO",
+      "Ahrefs",
+      "SEMrush"
+    ]
+  },
+  {
+    "id": "mkt.sem",
+    "canonical_name": "SEM & Google Ads",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "parent_id": "mkt.digital_marketing",
+    "aliases": [
+      "SEM",
+      "Google Ads",
+      "Google AdWords",
+      "Google Analytics",
+      "GA4"
+    ]
+  },
+  {
+    "id": "mkt.meta_ads",
+    "canonical_name": "Meta Ads & TikTok Ads",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "parent_id": "mkt.digital_marketing",
+    "aliases": [
+      "Meta Ads",
+      "Facebook Ads",
+      "FB Ads",
+      "Instagram Ads",
+      "IG Ads",
+      "TikTok Ads",
+      "TikTok Shop",
+      "Shopee Ads"
+    ]
+  },
+  {
+    "id": "mkt.social_media",
+    "canonical_name": "Social Media Management",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Social Media Marketing",
+      "Social Media Specialist",
+      "Manajemen Media Sosial",
+      "Content Calendar",
+      "Community Management"
+    ]
+  },
+  {
+    "id": "mkt.copywriting",
+    "canonical_name": "Copywriting",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Content Writing",
+      "Penulisan Konten",
+      "UX Writing",
+      "Scriptwriting"
+    ]
+  },
+  {
+    "id": "mkt.brand_management",
+    "canonical_name": "Brand Management",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Brand Strategy",
+      "Marketing Campaign",
+      "Campaign Management",
+      "Brand Activation"
+    ]
+  },
+  {
+    "id": "mkt.ecommerce",
+    "canonical_name": "E-Commerce & Marketplace",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Marketplace Management",
+      "Shopee",
+      "Tokopedia",
+      "Lazada",
+      "Live Streaming Commerce",
+      "E-Commerce Operations"
+    ]
+  },
+  {
+    "id": "mkt.market_research",
+    "canonical_name": "Riset Pasar",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Market Research",
+      "Consumer Insight",
+      "Competitor Analysis",
+      "Riset Pemasaran"
+    ]
+  },
+  {
+    "id": "mkt.b2b_sales",
+    "canonical_name": "B2B Sales & Akuisisi Klien",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "B2B Sales",
+      "Sales Executive",
+      "Account Executive",
+      "Lead Generation",
+      "Cold Calling",
+      "Canvassing",
+      "Penjualan"
+    ]
+  },
+  {
+    "id": "mkt.business_dev",
+    "canonical_name": "Business Development",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Pengembangan Bisnis",
+      "Partnership",
+      "Kemitraan Strategis",
+      "Pitching"
+    ]
+  },
+  {
+    "id": "mkt.account_mgmt",
+    "canonical_name": "Account Management",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Key Account Management",
+      "Client Relationship",
+      "Customer Retention",
+      "After Sales"
+    ]
+  },
+  {
+    "id": "mkt.crm",
+    "canonical_name": "CRM",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "aliases": [
+      "Salesforce",
+      "HubSpot",
+      "Zoho CRM",
+      "Customer Relationship Management"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "mkt.merchandiser",
+    "canonical_name": "Merchandising & Retail",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Visual Merchandising",
+      "Retail Management",
+      "Store Operations",
+      "Trade Marketing"
+    ]
+  },
+  {
+    "id": "mkt.trade_mkt",
+    "canonical_name": "Trade Marketing & Merchandising",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Trade Marketing",
+      "Planogram",
+      "POSM",
+      "Modern Trade",
+      "General Trade"
+    ]
+  },
+  {
+    "id": "mkt.key_account",
+    "canonical_name": "Key Account Management",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Key Account Manager",
+      "KAM",
+      "Distributor Management",
+      "Retail Partnership"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "mkt.kol_influencer",
+    "canonical_name": "KOL & Influencer Marketing",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "KOL Management",
+      "Affiliate Marketing",
+      "TikTok Affiliate",
+      "Shopee Live"
+    ]
+  },
+  {
+    "id": "mkt.marketplace_ops",
+    "canonical_name": "E-Commerce & Marketplace Management",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "aliases": [
+      "Shopee Seller",
+      "Tokopedia Seller",
+      "TikTok Shop",
+      "Lazada Seller",
+      "Marketplace Ads"
+    ]
+  },
+  {
+    "id": "mkt.ga4",
+    "canonical_name": "Google Analytics 4 & Attribution",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "aliases": [
+      "GA4",
+      "Google Tag Manager",
+      "UTM Tracking",
+      "Conversion Rate Optimization",
+      "CRO"
+    ],
+    "requires_domain_context": true
+  },
+  {
+    "id": "mkt.crm_hubspot",
+    "canonical_name": "CRM Automation (HubSpot / Salesforce)",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "aliases": [
+      "HubSpot",
+      "Salesforce CRM",
+      "Zoho CRM",
+      "Mailchimp",
+      "Email Marketing",
+      "Klaviyo"
+    ]
+  },
+  {
+    "id": "mkt.growth_hacking",
+    "canonical_name": "Growth Marketing & Retention",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Customer Retention",
+      "Cohort Analysis",
+      "Lifecycle Marketing",
+      "Loyalty Program"
+    ]
+  },
+  {
+    "id": "mkt.event_activation",
+    "canonical_name": "Event Marketing & Sponsorship",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Offline Activation",
+      "Booth Exhibition",
+      "Sponsorship Proposal"
+    ]
+  },
+  {
+    "id": "mkt.saas_sales",
+    "canonical_name": "SaaS & Solution Selling",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Product Demo",
+      "ARR / MRR Growth",
+      "Churn Reduction"
+    ]
+  },
+  {
+    "id": "mkt.pricing_strategy",
+    "canonical_name": "Pricing & Promotion Strategy",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Margin Analysis",
+      "Promo Bundling",
+      "Revenue Growth Management"
+    ]
+  },
+  {
+    "id": "mkt.field_sales",
+    "canonical_name": "Field Sales & Canvassing Area",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Territory Sales",
+      "Area Sales Supervisor",
+      "Kunjungan Outlet"
+    ]
+  },
+  {
+    "id": "mkt.public_speaking_pitch",
+    "canonical_name": "Sales Pitching & Presentasi Klien",
+    "domain": "bisnis_marketing_sales",
+    "category": "soft_skill",
+    "aliases": [
+      "Client Pitching",
+      "Presentation Deck"
+    ]
+  },
+  {
+    "id": "mkt.seo_tech",
+    "canonical_name": "Technical SEO & Keyword Research",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "parent_id": "mkt.seo",
+    "aliases": [
+      "Ahrefs",
+      "SEMrush",
+      "Google Search Console",
+      "Screaming Frog"
+    ]
+  },
+  {
+    "id": "mkt.content_cal",
+    "canonical_name": "Editorial & Content Calendar",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "parent_id": "mkt.social_media",
+    "aliases": [
+      "Content Strategy",
+      "Social Listening",
+      "Community Engagement"
+    ]
+  },
+  {
+    "id": "mkt.crm_lifecycle",
+    "canonical_name": "Customer Retention & Winback",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "parent_id": "mkt.crm",
+    "aliases": [
+      "WhatsApp Broadcast CRM",
+      "Qontak",
+      "Loyalty Tiering"
+    ]
+  },
+  {
+    "id": "mkt.programmatic",
+    "canonical_name": "Programmatic Ads & DV360",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "aliases": [
+      "Display & Video 360",
+      "The Trade Desk",
+      "DSP Media Buying"
+    ],
+    "parent_id": "mkt.digital_marketing"
+  },
+  {
+    "id": "mkt.aso_mobile",
+    "canonical_name": "App Store Optimization (ASO) & Mobile UA",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "AppsFlyer",
+      "Adjust MMP",
+      "CPI / ROAS Mobile"
+    ],
+    "parent_id": "mkt.digital_marketing"
+  },
+  {
+    "id": "mkt.seo_local",
+    "canonical_name": "Local SEO & Google Business Profile",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Google Maps SEO",
+      "Schema Markup",
+      "On-Page SEO"
+    ],
+    "parent_id": "mkt.seo"
+  },
+  {
+    "id": "mkt.crm_wa",
+    "canonical_name": "WhatsApp Business API & Chatbot Funnel",
+    "domain": "bisnis_marketing_sales",
+    "category": "tools_tech",
+    "aliases": [
+      "WABA",
+      "Mekari Qontak",
+      "SleekFlow",
+      "Lead Nurturing"
+    ],
+    "parent_id": "mkt.crm"
+  },
+  {
+    "id": "mkt.creative_brief",
+    "canonical_name": "Creative Brief & Campaign Concepting",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Campaign Strategy",
+      "360 Campaign",
+      "Media Plan"
+    ],
+    "parent_id": "mkt.brand_management"
+  },
+  {
+    "id": "mkt.pr_launch",
+    "canonical_name": "Go-To-Market (GTM) Product Launch",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "GTM Strategy",
+      "Product Positioning",
+      "Pricing Tiering"
+    ],
+    "parent_id": "mkt.brand_management"
+  },
+  {
+    "id": "mkt.dist_channel",
+    "canonical_name": "Manajemen Distributor & Modern Trade (MT/GT)",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "MTI / GT",
+      "Key Account Retail",
+      "Alfamart Indomaret Pitching",
+      "Sell-In Sell-Out"
+    ],
+    "parent_id": "mkt.trade_mkt"
+  },
+  {
+    "id": "mkt.medical_sales",
+    "canonical_name": "Medical Sales & Ethical Detailing",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Hospital Sales",
+      "Alkes Sales",
+      "Product Specialist Pharma"
+    ],
+    "parent_id": "mkt.b2b_sales"
+  },
+  {
+    "id": "mkt.property_sales",
+    "canonical_name": "Sales Properti & KPR Bank Partnership",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Property Agent",
+      "Akad KPR",
+      "Project Marketing Properti"
+    ],
+    "parent_id": "mkt.b2b_sales"
+  },
+  {
+    "id": "mkt.export_sales",
+    "canonical_name": "International B2B Export Sales",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Overseas Buyer Acquisition",
+      "Trade Expo Indonesia",
+      "Alibaba B2B"
+    ],
+    "parent_id": "mkt.b2b_sales"
+  },
+  {
+    "id": "mkt.revops",
+    "canonical_name": "Revenue Operations (RevOps) & Sales Ops",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Sales Quota Planning",
+      "CRM Pipeline Hygiene",
+      "Commission Modeling"
+    ],
+    "parent_id": "mkt.crm"
+  },
+  {
+    "id": "mkt.franchise_dev",
+    "canonical_name": "Franchise & Outlet Expansion",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Site Selection",
+      "Feasibility Outlet",
+      "Partnership Franchise"
+    ],
+    "parent_id": "mkt.business_dev"
+  },
+  {
+    "id": "mkt.branding_b2b",
+    "canonical_name": "B2B Thought Leadership & LinkedIn Organic",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "LinkedIn Marketing",
+      "Whitepaper B2B",
+      "Account Based Marketing",
+      "ABM"
+    ],
+    "parent_id": "mkt.b2b_sales",
+    "requires_domain_context": true
+  },
+  {
+    "id": "mkt.affiliate_live",
+    "canonical_name": "Manajemen Tim Host Live Commerce (TikTok / Shopee)",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Live Streaming Commerce",
+      "GMV Optimization",
+      "Studio Live Ops"
+    ],
+    "parent_id": "mkt.marketplace_ops"
+  },
+  {
+    "id": "mkt.media_kit",
+    "canonical_name": "Publicity Kit, Proposal Sponsorship & Media Value",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "PR Value",
+      "Media Deck",
+      "Partnership Deck"
+    ],
+    "parent_id": "mkt.event_activation"
+  },
+  {
+    "id": "mkt.fmcg_gt",
+    "canonical_name": "Manajemen Kanvas, Motoris & Outlet FMCG",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Motoris FMCG",
+      "Call Plan Sales",
+      "Effective Call",
+      "Numeric Distribution"
+    ],
+    "parent_id": "mkt.field_sales"
+  },
+  {
+    "id": "mkt.telesales",
+    "canonical_name": "Telesales, Inside Sales & Cold Calling",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Outbound Telemarketing",
+      "Qualification BANT",
+      "Follow-up Funnel"
+    ],
+    "parent_id": "mkt.b2b_sales"
+  },
+  {
+    "id": "mkt.retail_store",
+    "canonical_name": "Store Operations & Visual Merchandising Retail",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Visual Merchandising",
+      "Store KPI",
+      "Mystery Shopper",
+      "Basket Size"
+    ],
+    "parent_id": "mkt.trade_mkt"
+  },
+  {
+    "id": "mkt.brand_collab",
+    "canonical_name": "Co-Branding & Licensing IP Karakter",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Brand Collaboration",
+      "IP Licensing",
+      "Limited Edition Launch"
+    ],
+    "parent_id": "mkt.brand_management"
+  },
+  {
+    "id": "mkt.seo_youtube",
+    "canonical_name": "YouTube SEO & Video Funnel Growth",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "YouTube Growth",
+      "Thumbnail CTR",
+      "Audience Retention"
+    ]
+  },
+  {
+    "id": "mkt.social_reels",
+    "canonical_name": "Produksi Konten Reels, Shorts & TikTok Organik",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "TikTok Organic",
+      "Instagram Reels",
+      "Trend Hijacking"
+    ],
+    "parent_id": "mkt.content_cal"
+  },
+  {
+    "id": "mkt.shopee_live",
+    "canonical_name": "Optimasi GMV Shopee / Tokopedia / Lazada Ads",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "CPAS Meta",
+      "Shopee Ads",
+      "Tokopedia TopAds"
+    ],
+    "parent_id": "mkt.marketplace_ops"
+  },
+  {
+    "id": "mkt.b2b_tender",
+    "canonical_name": "Presentasi Proposal & Tender Korporasi B2B",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "RFP Response",
+      "Tender Submission",
+      "Commercial Proposal"
+    ],
+    "parent_id": "mkt.b2b_sales"
+  },
+  {
+    "id": "mkt.loyalty_crm",
+    "canonical_name": "Segmentasi RFM & Program Referral Pelanggan",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "RFM Segmentation",
+      "Churn Prediction",
+      "Referral Marketing"
+    ],
+    "parent_id": "mkt.growth_hacking"
+  },
+  {
+    "id": "mkt.branding_employer",
+    "canonical_name": "Brand Storytelling & Campaign Copywriting",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Tagline Copy",
+      "Ad Copy Testing",
+      "Landing Page Copy"
+    ],
+    "parent_id": "mkt.brand_management"
+  },
+  {
+    "id": "mkt.b2b_gov",
+    "canonical_name": "Penjualan B2G (Business to Government) & LPSE",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "E-Katalog Sales",
+      "Presentasi Instansi Pemerintah"
+    ],
+    "parent_id": "mkt.b2b_sales"
+  },
+  {
+    "id": "mkt.channel_dist",
+    "canonical_name": "Pengembangan Jaringan Agen & Reseller",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Distributor Onboarding",
+      "Reseller Program",
+      "Tier Komisi"
+    ],
+    "parent_id": "mkt.dist_channel"
+  },
+  {
+    "id": "mkt.omnichannel_ret",
+    "canonical_name": "Omnichannel Retail (Online-to-Offline / O2O)",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "Click & Collect",
+      "POS Omnichannel",
+      "Loyalty App Retail"
+    ],
+    "parent_id": "mkt.marketplace_ops"
+  },
+  {
+    "id": "mkt.media_pr_clip",
+    "canonical_name": "Analisis Sentimen Berita & PR Share of Voice",
+    "domain": "bisnis_marketing_sales",
+    "category": "core_hard",
+    "aliases": [
+      "Share of Voice",
+      "PR Clipping Report",
+      "Meltwater"
+    ],
+    "parent_id": "mkt.market_research"
+  },
+  {
+    "id": "mkt.category_mgmt",
+    "canonical_name": "Category Management FMCG",
+    "domain": "bisnis_marketing_sales",
+    "category": "core",
+    "aliases": [
+      "category management",
+      "planogram",
+      "nielsen iq",
+      "kantar",
+      "modern trade"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "mkt.trade_mkt"
+  },
+  {
+    "id": "mkt.tiktok_live",
+    "canonical_name": "TikTok Shop & Live Commerce Ops",
+    "domain": "bisnis_marketing_sales",
+    "category": "tool",
+    "aliases": [
+      "tiktok shop",
+      "live commerce",
+      "host live",
+      "shopee live",
+      "gmv max"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate",
+    "parent_id": "mkt.marketplace_ops"
+  },
+  {
+    "id": "mkt.partnership",
+    "canonical_name": "Strategic Partnership & Alliance",
+    "domain": "bisnis_marketing_sales",
+    "category": "core",
+    "aliases": [
+      "strategic partnership",
+      "channel partner",
+      "co-branding",
+      "affiliate partnership"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "mkt.business_dev"
+  },
+  {
+    "id": "mkt.customer_success",
+    "canonical_name": "Customer Success & Retention",
+    "domain": "bisnis_marketing_sales",
+    "category": "core",
+    "aliases": [
+      "customer success",
+      "onboarding client",
+      "churn reduction",
+      "nps",
+      "qbr"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate",
+    "parent_id": "mkt.account_mgmt"
+  },
+  {
+    "id": "mkt.b2g_tender",
+    "canonical_name": "B2G Sales & E-Katalog LKPP",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "e-katalog",
+      "lkpp",
+      "b2g sales",
+      "inaproc",
+      "penjualan pemerintah"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "mkt.b2b_sales"
+  },
+  {
+    "id": "mkt.product_marketing",
+    "canonical_name": "Product Marketing & GTM",
+    "domain": "bisnis_marketing_sales",
+    "category": "core",
+    "aliases": [
+      "product marketing",
+      "go to market",
+      "gtm strategy",
+      "positioning",
+      "messaging"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "mkt.brand_management"
+  },
+  {
+    "id": "mkt.perf_marketing",
+    "canonical_name": "Performance Marketing (Meta, TikTok, Google Ads)",
+    "domain": "bisnis_marketing_sales",
+    "category": "core",
+    "aliases": [
+      "performance marketing",
+      "roas",
+      "cpa",
+      "cac",
+      "tiktok ads",
+      "shopee ads"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "mkt.b2b_enterprise",
+    "canonical_name": "Enterprise Sales & Proposal Bidding",
+    "domain": "bisnis_marketing_sales",
+    "category": "core",
+    "aliases": [
+      "enterprise sales",
+      "account executive",
+      "sales funnel",
+      "closing enterprise"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate"
+  },
+  {
+    "id": "mkt.distrib_gt",
+    "canonical_name": "General Trade (GT) & Distributor Management",
+    "domain": "bisnis_marketing_sales",
+    "category": "domain",
+    "aliases": [
+      "general trade",
+      "distributor management",
+      "area sales supervisor",
+      "motorist",
+      "sell in sell out"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate"
+  }
 ]

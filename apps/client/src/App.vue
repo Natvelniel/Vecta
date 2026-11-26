@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useProfileStore } from "@/stores/profile";
 import { useSettingsStore } from "@/stores/settings";
 import { useToast } from "@/composables/useToast";
+import { useTheme } from "@/composables/useTheme";
 import { registerApiKeyMissingHandler } from "@/lib/ipc";
 import AppShell from "@/components/layout/AppShell.vue";
 import VToastContainer from "@/components/ui/VToastContainer.vue";
@@ -14,7 +15,30 @@ const settingsStore = useSettingsStore();
 const profileStore = useProfileStore();
 const toast = useToast();
 
+// Initialize persisted dual theme on boot
+useTheme();
+
 const bootstrapped = ref(false);
+
+const ROUTE_ORDER: Record<string, number> = {
+  "/dashboard": 0,
+  "/onboarding": 1,
+  "/jobs": 2,
+  "/cv": 3,
+  "/competency": 4,
+  "/roadmap": 5,
+  "/settings": 6,
+};
+
+const transitionName = ref("page-forward");
+watch(
+  () => route.path,
+  (toPath, fromPath) => {
+    const toIdx = ROUTE_ORDER[toPath] ?? 0;
+    const fromIdx = ROUTE_ORDER[fromPath ?? "/dashboard"] ?? 0;
+    transitionName.value = toIdx >= fromIdx ? "page-forward" : "page-back";
+  },
+);
 
 const isFirstRunChrome = computed(
   () => route.path === "/onboarding" && route.query.firstRun === "1",
@@ -56,7 +80,11 @@ onMounted(async () => {
   </div>
 
   <AppShell v-else>
-    <RouterView />
+    <RouterView v-slot="{ Component }">
+      <Transition :name="transitionName" mode="out-in">
+        <component :is="Component" :key="route.path" />
+      </Transition>
+    </RouterView>
   </AppShell>
 </template>
 

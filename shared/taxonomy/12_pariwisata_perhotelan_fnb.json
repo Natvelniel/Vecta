@@ -1,6 +1,318 @@
 [
-  {"id":"hos.front_office","canonical_name":"Front Office & Hotel PMS","domain":"pariwisata_perhotelan_fnb","category":"core_hard","aliases":["Front Office","Receptionist","Guest Relations","Opera PMS","VHP","Visual Hotel Program","Check-in Check-out","Reservasi Hotel"]},
-  {"id":"hos.housekeeping","canonical_name":"Housekeeping & Operasional Hotel","domain":"pariwisata_perhotelan_fnb","category":"core_hard","aliases":["Housekeeping","Room Attendant","Hotel Operations","Hospitality Management","Laundry Operations"]},
-  {"id":"hos.fnb","canonical_name":"Food & Beverage Service & Culinary","domain":"pariwisata_perhotelan_fnb","category":"core_hard","aliases":["F&B Service","F&B Management","Food & Beverage","Culinary","Pastry","Bakery","Barista","Kitchen Management","Food Cost","POS Kasir"]},
-  {"id":"hos.event","canonical_name":"Event Management & MICE","domain":"pariwisata_perhotelan_fnb","category":"domain","aliases":["Event Management","Event Organizer","MICE","Tour Leader","Ticketing","Travel Consultant","Sabre","Amadeus"]}
+  {
+    "id": "hos.front_office",
+    "canonical_name": "Front Office & Hotel PMS",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core_hard",
+    "aliases": [
+      "Front Office",
+      "Receptionist",
+      "Guest Relations",
+      "Opera PMS",
+      "VHP",
+      "Visual Hotel Program",
+      "Check-in Check-out",
+      "Reservasi Hotel"
+    ]
+  },
+  {
+    "id": "hos.housekeeping",
+    "canonical_name": "Housekeeping & Operasional Hotel",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core_hard",
+    "aliases": [
+      "Housekeeping",
+      "Room Attendant",
+      "Hotel Operations",
+      "Hospitality Management",
+      "Laundry Operations",
+      "Executive Housekeeper",
+      "Laundry Ops",
+      "Inventory Linen"
+    ]
+  },
+  {
+    "id": "hos.fnb",
+    "canonical_name": "Food & Beverage Service & Culinary",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core_hard",
+    "aliases": [
+      "F&B Service",
+      "F&B Management",
+      "Food & Beverage",
+      "Culinary",
+      "Pastry",
+      "Bakery",
+      "Barista",
+      "Kitchen Management",
+      "Food Cost",
+      "POS Kasir"
+    ]
+  },
+  {
+    "id": "hos.event",
+    "canonical_name": "Event Management & MICE",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Event Management",
+      "Event Organizer",
+      "MICE",
+      "Tour Leader",
+      "Ticketing",
+      "Travel Consultant",
+      "Sabre",
+      "Amadeus"
+    ]
+  },
+  {
+    "id": "hosp.pastry_bakery",
+    "canonical_name": "Pastry, Bakery & Cake Decoration",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core_hard",
+    "parent_id": "hos.fnb",
+    "aliases": [
+      "Pastry Chef",
+      "Artisan Bread",
+      "Croissant Lamination",
+      "Chocolatier"
+    ]
+  },
+  {
+    "id": "hosp.barista_mix",
+    "canonical_name": "Barista Specialty & Beverage Control",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "tools_tech",
+    "aliases": [
+      "Latte Art",
+      "Espresso Calibration",
+      "SCA Barista",
+      "Beverage Costing",
+      "Mixology"
+    ]
+  },
+  {
+    "id": "hosp.fnb_cost",
+    "canonical_name": "Food Costing & Kitchen Inventory (FIFO/FEFO)",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core_hard",
+    "parent_id": "hos.fnb",
+    "aliases": [
+      "Food Cost Control",
+      "Recipe Standardization",
+      "Stewarding",
+      "Central Kitchen Ops"
+    ]
+  },
+  {
+    "id": "hosp.ticketing_gds",
+    "canonical_name": "Reservasi Tiket & Tour Planning (GDS Amadeus/Sabre)",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "tools_tech",
+    "aliases": [
+      "Amadeus GDS",
+      "Sabre",
+      "Galileo",
+      "Tour Itinerary",
+      "Ticketing Penerbangan"
+    ]
+  },
+  {
+    "id": "hosp.mice_event",
+    "canonical_name": "MICE, Wedding & Event Management",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Event Organizer",
+      "Banquet Operations",
+      "Wedding Planner",
+      "Rundown Produksi"
+    ]
+  },
+  {
+    "id": "hosp.aviasi",
+    "canonical_name": "Ground Handling & Cabin Crew Safety",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Passenger Handling",
+      "Check-in Counter",
+      "Aviation Security",
+      "DGGR"
+    ]
+  },
+  {
+    "id": "hosp.ota_channel",
+    "canonical_name": "OTA & Channel Manager (Traveloka / Agoda / Booking)",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "tools_tech",
+    "parent_id": "hos.front_office",
+    "aliases": [
+      "SiteMinder",
+      "Revenue Management Hotel",
+      "OTA Optimization"
+    ]
+  },
+  {
+    "id": "hosp.sommelier_wine",
+    "canonical_name": "Wine, Beverage & Sommelier Service",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "WSET",
+      "Table Manner",
+      "Banquet Service Fine Dining"
+    ],
+    "parent_id": "hos.fnb"
+  },
+  {
+    "id": "hosp.ecotourism",
+    "canonical_name": "Pengembangan Destinasi & Ekowisata",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Sustainable Tourism",
+      "Desa Wisata",
+      "Tour Guiding HPI"
+    ],
+    "parent_id": "hosp.ticketing_gds"
+  },
+  {
+    "id": "hosp.franchise_fnb",
+    "canonical_name": "Central Kitchen QA & Multi-Outlet F&B Audit",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Audit Outlet F&B",
+      "Outlet Opening Checklist",
+      "POS Kasir Moka / Pawoon"
+    ],
+    "parent_id": "hosp.fnb_cost"
+  },
+  {
+    "id": "hosp.spa_wellness",
+    "canonical_name": "Spa, Wellness & Resort Operations",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Resort Guest Experience",
+      "Wellness Retreats"
+    ],
+    "parent_id": "hos.front_office"
+  },
+  {
+    "id": "hosp.sales_hotel",
+    "canonical_name": "Hotel Sales & Corporate Banquet Contracting",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Hotel Account Executive",
+      "Group Booking",
+      "MICE Sales Hotel"
+    ],
+    "parent_id": "hosp.mice_event"
+  },
+  {
+    "id": "hosp.bakery_artisanal",
+    "canonical_name": "R&D Menu Kuliner, Plating & Central Kitchen SOP",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core_hard",
+    "aliases": [
+      "Menu Engineering",
+      "Recipe Costing",
+      "Halal Kitchen Ops"
+    ]
+  },
+  {
+    "id": "hosp.cruise_ship",
+    "canonical_name": "Hospitality Kapal Pesiar (Galley / Cabin / Dining)",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "BST Sea Survival",
+      "Marlins English Test",
+      "USPH Sanitation"
+    ]
+  },
+  {
+    "id": "hosp.umroh_hajj",
+    "canonical_name": "Operasional Tour Travel, Umroh & Haji Khusus",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "domain",
+    "aliases": [
+      "Siskopatuh",
+      "Visa Umroh",
+      "Muthawwif / Tour Leader"
+    ],
+    "parent_id": "hosp.ticketing_gds"
+  },
+  {
+    "id": "hosp.concierge",
+    "canonical_name": "Layanan Concierge, VIP Guest & Butler Service",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "soft_skill",
+    "aliases": [
+      "VIP Protocol",
+      "Butler Service",
+      "Guest Complaint Recovery"
+    ]
+  },
+  {
+    "id": "hosp.barista_roast",
+    "canonical_name": "Coffee Roasting, Cupping & Quality Control Biji Kopi",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core_hard",
+    "aliases": [
+      "Roast Profile",
+      "Espresso Extraction",
+      "Menu Minuman Kafe"
+    ],
+    "parent_id": "hosp.barista_mix"
+  },
+  {
+    "id": "hosp.opera_pms",
+    "canonical_name": "OPERA PMS & Sistem Reservasi Hotel",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "tool",
+    "aliases": [
+      "opera pms",
+      "fidelio",
+      "cloudbeds",
+      "night audit",
+      "hotel pms"
+    ],
+    "base_weight": 1.1,
+    "difficulty": "intermediate",
+    "parent_id": "hos.front_office"
+  },
+  {
+    "id": "hosp.revenue_hotel",
+    "canonical_name": "Hotel Revenue Management & ADR/RevPAR",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "core",
+    "aliases": [
+      "revenue management hotel",
+      "revpar",
+      "adr",
+      "yield management"
+    ],
+    "base_weight": 1.15,
+    "difficulty": "intermediate",
+    "parent_id": "hosp.ota_channel"
+  },
+  {
+    "id": "hosp.halal_fnb",
+    "canonical_name": "Sertifikasi Halal & Standar Hygiene Resto",
+    "domain": "pariwisata_perhotelan_fnb",
+    "category": "compliance",
+    "aliases": [
+      "halal f&b",
+      "chse",
+      "laik higiene sanitasi",
+      "central kitchen qa"
+    ],
+    "base_weight": 1.05,
+    "difficulty": "intermediate",
+    "parent_id": "hos.fnb"
+  }
 ]

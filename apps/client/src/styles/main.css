@@ -35,6 +35,8 @@
 
   html, body, #app {
     height: 100%;
+    max-width: 100%;
+    overflow-x: clip;
     margin: 0;
     padding: 0;
   }
@@ -49,6 +51,7 @@
     caret-color: var(--brand-hover);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background-color 220ms var(--ease-out), color 180ms ease-out;
   }
 
   ::selection {
@@ -56,7 +59,6 @@
     color: var(--text-primary);
   }
 
-  /* Accessible interactive affordances (Section 11, R-32, R-39) */
   button:not(:disabled),
   a[href],
   select:not(:disabled),
@@ -98,7 +100,7 @@
   }
 }
 
-/* Typography roles (Section 4.2) */
+/* Typography roles */
 .t-display {
   font-size: 36px;
   line-height: 1.1;
@@ -148,6 +150,120 @@
 .t-num {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+/* Material Liquid Glass surface (floating dock, sticky bars, overlays) */
+.liquid-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-specular), var(--glass-shadow);
+}
+
+/* View Transitions API ripple helper */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* 1. Directional Page Depth Transitions */
+.page-forward-enter-active,
+.page-forward-leave-active,
+.page-back-enter-active,
+.page-back-leave-active {
+  transition:
+    opacity 220ms var(--ease-spring),
+    transform 240ms var(--ease-spring);
+}
+.page-forward-enter-from {
+  opacity: 0;
+  transform: translate3d(18px, 0, 0) scale(0.992);
+}
+.page-forward-leave-to {
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0) scale(0.992);
+}
+.page-back-enter-from {
+  opacity: 0;
+  transform: translate3d(-18px, 0, 0) scale(0.992);
+}
+.page-back-leave-to {
+  opacity: 0;
+  transform: translate3d(14px, 0, 0) scale(0.992);
+}
+
+/* 2. Mobile Detail Sheet Depth Push */
+.detail-push-enter-active,
+.detail-push-leave-active {
+  transition:
+    opacity 220ms var(--ease-spring),
+    transform 240ms var(--ease-spring);
+}
+.detail-push-enter-from,
+.detail-push-leave-to {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0) scale(0.985);
+}
+
+/* 3. Job Feed FLIP List Transitions */
+.job-list-move {
+  transition: transform 320ms var(--ease-spring);
+}
+.job-list-enter-active {
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-spring);
+}
+.job-list-leave-active {
+  transition: opacity 160ms ease-in, transform 160ms ease-in;
+}
+.job-list-enter-from {
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+}
+.job-list-leave-to {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+/* 4. Bookmark Pop + Nav Bounce + Diagonal Shimmer */
+@keyframes vecta-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-bookmark-pop {
+  animation: vecta-pop 300ms var(--ease-spring);
+}
+
+@keyframes vecta-nav-bounce {
+  0% {
+    transform: scale(0.86) translateY(2px);
+  }
+  55% {
+    transform: scale(1.12) translateY(-1.5px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-nav-bounce {
+  animation: vecta-nav-bounce 340ms var(--ease-spring);
+}
+
+@keyframes vecta-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

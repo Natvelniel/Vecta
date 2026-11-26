@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import type { ProdiRoleItem } from "@/lib/bindings";
 import { useProfileStore } from "@/stores/profile";
 import { useSettingsStore } from "@/stores/settings";
 import { useToast } from "@/composables/useToast";
@@ -10,7 +11,7 @@ import {
   formatProficiency,
   nextProficiency,
 } from "@/lib/format";
-import { openExternalUrl } from "@/lib/ipc";
+import { ipc } from "@/lib/ipc";
 import PageHeader from "@/components/layout/PageHeader.vue";
 import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
@@ -34,14 +35,71 @@ const settingsStore = useSettingsStore();
 const profileStore = useProfileStore();
 const toast = useToast();
 
-const isFirstRun = computed(() => route.query.firstRun === "1");
-const firstRunStep = ref<1 | 2>(settingsStore.apiKeyStatus.has_key ? 2 : 1);
+const isFirstRun = computed(() => route.query.firstRun === "1" || !profileStore.activeProfile);
 
-const apiKeyInput = ref("");
 const addingSkill = ref(false);
 const newSkillName = ref("");
 const customKeywordInput = ref("");
 const pdfInputRef = ref<HTMLInputElement | null>(null);
+const prodiSearchQuery = ref("");
+const prodiCatalog = ref<ProdiRoleItem[]>([]);
+
+onMounted(async () => {
+  try {
+    prodiCatalog.value = await ipc.listProdiRolesCatalog(null);
+  } catch {
+    prodiCatalog.value = [];
+  }
+});
+
+const filteredProdiRoles = computed(() => {
+  const q = prodiSearchQuery.value.trim().toLowerCase();
+  const list = q
+    ? prodiCatalog.value.filter(
+        (r) =>
+          r.prodi_label.toLowerCase().includes(q) ||
+          r.role_title.toLowerCase().includes(q) ||
+          r.domain.toLowerCase().includes(q),
+      )
+    : prodiCatalog.value;
+  return list.slice(0, 6);
+});
+
+function applyProdiRolePreset(item: ProdiRoleItem) {
+  const skills = [
+    ...item.mandatory_skills.map((name) => ({
+      canonical_name: name,
+      category: "core_hard" as const,
+      proficiency: "intermediate" as const,
+      evidence: `Kompetensi inti prodi ${item.prodi_label}`,
+    })),
+    ...item.preferred_skills.map((name) => ({
+      canonical_name: name,
+      category: "tools_tech" as const,
+      proficiency: "beginner" as const,
+      evidence: `Keahlian pendukung ${item.role_title}`,
+    })),
+  ];
+  profileStore.rawStoryDraft = `Saya lulusan ${item.prodi_label} yang menargetkan posisi ${item.role_title}. Menguasai ${item.mandatory_skills.join(", ")}.`;
+  profileStore.summaryDraft = `Lulusan ${item.prodi_label} dengan fokus peran ${item.role_title}.`;
+  profileStore.experienceLevelDraft = "junior";
+  profileStore.skillsDraft = skills;
+  profileStore.keywordsDraft = [
+    {
+      role_label: item.role_title,
+      fit_type: "primary_fit",
+      scrape_queries:
+        item.scrape_queries.length > 0 ? [...item.scrape_queries] : [item.role_title],
+      match_reason: `Kesesuaian langsung dari jurusan ${item.prodi_label}`,
+      is_active: true,
+    },
+  ];
+  profileStore.hasStructuredDraft = true;
+  toast.show(
+    `Template ${item.role_title} dimuat (${skills.length} skill). Tinjau lalu klik Simpan & Lihat Lowongan.`,
+    { tone: "success" },
+  );
+}
 
 async function handleImportPdfFile(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -72,20 +130,9 @@ async function handleParseLocal() {
   const ok = await profileStore.parseStoryLocal();
   if (ok) {
     toast.show(
-      "Profil dipetakan secara lokal lintas 14 rumpun prodi (0 token Gemini). Tinjau lalu simpan.",
+      "Profil dipetakan secara lokal lintas 23 bidang keahlian (0 token Gemini). Tinjau lalu simpan.",
       { tone: "success" },
     );
-  }
-}
-
-async function handleSaveApiKey() {
-  const ok = await settingsStore.saveAndTestApiKey(apiKeyInput.value);
-  if (ok) {
-    apiKeyInput.value = "";
-    firstRunStep.value = 2;
-    toast.show("Kunci API Gemini terverifikasi dan tersimpan aman di OS Keychain.", {
-      tone: "success",
-    });
   }
 }
 
@@ -165,77 +212,29 @@ async function handleAddCustomKeyword() {
 }
 
 async function handleSaveProfile() {
+  const isFirstSaved = !profileStore.activeProfile;
   const ok = await profileStore.saveProfile();
   if (ok) {
     sessionStorage.removeItem("vecta:skipped_onboarding");
     toast.show("Profil tersimpan dan skor kecocokan lowongan diperbarui secara lokal.", {
       tone: "success",
     });
-    router.push("/jobs");
+    if (isFirstSaved) {
+      router.push({ path: "/jobs", query: { welcome: "1" } });
+    } else {
+      router.push("/jobs");
+    }
   }
 }
 </script>
 
 <template>
-  <!-- Guided First-Run Step 1: BYOK Gemini Key -->
-  <div v-if="isFirstRun && firstRunStep === 1" class="v-narrow-wrap">
-    <div class="v-fr-top">
-      <div class="v-fr-step">
-        <VBadge tone="brand" class="t-num">Langkah 1 dari 2</VBadge>
-        <span class="t-meta">Koneksi Kunci AI Lokal</span>
-      </div>
-      <VButton variant="tertiary" size="compact" @click="skipFirstRun">
-        Lewati ke Dashboard
-      </VButton>
-    </div>
-
-    <h1 class="t-page">Hubungkan Kunci API Gemini</h1>
-    <p class="t-body" style="margin-top: var(--space-3); max-width: 60ch">
-      Vecta menggunakan model Bring Your Own Key. Kunci disimpan melalui OS Credential Manager
-      perangkatmu, tidak pernah dikirim ke server pihak ketiga atau disimpan ke SQLite.
-    </p>
-
-    <VCard style="margin-top: var(--space-8)">
-      <form @submit.prevent="handleSaveApiKey">
-        <label for="fr-api-key" class="v-field-label">Kunci API Google Gemini</label>
-        <div class="v-inline-field">
-          <input
-            id="fr-api-key"
-            v-model="apiKeyInput"
-            type="password"
-            class="v-input t-num"
-            placeholder="Tempel kunci dari Google AI Studio (AIza...)"
-            autocomplete="off"
-          />
-          <VButton type="submit" variant="primary" size="tall" :loading="settingsStore.loadingKey">
-            {{ settingsStore.loadingKey ? "Memverifikasi..." : "Tes & Simpan Kunci" }}
-          </VButton>
-        </div>
-        <p v-if="settingsStore.error" class="v-error-text" role="alert">
-          {{ settingsStore.error }}
-        </p>
-      </form>
-
-      <div class="v-fr-card-foot">
-        <span class="t-meta">Belum punya kunci? Dapatkan gratis di Google AI Studio.</span>
-        <VButton
-          variant="secondary"
-          size="compact"
-          @click="openExternalUrl('https://aistudio.google.com/apikey')"
-        >
-          <span>Buka Google AI Studio</span>
-          <VIcon name="external" :size="13" />
-        </VButton>
-      </div>
-    </VCard>
-  </div>
-
-  <!-- Story-to-Chips Studio (First-Run Step 2 OR Regular Workspace Editor) -->
-  <div v-else class="v-story-root">
+  <!-- Story-to-Chips Studio (Zero-API-Key Public First-Run OR Workspace Editor) -->
+  <div class="v-story-root">
     <PageHeader
       v-if="!isFirstRun"
       title="Profil & CV"
-      subtitle="Impor CV PDF instan (0 token) atau tulis cerita lintas 14 rumpun prodi Indonesia"
+      subtitle="Impor CV PDF instan (0 token) atau tulis cerita lintas 23 bidang keahlian Indonesia"
     >
       <template #actions>
         <input
@@ -265,22 +264,81 @@ async function handleSaveProfile() {
     </PageHeader>
 
     <div class="v-page-container">
-      <div v-if="isFirstRun" style="margin-bottom: var(--space-8)">
-        <div class="v-fr-top" style="margin-bottom: var(--space-6)">
+      <div v-if="isFirstRun" style="margin-bottom: var(--space-6)">
+        <div class="v-fr-top" style="margin-bottom: var(--space-4)">
           <div class="v-fr-step">
-            <VBadge tone="brand" class="t-num">Langkah 2 dari 2</VBadge>
-            <span class="t-meta">Ceritakan Profilmu</span>
+            <VBadge tone="success" class="t-num">Siap Tanpa API Key</VBadge>
+            <span class="t-meta">100% Lokal di Perangkat</span>
           </div>
           <VButton variant="tertiary" size="compact" @click="skipFirstRun">
             Lewati ke Dashboard
           </VButton>
         </div>
-        <h1 class="t-page">Ceritakan Pengalaman &amp; Proyekmu</h1>
+        <h1 class="t-page">Mulai Bangun Profil Kariermu</h1>
         <p class="t-body" style="margin-top: var(--space-2); max-width: 64ch">
-          Tulis dengan bahasa sehari-hari. AI menyusunnya menjadi profil terstruktur yang bisa kamu
-          koreksi sebelum disimpan.
+          Pilih jurusan dalam 20 detik, impor CV PDF (0 token), atau ceritakan pengalamanmu. Kunci
+          Gemini AI bersifat opsional dan dapat dihubungkan kapan saja di Pengaturan.
         </p>
+        <div v-if="isFirstRun" style="margin-top: var(--space-4); display: flex; gap: var(--space-2); flex-wrap: wrap">
+          <input
+            ref="pdfInputRef"
+            type="file"
+            accept="application/pdf,.pdf"
+            class="sr-only"
+            @change="handleImportPdfFile"
+          />
+          <VButton
+            variant="secondary"
+            :loading="profileStore.parsing"
+            @click="pdfInputRef?.click()"
+          >
+            <VIcon name="plus" :size="14" />
+            <span>Impor CV PDF (0 Token)</span>
+          </VButton>
+          <VButton
+            v-if="!settingsStore.apiKeyStatus.has_key"
+            variant="tertiary"
+            size="compact"
+            @click="router.push('/settings')"
+          >
+            Gemini AI Opsional di Pengaturan
+          </VButton>
+        </div>
       </div>
+
+      <!-- 20-Second Prodi & Role Quick Picker across 23 Domains -->
+      <VCard style="margin-bottom: var(--space-6)">
+        <div class="v-field-head">
+          <div>
+            <h2 class="t-section">Pilih Cepat Prodi &amp; Peran (20 Detik)</h2>
+            <p class="t-meta" style="margin-top: 2px">
+              Cari jurusan atau posisi targetmu dari 238 peran lintas 23 bidang di Indonesia.
+            </p>
+          </div>
+          <span class="t-meta t-num">{{ prodiCatalog.length }} peran</span>
+        </div>
+        <input
+          v-model="prodiSearchQuery"
+          type="search"
+          class="v-input"
+          placeholder="Cari prodi atau peran (mis. Akuntansi, Teknik Sipil, Backend, Apoteker, ODP)..."
+        />
+        <div v-if="filteredProdiRoles.length > 0" class="v-prodi-grid">
+          <button
+            v-for="item in filteredProdiRoles"
+            :key="item.id"
+            type="button"
+            class="v-prodi-card"
+            @click="applyProdiRolePreset(item)"
+          >
+            <strong class="v-prodi-role">{{ item.role_title }}</strong>
+            <span class="t-meta v-prodi-label">{{ item.prodi_label }}</span>
+            <span class="t-meta v-prodi-skills">
+              {{ item.mandatory_skills.slice(0, 3).join(" · ") }}
+            </span>
+          </button>
+        </div>
+      </VCard>
 
       <div class="v-studio-grid">
         <!-- Left Column: User Natural-Language Story & Editable Skill Chips -->
@@ -491,15 +549,38 @@ async function handleSaveProfile() {
           <VCard>
             <h2 class="t-section">Cara Kerja Pemetaan Profil</h2>
             <p class="t-body" style="margin-top: var(--space-3)">
-              Setelah kamu menulis pengalamanmu dan menekan <strong>Petakan Profil · AI</strong>,
-              Vecta mengekstrak daftar skill baku, tingkat pengalaman, dan rekomendasi kata kunci
-              pencarian lowongan.
+              Setelah kamu menulis pengalamanmu dan menekan <strong>Petakan Lokal (0 Token)</strong>
+              atau <strong>Petakan · AI</strong>, Vecta mengekstrak daftar skill baku, tingkat
+              pengalaman, dan rekomendasi kata kunci pencarian lowongan.
             </p>
             <p class="t-body" style="margin-top: var(--space-3)">
-              Seluruh hasil ekstraksi AI bisa kamu koreksi sebelum disimpan ke database SQLite lokal.
+              Seluruh hasil ekstraksi bisa kamu koreksi sebelum disimpan ke database SQLite lokal.
             </p>
           </VCard>
         </aside>
+      </div>
+
+      <!-- Sticky Bottom Save Bar when structured draft is ready -->
+      <div
+        v-if="profileStore.hasStructuredDraft && profileStore.skillsDraft.length > 0"
+        class="v-sticky-save-bar liquid-glass"
+        role="region"
+        aria-label="Simpan profil"
+      >
+        <div class="v-sticky-save-bar__meta">
+          <strong style="font-size: 13.5px; color: var(--text-1)">Profil siap disimpan</strong>
+          <span class="t-meta t-num">
+            {{ profileStore.skillsDraft.length }} skill siap ·
+            {{ profileStore.activeKeywordsCount }} peran aktif
+          </span>
+        </div>
+        <VButton
+          variant="primary"
+          :loading="profileStore.saving"
+          @click="handleSaveProfile"
+        >
+          {{ profileStore.saving ? "Menyimpan..." : "Simpan & Lihat Lowongan" }}
+        </VButton>
       </div>
     </div>
   </div>
@@ -510,16 +591,22 @@ async function handleSaveProfile() {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 .v-narrow-wrap {
   max-width: 800px;
   margin: 0 auto;
   padding: var(--space-16) var(--space-8);
   width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 .v-page-container {
   max-width: 1200px;
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding: var(--space-8);
 }
@@ -551,11 +638,61 @@ async function handleSaveProfile() {
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-divider);
 }
+.v-prodi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.v-prodi-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  text-align: left;
+  min-width: 0;
+  transition: border-color 140ms ease, background-color 140ms ease, transform 110ms ease;
+}
+.v-prodi-card:hover {
+  border-color: var(--brand);
+  background: var(--surface-hover);
+}
+.v-prodi-card:active {
+  transform: scale(0.985);
+}
+.v-prodi-role {
+  font-size: 13.5px;
+  color: var(--text-1);
+}
+.v-prodi-label {
+  color: var(--brand-hover);
+}
+.v-prodi-skills {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+@media (max-width: 900px) {
+  .v-prodi-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .v-studio-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: var(--space-8);
   align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+.v-studio-grid > * {
+  min-width: 0;
+  max-width: 100%;
 }
 .v-field-head {
   display: flex;
@@ -583,12 +720,15 @@ async function handleSaveProfile() {
 }
 .v-input {
   flex: 1;
-  min-width: 220px;
+  min-width: 0;
+  width: 100%;
   height: 44px;
   padding: 0 var(--space-4);
 }
 .v-input-compact {
-  width: 168px;
+  min-width: 0;
+  flex: 1 1 140px;
+  max-width: 100%;
   height: 38px;
   padding: 0 var(--space-3);
   font-size: 13px;
@@ -633,6 +773,7 @@ async function handleSaveProfile() {
 .v-skill-edit {
   display: inline-flex;
   align-items: stretch;
+  max-width: 100%;
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
@@ -642,13 +783,17 @@ async function handleSaveProfile() {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 36px;
-  padding: 0 var(--space-3);
+  min-width: 0;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 4px var(--space-3);
   border: 0;
   background: transparent;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
+  text-align: left;
 }
 .v-skill-edit__main:hover {
   background: var(--bg-hover);
@@ -668,9 +813,11 @@ async function handleSaveProfile() {
   color: var(--status-error);
 }
 .v-add-skill-form {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  max-width: 100%;
 }
 .v-dossier-head {
   display: flex;
@@ -697,11 +844,13 @@ async function handleSaveProfile() {
 }
 .v-kw-btn {
   width: 100%;
+  max-width: 100%;
   text-align: left;
   padding: var(--space-4);
   border-radius: var(--radius-control);
   border: 1px solid var(--border-divider);
   background: var(--bg-primary);
+  overflow-wrap: anywhere;
   transition: background var(--dur-hover) var(--ease-state), border-color var(--dur-hover) var(--ease-state);
 }
 .v-kw-btn:hover {
@@ -716,16 +865,41 @@ async function handleSaveProfile() {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+  min-width: 0;
 }
 .v-kw-add {
   display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
   gap: var(--space-2);
   margin-top: var(--space-3);
+}
+.v-kw-add :deep(button) {
+  flex-shrink: 0;
 }
 .v-dossier-foot {
   margin-top: var(--space-6);
   padding-top: var(--space-5);
   border-top: 1px solid var(--border-divider);
+}
+.v-sticky-save-bar {
+  position: sticky;
+  bottom: calc(var(--space-4));
+  z-index: 20;
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.v-sticky-save-bar__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 @media (max-width: 1199px) {
@@ -736,7 +910,7 @@ async function handleSaveProfile() {
 @media (max-width: 1023px) {
   .v-page-container,
   .v-narrow-wrap {
-    padding: var(--space-5) var(--space-4) var(--space-10);
+    padding: var(--space-4) var(--space-3) var(--space-8);
   }
 }
 </style>
