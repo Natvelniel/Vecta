@@ -2,7 +2,8 @@ use tauri::State;
 
 use crate::core::config::{MAX_KNOWN_SKILLS_CONTEXT, MIN_STORY_CHARS};
 use crate::core::gemini::EmbeddingTaskType;
-use crate::core::matching::{encode_embedding, format_profile_embedding_text};
+use crate::core::matching::{encode_embedding, encode_embedding_i8, format_profile_embedding_text};
+use crate::core::reranker::spawn_background_rerank;
 use crate::error::AppError;
 use crate::models::profile::{
     ConfirmedProfileInput, ProdiRoleItem, ProfileSummaryItem, ScrapeKeywordItem, StoryProfileDraft,
@@ -62,13 +63,65 @@ pub async fn save_confirmed_profile_impl(
         }
         Err(_) => state
             .local_embedder
-            .embed_one(&embed_input)
+            .embed_query(&embed_input)
             .map(|v| encode_embedding(&v)),
     };
 
     let saved = state
         .db
         .save_profile_atomic(&input, embedding_bytes.as_deref())?;
+
+    if state.local_embedder.is_neural_v2() {
+        let role_text = input.target_roles.join(", ");
+        let skill_text = input
+            .skills
+            .iter()
+            .map(|s| s.canonical_name.as_str())
+            .collect::<Vec<_>>()
+            .join(", ");
+        let story_text = if input.raw_story_text.trim().is_empty() {
+            input.summary.as_str()
+        } else {
+            input.raw_story_text.as_str()
+        };
+
+        let emb_role = if role_text.trim().is_empty() {
+            None
+        } else {
+            state
+                .local_embedder
+                .embed_query(&role_text)
+                .map(|v| encode_embedding_i8(&v))
+        };
+        let emb_skills = if skill_text.trim().is_empty() {
+            None
+        } else {
+            state
+                .local_embedder
+                .embed_query(&skill_text)
+                .map(|v| encode_embedding_i8(&v))
+        };
+        let emb_story = if story_text.trim().is_empty() {
+            None
+        } else {
+            state
+                .local_embedder
+                .embed_query(story_text)
+                .map(|v| encode_embedding_i8(&v))
+        };
+        let dom_probe = format!("{} {} {}", role_text, input.summary, skill_text);
+        let dominant_domain =
+            vecta_taxonomy::TaxonomyEngine::global().extract_from_profile_text(&dom_probe).dominant_domain;
+
+        let _ = state.db.update_profile_multifacet_embeddings(
+            &saved.id,
+            emb_role.as_deref(),
+            emb_skills.as_deref(),
+            emb_story.as_deref(),
+            Some(dominant_domain.as_str()),
+        );
+    }
+
     state.recalculate_all_matches_for_user(&saved.id)?;
     Ok(saved)
 }
@@ -157,10 +210,15 @@ pub async fn parse_user_story(
 #[tauri::command]
 #[specta::specta]
 pub async fn save_confirmed_profile(
+    app: tauri::AppHandle,
     state: State<'_, AppState>,
     input: ConfirmedProfileInput,
 ) -> Result<UserProfileDetail, AppError> {
-    save_confirmed_profile_impl(&state, input).await
+    let saved = save_confirmed_profile_impl(&state, input).await?;
+    if state.local_embedder.has_reranker() {
+        spawn_background_rerank(app, saved.id.clone(), 25);
+    }
+    Ok(saved)
 }
 
 #[tauri::command]

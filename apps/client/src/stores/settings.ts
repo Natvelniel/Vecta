@@ -12,7 +12,10 @@ export const useSettingsStore = defineStore("settings", () => {
   });
   const localAiStatus = ref<LocalAiModelStatus>({
     model_id: "local:potion-m128-i8",
+    engine_tier: "unavailable",
     is_ready: false,
+    reranker_ready: false,
+    semantic_index_ready: false,
     dimensions: 0,
     vocab_size: 0,
     size_mb: 0,

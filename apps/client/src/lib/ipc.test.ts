@@ -27,6 +27,9 @@ describe("Vecta IPC adapter & numeric guards", () => {
       skill_overlap_score: 0.804,
       level_score: 1.0,
       final_score: 0.872,
+      domain_score: 1.0,
+      reranker_score: 0.915,
+      match_explanation: ["Bidang utama selaras dengan target profil Anda."],
       matched_skills_count: 4,
       missing_skills_count: 1,
       has_gap_analysis: false,
@@ -50,6 +53,9 @@ describe("Vecta IPC adapter & numeric guards", () => {
     expect(summary.skill_overlap_score).toBeCloseTo(80.4, 2);
     expect(summary.level_score).toBe(100);
     expect(summary.final_score).toBeCloseTo(87.2, 2);
+    expect(summary.domain_score).toBe(100);
+    expect(summary.reranker_score).toBeCloseTo(91.5, 2);
+    expect(summary.match_explanation).toHaveLength(1);
 
     const comp = normalizeCompetencyMap({
       target_role: "Backend Engineer",

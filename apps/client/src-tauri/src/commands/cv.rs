@@ -2,7 +2,8 @@ use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use tauri::State;
 
 use crate::core::cv_export::{export_ats_pdf, AtsExportContext};
-use crate::core::cv_import::{build_draft_from_cv_text, import_cv_from_pdf_bytes};
+use crate::core::cv_import::import_cv_from_pdf_bytes;
+use crate::core::story_profiler::analyze_story_to_imported_draft;
 use crate::error::AppError;
 use crate::models::cv::{AtsExportResult, ImportedCvDraft, MasterCvProfile};
 use crate::state::AppState;
@@ -19,8 +20,12 @@ pub fn import_cv_pdf_impl(pdf_base64: String) -> Result<ImportedCvDraft, AppErro
     import_cv_from_pdf_bytes(&bytes)
 }
 
-pub fn parse_story_local_impl(raw_story: String) -> Result<ImportedCvDraft, AppError> {
-    build_draft_from_cv_text(&raw_story)
+pub fn parse_story_local_impl(
+    state: Option<&AppState>,
+    raw_story: String,
+) -> Result<ImportedCvDraft, AppError> {
+    let embedder = state.map(|s| &s.local_embedder);
+    analyze_story_to_imported_draft(&raw_story, embedder.map(|v| v.as_ref()))
 }
 
 pub fn get_master_cv_impl(state: &AppState, user_id: String) -> Result<MasterCvProfile, AppError> {
@@ -109,8 +114,11 @@ pub fn import_cv_pdf(pdf_base64: String) -> Result<ImportedCvDraft, AppError> {
 
 #[tauri::command]
 #[specta::specta]
-pub fn parse_story_local(raw_story: String) -> Result<ImportedCvDraft, AppError> {
-    parse_story_local_impl(raw_story)
+pub fn parse_story_local(
+    state: State<'_, AppState>,
+    raw_story: String,
+) -> Result<ImportedCvDraft, AppError> {
+    parse_story_local_impl(Some(&state), raw_story)
 }
 
 #[tauri::command]

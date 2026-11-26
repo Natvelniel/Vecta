@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use sha2::{Digest, Sha256};
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use url::Url;
 use uuid::Uuid;
 
@@ -29,16 +29,17 @@ use crate::core::gemini::{
     ApplyKitPromptInput, BatchJobInput, EmbeddingTaskType, GapAnalysisPromptInput,
 };
 use crate::core::interview_prep::build_local_interview_prep;
-use crate::core::local_embedder::LOCAL_EMBEDDING_MODEL_ID;
+use crate::core::local_embedder::{LOCAL_EMBEDDING_MODEL_ID, NEURAL_V2_MODEL_ID};
 use crate::core::local_matcher::{
     compute_local_keyword_relevance, extract_universal_job_metadata, infer_experience_level,
     infer_work_mode,
 };
 use crate::core::matching::{
     compute_hybrid_match, compute_local_hybrid_match, cosine_similarity, encode_embedding,
-    format_job_embedding_text, to_match_upsert,
+    encode_embedding_i8, format_job_embedding_text, to_match_upsert,
 };
 use crate::core::native_scraper::quality::{assess_job_quality, deduplicate_cross_portal};
+use crate::core::reranker::{rerank_top_jobs_for_user, spawn_background_rerank};
 use crate::core::worker::WorkerScrapeRequest;
 use crate::error::{AppError, ErrorCode};
 use crate::models::job::{
@@ -543,7 +544,7 @@ pub async fn scrape_and_store_jobs_impl(
             user_summary,
             user_skill_names.join(" ")
         );
-        state.local_embedder.embed_one(&profile_text)
+        state.local_embedder.embed_query(&profile_text)
     } else {
         None
     };
@@ -624,13 +625,19 @@ pub async fn scrape_and_store_jobs_impl(
         let also_available_on_json =
             serde_json::to_string(&alternate_portals).unwrap_or_else(|_| "[]".into());
 
-        // Pure-Rust offline multilingual semantic vector (< 0.3ms, 0 API key, 101 languages)
+        // Pure-Rust offline multilingual semantic vector (e5-base 768-dim Neural v2 or potion-m128-i8 fallback)
+        let is_v2 = state.local_embedder.is_neural_v2();
+        let active_model_id = if is_v2 {
+            NEURAL_V2_MODEL_ID
+        } else {
+            LOCAL_EMBEDDING_MODEL_ID
+        };
         let (local_job_vec, embedding_bytes, embedding_model) = if local_profile_vec.is_some() {
             let job_text = format!("{} {}", scraped_job.title, scraped_job.raw_description);
-            match state.local_embedder.embed_one(&job_text) {
+            match state.local_embedder.embed_passage(&job_text) {
                 Some(v) => {
                     let bytes = encode_embedding(&v);
-                    (Some(v), Some(bytes), Some(LOCAL_EMBEDDING_MODEL_ID.to_string()))
+                    (Some(v), Some(bytes), Some(active_model_id.to_string()))
                 }
                 None => (None, None, None),
             }
@@ -645,7 +652,7 @@ pub async fn scrape_and_store_jobs_impl(
             external_id: scraped_job.external_id,
             url: clean_url,
             title: scraped_job.title.clone(),
-            normalized_role: universal.normalized_role,
+            normalized_role: universal.normalized_role.clone(),
             company: scraped_job.company,
             location: scraped_job.location.clone(),
             work_mode,
@@ -663,9 +670,41 @@ pub async fn scrape_and_store_jobs_impl(
             embedding_model,
         };
 
-        let job_match_rec = state
+        let mut job_match_rec = state
             .db
             .insert_job_with_skill_ids(&new_job, &universal.skill_ids)?;
+
+        if is_v2 {
+            let role_facet = format!("{} ({})", scraped_job.title, universal.normalized_role);
+            let skills_facet = job_match_rec
+                .skills
+                .iter()
+                .map(|s| s.canonical_name.as_str())
+                .collect::<Vec<_>>()
+                .join(", ");
+            let emb_role = state
+                .local_embedder
+                .embed_passage(&role_facet)
+                .map(|v| encode_embedding_i8(&v));
+            let emb_skills = if skills_facet.is_empty() {
+                None
+            } else {
+                state
+                    .local_embedder
+                    .embed_passage(&skills_facet)
+                    .map(|v| encode_embedding_i8(&v))
+            };
+            let emb_context = local_job_vec.as_deref().map(encode_embedding_i8);
+            let _ = state.db.update_job_multifacet_embeddings(
+                &job_id,
+                emb_role.as_deref(),
+                emb_skills.as_deref(),
+                emb_context.as_deref(),
+            );
+            job_match_rec.emb_role = emb_role;
+            job_match_rec.emb_skills = emb_skills;
+            job_match_rec.emb_context = emb_context;
+        }
         let kw_ctx = compute_local_keyword_relevance(
             &user_summary,
             &profile_detail.target_roles,
@@ -1275,7 +1314,38 @@ pub async fn scrape_and_store_jobs(
     user_id: String,
     prefs: SearchPreferences,
 ) -> Result<ScrapeRunReport, AppError> {
-    scrape_and_store_jobs_impl(&state, Some(&app), user_id, prefs).await
+    let report = scrape_and_store_jobs_impl(&state, Some(&app), user_id.clone(), prefs).await?;
+    if report.newly_ingested > 0 && state.local_embedder.has_reranker() {
+        spawn_background_rerank(app, user_id, 25);
+    }
+    Ok(report)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn rerank_top_jobs(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    user_id: String,
+    top_n: Option<u32>,
+) -> Result<u32, AppError> {
+    if !state.local_embedder.has_reranker() {
+        return Ok(0);
+    }
+    let app_bg = app.clone();
+    let uid_bg = user_id.clone();
+    let limit = top_n.unwrap_or(25).clamp(1, 25) as usize;
+    let count = tokio::task::spawn_blocking(move || {
+        let st = app_bg.state::<AppState>();
+        rerank_top_jobs_for_user(&st, &uid_bg, limit)
+    })
+    .await
+    .map_err(|e| AppError::db_error(format!("Task rerank gagal: {e}")))??;
+    let _ = app.emit(
+        "rerank-complete",
+        serde_json::json!({ "user_id": user_id, "reranked_count": count }),
+    );
+    Ok(count)
 }
 
 #[tauri::command]

@@ -193,6 +193,13 @@ const freshnessTag = computed(() => {
             {{ job.enrichment_status === "ai_enriched" ? "AI" : "Lokal" }}
           </span>
           <span
+            v-if="job.reranker_score !== null && job.reranker_score !== undefined"
+            class="v-neural-tag"
+            title="Diverifikasi oleh Cross-Encoder Reranker Neural v2"
+          >
+            Neural
+          </span>
+          <span
             v-if="job.application_status !== 'new' && job.application_status !== 'saved'"
             class="v-app-tag"
           >
@@ -412,6 +419,11 @@ const freshnessTag = computed(() => {
 }
 .v-mode-tag[data-ai="true"] {
   background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+}
+.v-neural-tag {
+  background: var(--brand-soft);
   color: var(--text-1);
   border: 1px solid var(--border);
 }

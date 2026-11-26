@@ -24,7 +24,7 @@ import {
   formatWorkMode,
 } from "@/lib/format";
 import { formatLocationClusterLabel } from "@/lib/locationClusters";
-import { ipc, IpcError, listenScrapeProgress, openExternalUrl } from "@/lib/ipc";
+import { ipc, IpcError, listenRerankComplete, listenScrapeProgress, openExternalUrl } from "@/lib/ipc";
 import { shareOrDownloadPdf } from "@/lib/pdfShare";
 import PageHeader from "@/components/layout/PageHeader.vue";
 import VBadge from "@/components/ui/VBadge.vue";
@@ -82,6 +82,7 @@ const aiBarDismissed = ref(false);
 const noteDraft = ref("");
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 let unlistenProgress: (() => void) | null = null;
+let unlistenRerank: (() => void) | null = null;
 
 const WORK_MODE_OPTIONS: Array<{ id: WorkMode; label: string }> = [
   { id: "remote", label: "Remote" },
@@ -189,6 +190,7 @@ function handleMobileMenuKeydown(e: KeyboardEvent) {
 onBeforeUnmount(() => {
   if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
   if (unlistenProgress) unlistenProgress();
+  if (unlistenRerank) unlistenRerank();
   window.removeEventListener("click", handleMobileMenuOutsideClick);
   window.removeEventListener("keydown", handleMobileMenuKeydown);
 });
@@ -217,6 +219,11 @@ onMounted(async () => {
   window.addEventListener("keydown", handleMobileMenuKeydown);
   unlistenProgress = await listenScrapeProgress((evt) => {
     jobsStore.progress = evt;
+  });
+  unlistenRerank = await listenRerankComplete((evt) => {
+    if (evt.reranked_count > 0 && profileStore.userId === evt.user_id) {
+      void jobsStore.loadJobs(evt.user_id);
+    }
   });
   await jobsStore.loadSearchPreferences();
   if (!profileStore.activeProfile) {
@@ -1466,6 +1473,9 @@ async function handleCreateRoadmapFromJob() {
             :vector-score="jobsStore.selectedDetail.vector_score"
             :skill-score="jobsStore.selectedDetail.skill_overlap_score"
             :level-score="jobsStore.selectedDetail.level_score"
+            :domain-score="jobsStore.selectedDetail.domain_score"
+            :reranker-score="jobsStore.selectedDetail.reranker_score"
+            :match-explanation="jobsStore.selectedDetail.match_explanation"
           />
 
           <!-- Matched Skills -->

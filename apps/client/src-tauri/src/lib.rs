@@ -51,6 +51,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         jobs::ingest_manual_job,
         jobs::run_scrape_for_active_keywords,
         jobs::scrape_and_store_jobs,
+        jobs::rerank_top_jobs,
         jobs::run_ai_matching_queue,
         jobs::enrich_job_with_ai,
         jobs::list_ranked_jobs,
@@ -82,6 +83,77 @@ pub fn typescript_exporter() -> Typescript {
     Typescript::default()
 }
 
+#[cfg(target_os = "android")]
+fn extract_android_neural_assets(app_data_dir: &std::path::Path) -> Option<PathBuf> {
+    use std::fs::{self, File};
+    use std::io::{self, Read};
+
+    let dest_dir = app_data_dir.join("models").join("neural-v2");
+    if let Err(e) = fs::create_dir_all(&dest_dir) {
+        eprintln!("[vecta::android_assets] mkdir failed: {e}");
+        return None;
+    }
+
+    let maps = fs::read_to_string("/proc/self/maps").ok()?;
+    let apk_path = maps
+        .lines()
+        .filter_map(|line| {
+            let trimmed = line.trim();
+            let pos = trimmed.find('/')?;
+            let p = trimmed[pos..].trim();
+            if p.ends_with(".apk") && std::path::Path::new(p).exists() {
+                Some(p.to_string())
+            } else {
+                None
+            }
+        })
+        .next()?;
+
+    let apk_file = File::open(&apk_path).ok()?;
+    let mut archive = zip::ZipArchive::new(apk_file).ok()?;
+    let mut extracted_any = false;
+
+    for idx in 0..archive.len() {
+        let mut entry = archive.by_index(idx).ok()?;
+        if entry.is_dir() {
+            continue;
+        }
+        let name = entry.name().to_string();
+        let rel = name
+            .strip_prefix("assets/resources/models/neural-v2/")
+            .or_else(|| name.strip_prefix("assets/models/neural-v2/"));
+        let Some(fname) = rel else {
+            continue;
+        };
+        if fname.contains('/') || fname.contains('\\') || fname.contains("..") {
+            continue;
+        }
+        let out_path = dest_dir.join(fname);
+        let expected_size = entry.size();
+        if let Ok(meta) = fs::metadata(&out_path) {
+            if meta.len() == expected_size && expected_size > 0 {
+                extracted_any = true;
+                continue;
+            }
+        }
+        let tmp_path = dest_dir.join(format!("{fname}.tmp"));
+        if let Ok(mut out_f) = File::create(&tmp_path) {
+            if io::copy(&mut entry, &mut out_f).is_ok() {
+                let _ = fs::rename(&tmp_path, &out_path);
+                extracted_any = true;
+            } else {
+                let _ = fs::remove_file(&tmp_path);
+            }
+        }
+    }
+
+    if extracted_any || dest_dir.join("e5-base.vtxr").exists() {
+        Some(dest_dir)
+    } else {
+        None
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = specta_builder();
@@ -104,6 +176,12 @@ pub fn run() {
             let db = Database::open(&db_path).expect("failed to initialize Vecta SQLite database");
 
             let mut resource_dirs: Vec<PathBuf> = Vec::new();
+            #[cfg(target_os = "android")]
+            {
+                if extract_android_neural_assets(&data_dir).is_some() {
+                    resource_dirs.push(data_dir.clone());
+                }
+            }
             if let Ok(res_dir) = app.path().resource_dir() {
                 resource_dirs.push(res_dir.join("resources"));
                 resource_dirs.push(res_dir);
@@ -181,6 +259,7 @@ mod tests {
             "ingest_manual_job",
             "run_scrape_for_active_keywords",
             "scrape_and_store_jobs",
+            "rerank_top_jobs",
             "run_ai_matching_queue",
             "enrich_job_with_ai",
             "list_ranked_jobs",
@@ -205,7 +284,7 @@ mod tests {
             "quick_add_user_skill",
         ];
 
-        assert_eq!(expected_commands.len(), 50);
+        assert_eq!(expected_commands.len(), 51);
         for cmd in expected_commands {
             assert!(
                 content.contains(cmd),

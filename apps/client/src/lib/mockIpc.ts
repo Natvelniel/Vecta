@@ -610,6 +610,14 @@ function computeJobDetail(job: MockJobRecord): JobMatchDetail_Serialize {
     skill_overlap_score,
     level_score: job.level_score,
     final_score,
+    domain_score: 0.92,
+    reranker_score: job.job_id === "job-1" ? 0.91 : null,
+    match_explanation: [
+      "Bidang utama selaras dengan target profil Anda.",
+      ...(matched_skills.length > 0
+        ? [`Skill inti cocok: ${matched_skills.slice(0, 3).map((s) => s.canonical_name).join(", ")}`]
+        : []),
+    ],
     matched_skills,
     missing_skills,
     ai_gap_analysis: job.ai_gap_analysis,
@@ -1024,6 +1032,9 @@ export const mockCommands = {
         skill_overlap_score: d.skill_overlap_score,
         level_score: d.level_score,
         final_score: d.final_score,
+        domain_score: d.domain_score,
+        reranker_score: d.reranker_score,
+        match_explanation: d.match_explanation,
         matched_skills_count: d.matched_skills.length,
         missing_skills_count: d.missing_skills.length,
         has_gap_analysis: d.ai_gap_analysis !== null,
@@ -1197,13 +1208,19 @@ export const mockCommands = {
   },
   async getLocalAiStatus(): Promise<LocalAiModelStatus> {
     return {
-      model_id: "local:potion-m128-i8",
+      model_id: "local:vecta-neural-v2",
+      engine_tier: "neural_v2",
       is_ready: true,
-      dimensions: 256,
-      vocab_size: 500353,
-      size_mb: 141.8,
-      source_path: "resources/models/potion-m128-i8",
+      reranker_ready: true,
+      semantic_index_ready: true,
+      dimensions: 768,
+      vocab_size: 250002,
+      size_mb: 424.2,
+      source_path: "resources/models/neural-v2",
     };
+  },
+  async rerankTopJobs(_userId: string, topN: number | null): Promise<number> {
+    return Math.min(mockJobs.length, topN ?? 25);
   },
   async getScraperMode(): Promise<string> {
     return scraperModeState;

@@ -7,12 +7,24 @@ const props = defineProps<{
   vectorScore: number;
   skillScore: number;
   levelScore: number;
+  domainScore?: number | null;
+  rerankerScore?: number | null;
+  matchExplanation?: string[];
 }>();
 
 const finalPct = computed(() => formatScore(props.finalScore));
 const vecPct = computed(() => formatScore(props.vectorScore));
 const skillPct = computed(() => formatScore(props.skillScore));
 const levelPct = computed(() => formatScore(props.levelScore));
+const domainPct = computed(() =>
+  props.domainScore !== null && props.domainScore !== undefined ? formatScore(props.domainScore) : null,
+);
+const rerankerPct = computed(() =>
+  props.rerankerScore !== null && props.rerankerScore !== undefined
+    ? formatScore(props.rerankerScore)
+    : null,
+);
+const explanationBullets = computed(() => (props.matchExplanation ?? []).slice(0, 3));
 </script>
 
 <template>
@@ -21,6 +33,9 @@ const levelPct = computed(() => formatScore(props.levelScore));
       <div class="t-meta">Skor Kecocokan</div>
       <div class="t-display t-num" style="margin-top: 4px; color: var(--brand-hover)">
         {{ finalPct }}%
+      </div>
+      <div v-if="rerankerPct !== null" class="v-rerank-pill t-meta t-num">
+        Neural Reranker {{ rerankerPct }}%
       </div>
     </div>
 
@@ -42,15 +57,20 @@ const levelPct = computed(() => formatScore(props.levelScore));
       >
         <div
           class="v-meter-seg"
-          :style="{ width: `${(0.4 * vecPct).toFixed(1)}%`, background: 'var(--brand-primary)' }"
+          :style="{ width: `${((domainPct !== null ? 0.36 : 0.4) * vecPct).toFixed(1)}%`, background: 'var(--brand-primary)' }"
         />
         <div
           class="v-meter-seg"
-          :style="{ width: `${(0.45 * skillPct).toFixed(1)}%`, background: 'var(--status-success)' }"
+          :style="{ width: `${((domainPct !== null ? 0.36 : 0.45) * skillPct).toFixed(1)}%`, background: 'var(--status-success)' }"
         />
         <div
           class="v-meter-seg"
-          :style="{ width: `${(0.15 * levelPct).toFixed(1)}%`, background: 'var(--status-info)' }"
+          :style="{ width: `${((domainPct !== null ? 0.14 : 0.15) * levelPct).toFixed(1)}%`, background: 'var(--status-info)' }"
+        />
+        <div
+          v-if="domainPct !== null"
+          class="v-meter-seg"
+          :style="{ width: `${(0.14 * domainPct).toFixed(1)}%`, background: 'var(--status-warning)' }"
         />
       </div>
 
@@ -58,7 +78,16 @@ const levelPct = computed(() => formatScore(props.levelScore));
         <span><span class="v-swatch" style="background: var(--brand-primary)" />Konteks {{ vecPct }}%</span>
         <span><span class="v-swatch" style="background: var(--status-success)" />Skill {{ skillPct }}%</span>
         <span><span class="v-swatch" style="background: var(--status-info)" />Level {{ levelPct }}%</span>
+        <span v-if="domainPct !== null">
+          <span class="v-swatch" style="background: var(--status-warning)" />Domain {{ domainPct }}%
+        </span>
       </div>
+
+      <ul v-if="explanationBullets.length > 0" class="v-match-expl">
+        <li v-for="(item, idx) in explanationBullets" :key="idx" class="t-meta">
+          {{ item }}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -121,5 +150,22 @@ const levelPct = computed(() => formatScore(props.levelScore));
     align-items: stretch;
     gap: var(--space-5);
   }
+}
+.v-rerank-pill {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+.v-match-expl {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--text-secondary);
 }
 </style>

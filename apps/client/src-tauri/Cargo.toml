@@ -1,6 +1,6 @@
 [package]
 name = "vecta"
-version = "0.4.1"
+version = "0.5.0"
 description = "Vecta local-first AI career intelligence core engine"
 authors = ["Vecta"]
 edition = "2021"
@@ -15,7 +15,10 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 async-trait = "0.1"
 base64 = "0.22"
+candle-core = "0.11.1"
+candle-nn = "0.11.1"
 chrono = { version = "0.4", features = ["serde"] }
+memmap2 = "0.9"
 pdf-extract = "0.7"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
@@ -40,3 +43,6 @@ vecta-taxonomy = { path = "../../../crates/vecta-taxonomy" }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 keyring = { version = "3", features = ["windows-native", "apple-native", "sync-secret-service"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+zip = { version = "2", default-features = false, features = ["deflate"] }

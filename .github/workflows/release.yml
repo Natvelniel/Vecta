@@ -42,16 +42,18 @@ jobs:
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Setup Python & build offline 101-language AI model (~142 MB)
+      - name: Setup Python & build Neural Engine v2 offline AI pack (~424 MB)
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Fetch and quantize offline multilingual model
+      - name: Build Neural v2 quantized models & semantic taxonomy index
         shell: pwsh
         run: |
           python -m pip install --upgrade pip numpy
           python scripts/fetch_offline_ai_model.py
+          python scripts/build_neural_v2_pack.py
+          cargo run --release --manifest-path apps/client/src-tauri/Cargo.toml --bin build_semantic_index
 
       - name: Install frontend dependencies
         working-directory: apps/client
@@ -148,6 +150,17 @@ jobs:
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
 
+      - name: Setup Python & build Neural Engine v2 offline pack (~424 MB)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Neural v2 quantized models & semantic taxonomy index
+        run: |
+          python3 -m pip install --upgrade pip numpy
+          python3 scripts/build_neural_v2_pack.py
+          cargo run --release --manifest-path apps/client/src-tauri/Cargo.toml --bin build_semantic_index
+
       - name: Install frontend dependencies
         working-directory: apps/client
         run: npm ci
@@ -158,6 +171,16 @@ jobs:
           CI: "true"
         run: |
           npx tauri android init --ci --skip-targets-install
+          python3 - <<'PY'
+          from pathlib import Path
+          gradle = Path("src-tauri/gen/android/app/build.gradle.kts")
+          text = gradle.read_text(encoding="utf-8")
+          if "noCompress" not in text:
+              needle = "android {"
+              assert needle in text, "android block not found in build.gradle.kts"
+              patch = 'android {\n    androidResources {\n        noCompress += listOf("vtxr", "vidx", "vemb", "json")\n    }'
+              gradle.write_text(text.replace(needle, patch, 1), encoding="utf-8")
+          PY
           npx tauri icon src-tauri/icons/app-icon.png
           npx tauri android build --apk --target aarch64 --ci
 

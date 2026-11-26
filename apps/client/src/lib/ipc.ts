@@ -48,24 +48,33 @@ export interface ScrapeProgressEvent {
   total: number;
 }
 
+export interface RerankCompleteEvent {
+  user_id: string;
+  reranked_count: number;
+}
+
 export type NormalizedJobSummary = Omit<
   JobMatchSummary_Serialize,
-  "vector_score" | "skill_overlap_score" | "level_score" | "final_score"
+  "vector_score" | "skill_overlap_score" | "level_score" | "final_score" | "domain_score" | "reranker_score"
 > & {
   vector_score: number;
   skill_overlap_score: number;
   level_score: number;
   final_score: number;
+  domain_score: number | null;
+  reranker_score: number | null;
 };
 
 export type NormalizedJobDetail = Omit<
   JobMatchDetail_Serialize,
-  "vector_score" | "skill_overlap_score" | "level_score" | "final_score"
+  "vector_score" | "skill_overlap_score" | "level_score" | "final_score" | "domain_score" | "reranker_score"
 > & {
   vector_score: number;
   skill_overlap_score: number;
   level_score: number;
   final_score: number;
+  domain_score: number | null;
+  reranker_score: number | null;
 };
 
 export type NormalizedCompetencySkill = Omit<
@@ -126,6 +135,13 @@ function ratioToPercent(value: number | null | undefined): number {
   return Math.max(0, Math.min(100, n * 100));
 }
 
+function optionalRatioToPercent(value: number | null | undefined): number | null {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return null;
+  }
+  return Math.max(0, Math.min(100, value * 100));
+}
+
 export function normalizeJobSummary(raw: JobMatchSummary_Serialize): NormalizedJobSummary {
   return {
     ...raw,
@@ -133,6 +149,9 @@ export function normalizeJobSummary(raw: JobMatchSummary_Serialize): NormalizedJ
     skill_overlap_score: ratioToPercent(raw.skill_overlap_score),
     level_score: ratioToPercent(raw.level_score),
     final_score: ratioToPercent(raw.final_score),
+    domain_score: optionalRatioToPercent(raw.domain_score),
+    reranker_score: optionalRatioToPercent(raw.reranker_score),
+    match_explanation: raw.match_explanation ?? [],
   };
 }
 
@@ -143,6 +162,9 @@ export function normalizeJobDetail(raw: JobMatchDetail_Serialize): NormalizedJob
     skill_overlap_score: ratioToPercent(raw.skill_overlap_score),
     level_score: ratioToPercent(raw.level_score),
     final_score: ratioToPercent(raw.final_score),
+    domain_score: optionalRatioToPercent(raw.domain_score),
+    reranker_score: optionalRatioToPercent(raw.reranker_score),
+    match_explanation: raw.match_explanation ?? [],
   };
 }
 
@@ -570,6 +592,13 @@ export const ipc = {
     }
     return unwrapResult(await commands.exportTailoredAtsPdf(userId, jobId, language));
   },
+
+  async rerankTopJobs(userId: string, topN: number | null = 25): Promise<number> {
+    if (isMockMode()) {
+      return (await getMockBackend()).rerankTopJobs(userId, topN);
+    }
+    return unwrapResult(await commands.rerankTopJobs(userId, topN));
+  },
 };
 
 export async function openExternalUrl(url: string): Promise<void> {
@@ -599,6 +628,19 @@ export async function listenScrapeProgress(
   }
   const { listen } = await import("@tauri-apps/api/event");
   const unlisten = await listen<ScrapeProgressEvent>("scrape-progress", (evt) => {
+    handler(evt.payload);
+  });
+  return unlisten;
+}
+
+export async function listenRerankComplete(
+  handler: (event: RerankCompleteEvent) => void,
+): Promise<() => void> {
+  if (!isTauriRuntime()) {
+    return () => {};
+  }
+  const { listen } = await import("@tauri-apps/api/event");
+  const unlisten = await listen<RerankCompleteEvent>("rerank-complete", (evt) => {
     handler(evt.payload);
   });
   return unlisten;

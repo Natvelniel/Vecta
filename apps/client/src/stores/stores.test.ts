@@ -294,7 +294,9 @@ describe("Vecta end-to-end store logic & cross-store loop", () => {
     const profile = useProfileStore();
     await settings.loadOfflineEngineStatus();
     expect(settings.localAiStatus.is_ready).toBe(true);
-    expect(settings.localAiStatus.dimensions).toBe(256);
+    expect(settings.localAiStatus.engine_tier).toBe("neural_v2");
+    expect(settings.localAiStatus.reranker_ready).toBe(true);
+    expect(settings.localAiStatus.dimensions).toBe(768);
     expect(settings.scraperMode).toBe("native_rust");
 
     const toggled = await settings.updateScraperMode("python_worker");

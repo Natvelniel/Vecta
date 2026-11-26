@@ -42,25 +42,23 @@ withDefaults(
 <template>
   <svg
     v-if="name === 'mark'"
-    :width="size"
-    :height="size"
-    viewBox="0 0 24 24"
+    :width="Math.round(size * 1.65)"
+    :height="Math.round(size * 0.85)"
+    viewBox="0 0 245 120"
     fill="none"
     aria-hidden="true"
   >
     <path
-      d="M4 5.5L11.2 19.5L20 4.5"
-      stroke="currentColor"
-      stroke-width="2.2"
-      stroke-linecap="square"
-      stroke-linejoin="miter"
+      d="M0 0H58C74 0 83 8 92 20L157 104L146 115C141 119 135 119 126 119H106C97 119 90 115 84 107L0 0Z"
+      fill="currentColor"
     />
     <path
-      d="M14.5 4.5H20V10"
-      stroke="currentColor"
-      stroke-width="2.1"
-      stroke-linecap="square"
-      stroke-linejoin="miter"
+      d="M204 0H244L207 43C199 52 191 55 180 55H143L180 12C187 4 194 0 204 0Z"
+      fill="currentColor"
+    />
+    <path
+      d="M147 67H189L166.5 92L147 67Z"
+      fill="currentColor"
     />
   </svg>
 

@@ -1,7 +1,7 @@
 use crate::core::db::{JobMatchRecord, JobMatchUpsert, ProfileMatchRecord};
 use crate::error::AppError;
 use crate::models::job::JobMatchSkillRef;
-use crate::models::profile::ExperienceLevel;
+use crate::models::profile::{ExperienceLevel, Proficiency};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ComputedMatch {
@@ -9,8 +9,72 @@ pub struct ComputedMatch {
     pub skill_overlap_score: f64,
     pub level_score: f64,
     pub final_score: f64,
+    pub domain_score: Option<f64>,
+    pub reranker_score: Option<f64>,
+    pub match_explanation: Vec<String>,
     pub matched_skills: Vec<JobMatchSkillRef>,
     pub missing_skills: Vec<JobMatchSkillRef>,
+}
+
+pub fn quantize_i8_vec(vec: &[f32]) -> (f32, Vec<i8>) {
+    let max_abs = vec.iter().fold(0.0f32, |m, &v| m.max(v.abs()));
+    let scale = if max_abs > 1e-8 { max_abs / 127.0 } else { 1.0 };
+    let inv = 1.0 / scale;
+    let q = vec
+        .iter()
+        .map(|&v| (v * inv).round().clamp(-127.0, 127.0) as i8)
+        .collect();
+    (scale, q)
+}
+
+pub fn encode_embedding_i8(vec: &[f32]) -> Vec<u8> {
+    let (scale, q) = quantize_i8_vec(vec);
+    let mut out = Vec::with_capacity(4 + q.len());
+    out.extend_from_slice(&scale.to_le_bytes());
+    for v in q {
+        out.push(v as u8);
+    }
+    out
+}
+
+pub fn cosine_i8_bytes(a: &[u8], b: &[u8]) -> Option<f64> {
+    if a.len() < 5 || a.len() != b.len() {
+        return None;
+    }
+    let sa = f32::from_le_bytes([a[0], a[1], a[2], a[3]]) as f64;
+    let sb = f32::from_le_bytes([b[0], b[1], b[2], b[3]]) as f64;
+    if !sa.is_finite() || !sb.is_finite() {
+        return None;
+    }
+    let mut dot = 0.0f64;
+    let mut na = 0.0f64;
+    let mut nb = 0.0f64;
+    for (&ba, &bb) in a[4..].iter().zip(b[4..].iter()) {
+        let xa = ((ba as i8) as f64) * sa;
+        let yb = ((bb as i8) as f64) * sb;
+        dot += xa * yb;
+        na += xa * xa;
+        nb += yb * yb;
+    }
+    let denom = na.sqrt() * nb.sqrt();
+    if denom == 0.0 || !denom.is_finite() {
+        return None;
+    }
+    Some((dot / denom).clamp(0.0, 1.0))
+}
+
+/// Calibrate raw multilingual-e5-base cosine similarity ([0.72..0.93]) into an intuitive [0.0..1.0] scale.
+pub fn calibrate_e5_cosine(raw: f64) -> f64 {
+    let c = raw.clamp(0.0, 1.0);
+    if c <= 0.72 {
+        (c / 0.72) * 0.15
+    } else if c <= 0.82 {
+        0.15 + ((c - 0.72) / 0.10) * 0.45
+    } else if c <= 0.92 {
+        0.60 + ((c - 0.82) / 0.10) * 0.35
+    } else {
+        (0.95 + ((c - 0.92) / 0.08) * 0.05).clamp(0.0, 1.0)
+    }
 }
 
 pub fn encode_embedding(vec: &[f32]) -> Vec<u8> {
@@ -70,6 +134,56 @@ pub fn level_compatibility(user: ExperienceLevel, job: ExperienceLevel) -> f64 {
             _ => 0.00,
         },
         _ => 0.75,
+    }
+}
+
+pub fn asymmetric_level_compatibility(user: ExperienceLevel, job: ExperienceLevel) -> f64 {
+    match (user.ordinal(), job.ordinal()) {
+        (Some(u), Some(j)) => {
+            if u == j {
+                1.00
+            } else if u > j {
+                match u - j {
+                    1 => 0.85,
+                    2 => 0.60,
+                    _ => 0.35,
+                }
+            } else {
+                match j - u {
+                    1 => 0.55,
+                    2 => 0.20,
+                    _ => 0.05,
+                }
+            }
+        }
+        _ => 0.78,
+    }
+}
+
+pub fn compute_neural_domain_score(user_domain: Option<&str>, job_domain: &str) -> Option<f64> {
+    let u = user_domain?.trim();
+    let j = job_domain.trim();
+    if u.is_empty() || j.is_empty() {
+        return None;
+    }
+    if u.eq_ignore_ascii_case(j) {
+        return Some(1.0);
+    }
+    if u.eq_ignore_ascii_case("umum_lintas_bidang")
+        || j.eq_ignore_ascii_case("umum_lintas_bidang")
+        || u.eq_ignore_ascii_case("soft_skills_bahasa_umum")
+        || j.eq_ignore_ascii_case("soft_skills_bahasa_umum")
+    {
+        return Some(0.65);
+    }
+    Some(0.25)
+}
+
+fn proficiency_weight(prof: Proficiency) -> f64 {
+    match prof {
+        Proficiency::Advanced => 1.0,
+        Proficiency::Intermediate => 0.88,
+        Proficiency::Beginner => 0.68,
     }
 }
 
@@ -237,9 +351,40 @@ fn compute_hybrid_match_with_precomputed(
     job: &JobMatchRecord,
     local_context_fallback: Option<f64>,
 ) -> ComputedMatch {
-    let valid_vector = match (user_emb, job.embedding.as_deref()) {
-        (Some(u_emb), Some(j_bytes)) => u_emb.cosine_with_bytes(j_bytes),
-        _ => None,
+    let has_multifacet = (user.emb_role.is_some() && job.emb_role.is_some())
+        || (user.emb_story.is_some() && job.emb_context.is_some())
+        || (user.emb_skills.is_some() && job.emb_skills.is_some());
+
+    let mut multifacet_weighted_sum = 0.0f64;
+    let mut multifacet_weight_total = 0.0f64;
+    if has_multifacet {
+        if let (Some(ur), Some(jr)) = (user.emb_role.as_deref(), job.emb_role.as_deref()) {
+            if let Some(raw) = cosine_i8_bytes(ur, jr) {
+                multifacet_weighted_sum += 0.40 * calibrate_e5_cosine(raw);
+                multifacet_weight_total += 0.40;
+            }
+        }
+        if let (Some(us), Some(jc)) = (user.emb_story.as_deref(), job.emb_context.as_deref()) {
+            if let Some(raw) = cosine_i8_bytes(us, jc) {
+                multifacet_weighted_sum += 0.35 * calibrate_e5_cosine(raw);
+                multifacet_weight_total += 0.35;
+            }
+        }
+        if let (Some(uk), Some(jk)) = (user.emb_skills.as_deref(), job.emb_skills.as_deref()) {
+            if let Some(raw) = cosine_i8_bytes(uk, jk) {
+                multifacet_weighted_sum += 0.25 * calibrate_e5_cosine(raw);
+                multifacet_weight_total += 0.25;
+            }
+        }
+    }
+
+    let valid_vector = if multifacet_weight_total > 0.0 {
+        Some((multifacet_weighted_sum / multifacet_weight_total).clamp(0.0, 1.0))
+    } else {
+        match (user_emb, job.embedding.as_deref()) {
+            (Some(u_emb), Some(j_bytes)) => u_emb.cosine_with_bytes(j_bytes),
+            _ => None,
+        }
     };
 
     let (has_valid_vector, vector_score) = match valid_vector {
@@ -249,6 +394,8 @@ fn compute_hybrid_match_with_precomputed(
             None => (false, 0.0),
         },
     };
+
+    let use_neural_v2 = multifacet_weight_total > 0.0 || user.dominant_domain.is_some();
 
     let mut matched_skills = Vec::new();
     let mut missing_skills = Vec::new();
@@ -271,7 +418,16 @@ fn compute_hybrid_match_with_precomputed(
         };
 
         if user.skill_ids.contains(&row.skill_id) {
-            matched_weight += w;
+            let p_mult = if use_neural_v2 {
+                user.skill_proficiencies
+                    .get(&row.skill_id)
+                    .copied()
+                    .map(proficiency_weight)
+                    .unwrap_or(1.0)
+            } else {
+                1.0
+            };
+            matched_weight += w * p_mult;
             matched_skills.push(skill_ref);
         } else {
             // Parent-Child Partial Credit (0.45x): if the job asks for a parent skill (e.g. Perpajakan or PHP)
@@ -294,20 +450,70 @@ fn compute_hybrid_match_with_precomputed(
         (matched_weight / total_weight).clamp(0.0, 1.0)
     };
 
-    let level_score = level_compatibility(user.experience_level, job.experience_level);
+    let level_score = if use_neural_v2 {
+        asymmetric_level_compatibility(user.experience_level, job.experience_level)
+    } else {
+        level_compatibility(user.experience_level, job.experience_level)
+    };
 
-    let final_score = if has_valid_vector {
+    let domain_score = compute_neural_domain_score(
+        user.dominant_domain.as_deref(),
+        &job.domain_slug,
+    );
+
+    let mut final_score = if use_neural_v2 {
+        let ds = domain_score.unwrap_or(0.65);
+        if has_valid_vector {
+            (0.36 * vector_score)
+                + (0.36 * skill_overlap_score)
+                + (0.14 * level_score)
+                + (0.14 * ds)
+        } else {
+            (0.58 * skill_overlap_score) + (0.22 * level_score) + (0.20 * ds)
+        }
+    } else if has_valid_vector {
         (0.40 * vector_score) + (0.45 * skill_overlap_score) + (0.15 * level_score)
     } else {
         (0.75 * skill_overlap_score) + (0.25 * level_score)
     }
     .clamp(0.0, 1.0);
 
+    let mut match_explanation = Vec::new();
+    if use_neural_v2 {
+        if let Some(ds) = domain_score {
+            if ds <= 0.30 && matched_skills.is_empty() {
+                final_score = final_score.min(0.48);
+                match_explanation.push(
+                    "Lintas bidang tanpa irisan skill inti (skor dibatasi maksimal 48%).".into(),
+                );
+            } else if ds >= 0.99 {
+                match_explanation.push("Bidang utama selaras dengan target profil Anda.".into());
+            }
+        }
+        if !matched_skills.is_empty() {
+            let names: Vec<&str> = matched_skills
+                .iter()
+                .take(3)
+                .map(|s| s.canonical_name.as_str())
+                .collect();
+            match_explanation.push(format!("Skill inti cocok: {}", names.join(", ")));
+        }
+        if multifacet_weight_total > 0.0 && vector_score >= 0.65 {
+            match_explanation.push(format!(
+                "Relevansi semantik multi-faset kuat ({}%).",
+                (vector_score * 100.0).round() as u32
+            ));
+        }
+    }
+
     ComputedMatch {
         vector_score,
         skill_overlap_score,
         level_score,
         final_score,
+        domain_score,
+        reranker_score: None,
+        match_explanation,
         matched_skills,
         missing_skills,
     }
@@ -318,10 +524,25 @@ pub fn to_match_upsert(
     job_id: &str,
     computed: &ComputedMatch,
 ) -> Result<JobMatchUpsert, AppError> {
-    let matched_skills_json = serde_json::to_string(&computed.matched_skills)
-        .map_err(|e| AppError::db_error(format!("Gagal serialisasi matched_skills: {e}")))?;
-    let missing_skills_json = serde_json::to_string(&computed.missing_skills)
-        .map_err(|e| AppError::db_error(format!("Gagal serialisasi missing_skills: {e}")))?;
+    let matched_skills_json = if computed.matched_skills.is_empty() {
+        "[]".to_string()
+    } else {
+        serde_json::to_string(&computed.matched_skills)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi matched_skills: {e}")))?
+    };
+    let missing_skills_json = if computed.missing_skills.is_empty() {
+        "[]".to_string()
+    } else {
+        serde_json::to_string(&computed.missing_skills)
+            .map_err(|e| AppError::db_error(format!("Gagal serialisasi missing_skills: {e}")))?
+    };
+
+    let match_explanation_json = if computed.match_explanation.is_empty() {
+        "[]".to_string()
+    } else {
+        serde_json::to_string(&computed.match_explanation)
+            .unwrap_or_else(|_| "[]".to_string())
+    };
 
     Ok(JobMatchUpsert {
         user_id: user_id.to_string(),
@@ -330,6 +551,9 @@ pub fn to_match_upsert(
         skill_overlap_score: computed.skill_overlap_score,
         level_score: computed.level_score,
         final_score: computed.final_score,
+        domain_score: computed.domain_score,
+        reranker_score: computed.reranker_score,
+        match_explanation_json,
         matched_skills_json,
         missing_skills_json,
     })
@@ -380,6 +604,11 @@ mod tests {
             user_id: "u1".into(),
             experience_level: ExperienceLevel::Junior,
             embedding: Some(user_vec),
+            emb_role: None,
+            emb_skills: None,
+            emb_story: None,
+            dominant_domain: None,
+            skill_proficiencies: Default::default(),
             skill_ids: HashSet::from([1, 3]),
             skill_names_lower: HashSet::new(),
         };
@@ -387,6 +616,10 @@ mod tests {
             job_id: "j1".into(),
             experience_level: ExperienceLevel::Mid,
             embedding: Some(job_vec),
+            emb_role: None,
+            emb_skills: None,
+            emb_context: None,
+            domain_slug: String::new(),
             skills: vec![
                 make_skill_row(1, "Rust", RequirementType::Mandatory),
                 make_skill_row(2, "Docker", RequirementType::Mandatory),
@@ -409,6 +642,11 @@ mod tests {
             user_id: "u1".into(),
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
+            emb_role: None,
+            emb_skills: None,
+            emb_story: None,
+            dominant_domain: None,
+            skill_proficiencies: Default::default(),
             skill_ids: HashSet::from([1]),
             skill_names_lower: HashSet::new(),
         };
@@ -416,6 +654,10 @@ mod tests {
             job_id: "j1".into(),
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[0.6, 0.8])),
+            emb_role: None,
+            emb_skills: None,
+            emb_context: None,
+            domain_slug: String::new(),
             skills: vec![],
         };
 
@@ -431,6 +673,11 @@ mod tests {
             user_id: "u1".into(),
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
+            emb_role: None,
+            emb_skills: None,
+            emb_story: None,
+            dominant_domain: None,
+            skill_proficiencies: Default::default(),
             skill_ids: HashSet::new(),
             skill_names_lower: HashSet::new(),
         };
@@ -438,6 +685,10 @@ mod tests {
             job_id: "j1".into(),
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
+            emb_role: None,
+            emb_skills: None,
+            emb_context: None,
+            domain_slug: String::new(),
             skills: vec![
                 make_skill_row(1, "Rust", RequirementType::Mandatory),
                 make_skill_row(2, "SQL", RequirementType::NiceToHave),
@@ -474,6 +725,11 @@ mod tests {
                 user_id: "u1".into(),
                 experience_level: ExperienceLevel::Junior,
                 embedding: u_emb,
+                emb_role: None,
+                emb_skills: None,
+                emb_story: None,
+                dominant_domain: None,
+                skill_proficiencies: Default::default(),
                 skill_ids: HashSet::from([1]),
                 skill_names_lower: HashSet::new(),
             };
@@ -481,6 +737,10 @@ mod tests {
                 job_id: "j1".into(),
                 experience_level: ExperienceLevel::Junior,
                 embedding: j_emb,
+                emb_role: None,
+                emb_skills: None,
+                emb_context: None,
+                domain_slug: String::new(),
                 skills: base_job_skills.clone(),
             };
 
@@ -517,6 +777,11 @@ mod tests {
             user_id: "u1".into(),
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
+            emb_role: None,
+            emb_skills: None,
+            emb_story: None,
+            dominant_domain: None,
+            skill_proficiencies: Default::default(),
             skill_ids: HashSet::from([42]),
             skill_names_lower: HashSet::new(),
         };
@@ -524,6 +789,10 @@ mod tests {
             job_id: "j1".into(),
             experience_level: ExperienceLevel::Junior,
             embedding: Some(encode_embedding(&[1.0, 0.0])),
+            emb_role: None,
+            emb_skills: None,
+            emb_context: None,
+            domain_slug: String::new(),
             skills: vec![make_skill_row(42, "TypeScript", RequirementType::Mandatory)],
         };
 
@@ -540,6 +809,11 @@ mod tests {
             user_id: "u1".into(),
             experience_level: ExperienceLevel::Mid,
             embedding: Some(encode_embedding(&vec_u)),
+            emb_role: None,
+            emb_skills: None,
+            emb_story: None,
+            dominant_domain: None,
+            skill_proficiencies: Default::default(),
             skill_ids: (1..=10).collect(),
             skill_names_lower: HashSet::new(),
         };
@@ -548,6 +822,10 @@ mod tests {
                 job_id: format!("job-{idx}"),
                 experience_level: ExperienceLevel::Junior,
                 embedding: Some(encode_embedding(&vec_j)),
+                emb_role: None,
+                emb_skills: None,
+                emb_context: None,
+                domain_slug: String::new(),
                 skills: (5..=15)
                     .map(|sid| make_skill_row(sid, "Skill", RequirementType::Mandatory))
                     .collect(),
@@ -567,5 +845,62 @@ mod tests {
             "1,000 matches took {}ms (must be < 100ms)",
             elapsed.as_millis()
         );
+    }
+
+    #[test]
+    fn neural_v2_asymmetric_level_multifacet_and_domain_gate() {
+        assert!(
+            asymmetric_level_compatibility(ExperienceLevel::Senior, ExperienceLevel::Mid)
+                > asymmetric_level_compatibility(ExperienceLevel::Mid, ExperienceLevel::Senior)
+        );
+
+        let same_vec = encode_embedding_i8(&vec![0.5f32; 768]);
+        let mut profs = std::collections::HashMap::new();
+        profs.insert(1i64, Proficiency::Advanced);
+
+        let user = ProfileMatchRecord {
+            user_id: "u1".into(),
+            experience_level: ExperienceLevel::Mid,
+            embedding: None,
+            emb_role: Some(same_vec.clone()),
+            emb_skills: Some(same_vec.clone()),
+            emb_story: Some(same_vec.clone()),
+            dominant_domain: Some("ekonomi_akuntansi_pajak".into()),
+            skill_proficiencies: profs,
+            skill_ids: HashSet::from([1]),
+            skill_names_lower: HashSet::new(),
+        };
+
+        let mismatched_job = JobMatchRecord {
+            job_id: "j-bad".into(),
+            experience_level: ExperienceLevel::Mid,
+            embedding: None,
+            emb_role: Some(same_vec.clone()),
+            emb_skills: Some(same_vec.clone()),
+            emb_context: Some(same_vec.clone()),
+            domain_slug: "informatika_data".into(),
+            skills: vec![make_skill_row(99, "Kubernetes", RequirementType::Mandatory)],
+        };
+        let bad_match = compute_hybrid_match(&user, &mismatched_job);
+        assert!(
+            bad_match.final_score <= 0.48,
+            "cross-domain zero-skill match must be capped <= 0.48, got {}",
+            bad_match.final_score
+        );
+        assert!(!bad_match.match_explanation.is_empty());
+
+        let matched_job = JobMatchRecord {
+            job_id: "j-good".into(),
+            experience_level: ExperienceLevel::Mid,
+            embedding: None,
+            emb_role: Some(same_vec.clone()),
+            emb_skills: Some(same_vec.clone()),
+            emb_context: Some(same_vec),
+            domain_slug: "ekonomi_akuntansi_pajak".into(),
+            skills: vec![make_skill_row(1, "Akuntansi", RequirementType::Mandatory)],
+        };
+        let good_match = compute_hybrid_match(&user, &matched_job);
+        assert!(good_match.final_score > 0.90);
+        assert_eq!(good_match.domain_score, Some(1.0));
     }
 }

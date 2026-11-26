@@ -67,10 +67,15 @@ impl AppState {
             .filter(|m| matches!(m.as_str(), "native_rust" | "python_worker"))
             .unwrap_or_else(|| "native_rust".to_string());
 
-        let model_dirs: Vec<PathBuf> = resource_dirs
+        let mut model_dirs: Vec<PathBuf> = resource_dirs
             .iter()
-            .map(|r| r.join("models").join("potion-m128-i8"))
+            .map(|r| r.join("models").join("neural-v2"))
             .collect();
+        model_dirs.extend(
+            resource_dirs
+                .iter()
+                .map(|r| r.join("models").join("potion-m128-i8")),
+        );
         let font_dirs: Vec<PathBuf> = resource_dirs
             .iter()
             .map(|r| r.join("fonts"))

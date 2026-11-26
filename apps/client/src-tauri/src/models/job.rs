@@ -280,6 +280,12 @@ pub struct JobMatchSummary {
     pub skill_overlap_score: f64,
     pub level_score: f64,
     pub final_score: f64,
+    #[serde(default)]
+    pub domain_score: Option<f64>,
+    #[serde(default)]
+    pub reranker_score: Option<f64>,
+    #[serde(default)]
+    pub match_explanation: Vec<String>,
     pub matched_skills_count: u32,
     pub missing_skills_count: u32,
     pub has_gap_analysis: bool,
@@ -318,6 +324,12 @@ pub struct JobMatchDetail {
     pub skill_overlap_score: f64,
     pub level_score: f64,
     pub final_score: f64,
+    #[serde(default)]
+    pub domain_score: Option<f64>,
+    #[serde(default)]
+    pub reranker_score: Option<f64>,
+    #[serde(default)]
+    pub match_explanation: Vec<String>,
     pub matched_skills: Vec<JobMatchSkillRef>,
     pub missing_skills: Vec<JobMatchSkillRef>,
     pub ai_gap_analysis: Option<GapAnalysis>,

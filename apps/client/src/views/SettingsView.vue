@@ -223,15 +223,22 @@ async function handleImportBackupFile(event: Event) {
           <div>
             <h2 class="t-section">Mesin AI Semantik Offline (Tanpa API Key)</h2>
             <p class="t-secondary" style="margin-top: 4px">
-              Model multilingual 101 bahasa (termasuk Bahasa Indonesia) + taksonomi 23 rumpun prodi
-              (917 skill) berjalan 100% lokal di perangkatmu.
+              <template v-if="settingsStore.localAiStatus.engine_tier === 'neural_v2'">
+                Vecta Neural Engine v2: Bi-Encoder XLM-R {{ settingsStore.localAiStatus.dimensions }} dim,
+                {{ settingsStore.localAiStatus.reranker_ready ? "Cross-Encoder Reranker aktif" : "Reranker nonaktif" }},
+                dan {{ settingsStore.localAiStatus.semantic_index_ready ? "Semantic Index 917 skill / 238 peran siap" : "Taksonomi lokal" }}.
+              </template>
+              <template v-else>
+                Model multilingual 101 bahasa (termasuk Bahasa Indonesia) + taksonomi 23 rumpun prodi
+                (917 skill) berjalan 100% lokal di perangkatmu.
+              </template>
             </p>
           </div>
           <VBadge :tone="settingsStore.localAiStatus.is_ready ? 'success' : 'neutral'" class="t-num">
             <span>
               {{
                 settingsStore.localAiStatus.is_ready
-                  ? `Aktif · ${settingsStore.localAiStatus.dimensions} dim · ${settingsStore.localAiStatus.size_mb} MB`
+                  ? `${settingsStore.localAiStatus.engine_tier === "neural_v2" ? "Neural v2" : "Aktif"} · ${settingsStore.localAiStatus.dimensions} dim · ${settingsStore.localAiStatus.size_mb} MB`
                   : "Mode Taksonomi Lokal"
               }}
             </span>

@@ -267,7 +267,9 @@ async function handleSaveProfile() {
       <div v-if="isFirstRun" style="margin-bottom: var(--space-6)">
         <div class="v-fr-top" style="margin-bottom: var(--space-4)">
           <div class="v-fr-step">
-            <VBadge tone="success" class="t-num">Siap Tanpa API Key</VBadge>
+            <VBadge tone="success" class="t-num">
+              {{ settingsStore.localAiStatus.engine_tier === "neural_v2" ? "Neural Engine v2 Aktif" : "Siap Tanpa API Key" }}
+            </VBadge>
             <span class="t-meta">100% Lokal di Perangkat</span>
           </div>
           <VButton variant="tertiary" size="compact" @click="skipFirstRun">

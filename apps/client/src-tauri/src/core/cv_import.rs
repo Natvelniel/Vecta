@@ -72,7 +72,7 @@ fn infer_candidate_name(text: &str) -> String {
     String::new()
 }
 
-fn infer_city_from_text(text: &str) -> String {
+pub(crate) fn infer_city_from_text(text: &str) -> String {
     const CITIES: &[&str] = &[
         "Jakarta", "Bandung", "Surabaya", "Yogyakarta", "Semarang", "Medan",
         "Makassar", "Denpasar", "Bali", "Tangerang", "Bekasi", "Depok", "Bogor",
