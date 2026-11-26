@@ -212,7 +212,7 @@ const freshnessTag = computed(() => {
           </span>
         </span>
         <span class="t-meta t-num v-job-row__counts">
-          <span style="color: var(--status-success)">{{ job.matched_skills_count }} cocok</span>
+          <span style="color: var(--text-1); font-weight: 600">{{ job.matched_skills_count }} cocok</span>
           <span
             :style="{
               color:
@@ -225,7 +225,7 @@ const freshnessTag = computed(() => {
           </span>
           <span
             v-if="job.is_saved"
-            class="v-job-row__saved animate-bookmark-pop"
+            class="v-job-row__saved"
             aria-label="Tersimpan"
           >
             <VIcon name="bookmarkFill" :size="13" />
@@ -271,24 +271,28 @@ const freshnessTag = computed(() => {
   padding: var(--space-4);
   border-radius: var(--radius-card);
   border: 1px solid transparent;
-  background: var(--bg);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-surface);
   cursor: pointer;
+  touch-action: pan-y;
   transition:
     background-color var(--dur-hover) var(--ease-state),
     border-color var(--dur-hover) var(--ease-state),
-    transform 180ms var(--ease-out);
+    box-shadow var(--dur-hover) var(--ease-state),
+    transform var(--dur-press) ease-out;
 }
-.v-job-row:hover {
-  background: var(--surface-1);
-  border-color: var(--border);
+@media (hover: hover) {
+  .v-job-row:hover {
+    box-shadow: var(--shadow-surface-hover);
+  }
 }
 .v-job-row:active {
-  transform: scale(0.992);
+  transform: scale(0.985);
 }
 .v-job-row[aria-selected="true"] {
   background: var(--surface-1);
-  border-color: var(--brand-border);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--brand);
+  box-shadow: var(--shadow-surface-hover);
 }
 
 .v-job-row__top {
@@ -325,13 +329,15 @@ const freshnessTag = computed(() => {
   align-items: center;
   justify-content: center;
 }
-.v-row-qbtn:hover {
-  border-color: var(--brand-border);
-  color: var(--text-1);
-}
-.v-row-qbtn--dim:hover {
-  border-color: var(--warning-border);
-  color: var(--status-warning);
+@media (hover: hover) {
+  .v-row-qbtn:hover {
+    border-color: var(--brand-border);
+    color: var(--text-1);
+  }
+  .v-row-qbtn--dim:hover {
+    border-color: var(--warning-border);
+    color: var(--status-warning);
+  }
 }
 .v-job-row__titles {
   min-width: 0;
@@ -367,17 +373,19 @@ const freshnessTag = computed(() => {
 }
 
 .v-pill-salary {
-  background: var(--success-soft);
-  color: var(--status-success);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 .v-pill-opp {
-  background: var(--brand-soft);
-  color: var(--text-1);
-  border: 1px solid var(--brand-border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
 }
 .v-pill-fresh[data-tone="new"] {
-  background: var(--info-soft);
-  color: var(--status-info);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 .v-pill-fresh[data-tone="stale"] {
   background: var(--surface-2);
@@ -403,16 +411,18 @@ const freshnessTag = computed(() => {
   color: var(--text-2);
 }
 .v-mode-tag[data-ai="true"] {
-  background: var(--ai-soft);
-  color: var(--ai-accent);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 .v-app-tag {
   background: var(--brand-soft);
   color: var(--text-1);
 }
 .v-trust-tag {
-  background: var(--success-soft);
-  color: var(--status-success);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 .v-warn-tag {
   background: var(--warning-soft);
@@ -424,7 +434,7 @@ const freshnessTag = computed(() => {
   gap: var(--space-3);
 }
 .v-job-row__saved {
-  color: var(--brand-hover);
+  color: var(--text-1);
   display: inline-flex;
 }
 </style>

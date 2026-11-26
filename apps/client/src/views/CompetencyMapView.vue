@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { SkillCategory, SkillImpactItem } from "@/lib/bindings";
 import { useCompetencyStore } from "@/stores/competency";
@@ -35,6 +35,65 @@ const CLUSTERS: Array<{ id: SkillCategory | "all"; label: string }> = [
 const simSkillIds = ref<number[]>([]);
 const simResults = ref<SkillImpactItem[]>([]);
 const simLoading = ref(false);
+const simPanelRef = ref<HTMLElement | null>(null);
+const simPanelVisible = ref(true);
+let simObserver: IntersectionObserver | null = null;
+
+const simAggregate = computed(() => {
+  if (simResults.value.length === 0) {
+    return { totalDelta: 0, maxAffected: 0, totalCrossing75: 0 };
+  }
+  const totalDelta = Number(
+    simResults.value.reduce((acc, item) => acc + (item.avg_score_delta ?? 0), 0).toFixed(1),
+  );
+  const maxAffected = Math.max(...simResults.value.map((i) => i.affected_jobs_count));
+  const totalCrossing75 = simResults.value.reduce(
+    (acc, item) => acc + item.jobs_crossing_75_count,
+    0,
+  );
+  return { totalDelta, maxAffected, totalCrossing75 };
+});
+
+function setupSimObserver() {
+  if (simObserver) {
+    simObserver.disconnect();
+    simObserver = null;
+  }
+  if (typeof IntersectionObserver === "undefined" || !simPanelRef.value) {
+    simPanelVisible.value = true;
+    return;
+  }
+  simObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]) {
+        simPanelVisible.value = entries[0].isIntersecting;
+      }
+    },
+    { threshold: 0.1 },
+  );
+  simObserver.observe(simPanelRef.value);
+}
+
+watch(
+  () => simSkillIds.value.length,
+  async (len) => {
+    if (len > 0) {
+      await nextTick();
+      setupSimObserver();
+    } else {
+      simPanelVisible.value = true;
+      simObserver?.disconnect();
+    }
+  },
+);
+
+onBeforeUnmount(() => {
+  simObserver?.disconnect();
+});
+
+function scrollToSimPanel() {
+  simPanelRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
 
 async function runImpactSimulation() {
   const uid = profileStore.userId;
@@ -213,25 +272,15 @@ async function handleGenerateRoadmap() {
           </div>
         </div>
 
-        <!-- What-If Skill Impact Simulator Summary Bar -->
-        <div v-if="simSkillIds.length > 0" class="v-sim-bar liquid-glass" role="status">
-          <div class="v-sim-bar__info">
+        <!-- What-If Skill Impact Simulator Vertical Architectural Panel -->
+        <section v-if="simSkillIds.length > 0" ref="simPanelRef" class="v-sim-panel" role="status">
+          <div class="v-sim-panel__head">
             <div class="v-sim-head">
               <VIcon name="sparkle" :size="15" />
-              <strong>Simulasi Dampak What-If (0 Token)</strong>
-              <span v-if="simLoading" class="t-meta">Menghitung...</span>
+              <strong>Simulasi What-If</strong>
+              <span class="v-sim-quota t-num">{{ simSkillIds.length }}/3</span>
+              <span class="t-meta">0 Token · Lokal</span>
             </div>
-            <div v-if="!simLoading && simResults.length > 0" class="v-sim-metrics">
-              <span v-for="item in simResults" :key="item.skill_id" class="v-sim-chip t-num">
-                <strong>{{ item.canonical_name }}:</strong>
-                +{{ item.avg_score_delta }}% skor · {{ item.affected_jobs_count }} lowongan
-                <span v-if="item.jobs_crossing_75_count > 0">
-                  ({{ item.jobs_crossing_75_count }} tembus >= 75%)
-                </span>
-              </span>
-            </div>
-          </div>
-          <div class="v-sim-bar__actions">
             <VButton
               variant="tertiary"
               size="compact"
@@ -239,16 +288,87 @@ async function handleGenerateRoadmap() {
             >
               Reset
             </VButton>
+          </div>
+
+          <div v-if="simLoading" class="v-sim-well t-meta">Menghitung dampak pasar lokal...</div>
+
+          <template v-else-if="simResults.length > 0">
+            <div class="v-sim-well" aria-label="Ringkasan dampak simulasi">
+              <div class="v-sim-kpi">
+                <span class="t-meta">Potensi Skor</span>
+                <strong class="v-sim-kpi__val v-sim-kpi__val--accent t-num">
+                  +{{ simAggregate.totalDelta }}%
+                </strong>
+              </div>
+              <div class="v-sim-kpi">
+                <span class="t-meta">Lowongan Naik</span>
+                <strong class="v-sim-kpi__val t-num">{{ simAggregate.maxAffected }}</strong>
+              </div>
+              <div class="v-sim-kpi">
+                <span class="t-meta">Tembus >= 75%</span>
+                <strong
+                  class="v-sim-kpi__val t-num"
+                  :class="{ 'v-sim-kpi__val--accent': simAggregate.totalCrossing75 > 0 }"
+                >
+                  {{ simAggregate.totalCrossing75 }}
+                </strong>
+              </div>
+            </div>
+
+            <div class="v-sim-list">
+              <div v-for="item in simResults" :key="item.skill_id" class="v-sim-item">
+                <div class="v-sim-item__top">
+                  <strong class="v-sim-item__name">{{ item.canonical_name }}</strong>
+                  <button
+                    type="button"
+                    class="v-sim-item__remove"
+                    :aria-label="`Hapus ${item.canonical_name} dari simulasi`"
+                    @click="toggleSimulateSkill(item.skill_id)"
+                  >
+                    <VIcon name="close" :size="13" />
+                  </button>
+                </div>
+                <div class="v-sim-item__metrics t-num">
+                  <span style="color: var(--status-success); font-weight: 600">
+                    +{{ item.avg_score_delta }}% skor
+                  </span>
+                  <span>·</span>
+                  <span>{{ item.affected_jobs_count }} lowongan naik</span>
+                  <template v-if="item.jobs_crossing_75_count > 0">
+                    <span>·</span>
+                    <span style="color: var(--status-success)">
+                      {{ item.jobs_crossing_75_count }} tembus >= 75%
+                    </span>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <div class="v-sim-panel__foot">
             <VButton
               variant="primary"
               size="compact"
+              class="v-sim-cta"
               :loading="roadmapStore.generating"
               @click="handleGenerateRoadmap"
             >
-              Buat Roadmap
+              Buat Roadmap dari Simulasi
             </VButton>
           </div>
-        </div>
+        </section>
+
+        <Transition name="v-sheet-slide">
+          <button
+            v-if="simSkillIds.length > 0 && !simPanelVisible"
+            type="button"
+            class="v-sim-peek"
+            @click="scrollToSimPanel"
+          >
+            <VIcon name="sparkle" :size="13" />
+            <span>Simulasi aktif: {{ simSkillIds.length }}/3 skill · Lihat dampak</span>
+          </button>
+        </Transition>
 
         <div role="region" aria-label="Tabel permintaan kompetensi">
           <div class="v-ledger-head">
@@ -360,10 +480,13 @@ async function handleGenerateRoadmap() {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
 }
 .v-page-container {
   max-width: 1200px;
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding: var(--space-8);
 }
@@ -381,7 +504,7 @@ async function handleGenerateRoadmap() {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-control);
   background: var(--info-soft);
-  border: 1px solid rgba(85, 166, 232, 0.25);
+  border: 1px solid var(--border);
 }
 .v-filter-bar {
   display: flex;
@@ -408,10 +531,16 @@ async function handleGenerateRoadmap() {
   font-size: 13px;
   font-weight: 500;
   border-radius: var(--radius-control);
+  transition: color 140ms ease-out, background-color 140ms ease-out, transform var(--dur-press) ease-out;
 }
-.v-filter-tab:hover {
-  color: var(--text-primary);
-  background: var(--bg-elevated);
+.v-filter-tab:not(:disabled):active {
+  transform: scale(0.96);
+}
+@media (hover: hover) {
+  .v-filter-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+  }
 }
 .v-filter-tab[aria-pressed="true"] {
   color: var(--text-primary);
@@ -447,13 +576,16 @@ async function handleGenerateRoadmap() {
   border-radius: var(--radius-control);
   transition: background var(--dur-hover) var(--ease-state);
 }
-.v-ledger-row:hover {
-  background: var(--bg-elevated);
+@media (hover: hover) {
+  .v-ledger-row:hover {
+    background: var(--bg-elevated);
+  }
 }
 .v-bar-track {
   height: 5px;
   width: 100%;
-  background: var(--bg-hover);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -476,57 +608,173 @@ async function handleGenerateRoadmap() {
   color: var(--text-2);
   font-size: 12px;
   font-weight: 600;
-  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+  box-shadow: var(--shadow-control);
+  transition: transform var(--dur-press) ease-out;
+}
+.v-sim-pill:not(:disabled):active {
+  transform: scale(0.96);
 }
 .v-sim-pill--active {
   background: var(--filter-active-bg);
   border-color: var(--filter-active-border);
   color: var(--filter-active-fg);
 }
-.v-sim-bar {
-  margin-top: var(--space-5);
+.v-sim-panel {
+  margin-bottom: var(--space-5);
   padding: var(--space-4);
   border-radius: var(--radius-card);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--filter-active-border);
+  box-shadow: var(--shadow-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: 100%;
+}
+.v-sim-panel__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-.v-sim-bar__info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 0;
-  flex: 1;
 }
 .v-sim-head {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
+  gap: 7px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--text-1);
+  min-width: 0;
+}
+.v-sim-quota {
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--filter-active-tint);
+  border: 1px solid var(--filter-active-border);
+  color: var(--status-success);
+  font-size: 11px;
+  font-weight: 700;
+}
+.v-sim-well {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
+}
+.v-sim-kpi {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+}
+.v-sim-kpi__val {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
   color: var(--text-1);
 }
-.v-sim-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.v-sim-chip {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: var(--radius-control);
-  background: var(--success-soft);
+.v-sim-kpi__val--accent {
   color: var(--status-success);
 }
-.v-sim-bar__actions {
+.v-sim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.v-sim-item {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v-sim-item__top {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.v-sim-item__name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-1);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v-sim-item__remove {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 140ms ease-out, color 140ms ease-out, transform var(--dur-press) ease-out;
+}
+.v-sim-item__remove:active {
+  transform: scale(0.96);
+}
+.v-sim-item__metrics {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.v-sim-panel__foot {
+  display: flex;
+  justify-content: flex-end;
+}
+.v-sim-peek {
+  position: fixed;
+  left: 50%;
+  bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 35;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--filter-active-border);
+  background: var(--surface-1);
+  color: var(--text-1);
+  box-shadow: var(--shadow-overlay);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+@media (min-width: 1024px) {
+  .v-sim-peek {
+    bottom: 20px;
+  }
 }
 @media (max-width: 1023px) {
   .v-page-container {
     padding: var(--space-5) var(--space-4) var(--space-10);
+  }
+  .v-sim-cta {
+    width: 100%;
   }
   .v-ledger-head {
     display: none;

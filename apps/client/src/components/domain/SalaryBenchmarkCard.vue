@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import type { SalaryBenchmarkSummary } from "@/lib/bindings";
+import { formatLocationClusterLabel } from "@/lib/locationClusters";
 import { ipc } from "@/lib/ipc";
 import VCard from "@/components/ui/VCard.vue";
 
@@ -12,22 +13,8 @@ const selectedCluster = ref<string | null>(null);
 const loading = ref(false);
 const data = ref<SalaryBenchmarkSummary | null>(null);
 
-const CLUSTER_LABELS: Record<string, string> = {
-  jabodetabek: "Jabodetabek",
-  bandung_jabar: "Bandung & Jabar",
-  surabaya_jatim: "Surabaya & Jatim",
-  jogja_jateng: "Jogja & Jateng",
-  bali_ntt: "Bali & NTT",
-  sumatera: "Sumatera",
-  kalimantan: "Kalimantan",
-  sulawesi_timur: "Sulawesi & Timur",
-  remote_indonesia: "Remote ID",
-  luar_negeri: "Luar Negeri",
-  indonesia: "Umum",
-};
-
 function formatCluster(slug: string): string {
-  return CLUSTER_LABELS[slug] ?? slug;
+  return formatLocationClusterLabel(slug);
 }
 
 function formatMillionIdr(val: number | null | undefined): string {
@@ -161,9 +148,9 @@ const medianPct = computed(() => {
   font-weight: 600;
 }
 .v-sb-pill--all {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: var(--brand-fg);
+  background: var(--pill-all-bg);
+  border-color: var(--pill-all-border);
+  color: var(--pill-all-fg);
 }
 .v-sb-pill--manual {
   background: var(--filter-active-bg);

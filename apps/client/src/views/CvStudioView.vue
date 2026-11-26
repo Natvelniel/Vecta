@@ -649,8 +649,9 @@ async function handleExportMasterPdf() {
   font-weight: 600;
 }
 .v-cv-mtab--active {
-  background: var(--brand);
-  color: var(--brand-fg);
+  background: var(--surface-1);
+  color: var(--text-1);
+  box-shadow: var(--shadow-surface);
 }
 .v-sec-head {
   display: flex;

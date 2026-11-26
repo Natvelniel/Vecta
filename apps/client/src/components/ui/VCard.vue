@@ -21,6 +21,7 @@ withDefaults(
   border: 1px solid var(--border-default);
   border-radius: var(--radius-card);
   padding: var(--space-6);
+  box-shadow: var(--shadow-surface);
 }
 .v-card--compact {
   padding: var(--space-5);

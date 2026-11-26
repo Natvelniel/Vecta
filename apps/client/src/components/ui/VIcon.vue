@@ -26,6 +26,7 @@ export type IconName =
   | "trash"
   | "chevronDown"
   | "chevronRight"
+  | "moreVertical"
   | "cv"
   | "aiNode";
 
@@ -49,15 +50,15 @@ withDefaults(
   >
     <path
       d="M4 5.5L11.2 19.5L20 4.5"
-      stroke="var(--brand-hover)"
-      stroke-width="2.4"
+      stroke="currentColor"
+      stroke-width="2.2"
       stroke-linecap="square"
       stroke-linejoin="miter"
     />
     <path
       d="M14.5 4.5H20V10"
-      stroke="var(--brand-hover)"
-      stroke-width="2.2"
+      stroke="currentColor"
+      stroke-width="2.1"
       stroke-linecap="square"
       stroke-linejoin="miter"
     />
@@ -470,6 +471,19 @@ withDefaults(
     aria-hidden="true"
   >
     <path d="M9 18l6-6-6-6" />
+  </svg>
+
+  <svg
+    v-else-if="name === 'moreVertical'"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="5.5" r="1.75" />
+    <circle cx="12" cy="12" r="1.75" />
+    <circle cx="12" cy="18.5" r="1.75" />
   </svg>
 
   <svg

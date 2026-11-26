@@ -54,11 +54,11 @@ withDefaults(
     background var(--dur-hover) var(--ease-state),
     border-color var(--dur-hover) var(--ease-state),
     color var(--dur-hover) var(--ease-state),
-    transform var(--dur-press) var(--ease-out);
+    transform var(--dur-press) ease-out;
 }
 
-.v-btn:active:not(:disabled) {
-  transform: translateY(0.5px);
+.v-btn:not(:disabled):active {
+  transform: scale(0.96);
 }
 
 .v-btn--default {
@@ -78,24 +78,18 @@ withDefaults(
   background: var(--brand);
   color: var(--brand-fg);
   font-weight: 600;
+  box-shadow: var(--shadow-control);
 }
-.v-btn--primary:hover:not(:disabled) {
-  background: var(--brand-hover);
-  color: var(--brand-fg);
-}
-.v-btn--primary:active:not(:disabled) {
+.v-btn--primary:not(:disabled):active {
   background: var(--brand-active);
   color: var(--brand-fg);
-  transform: scale(0.975);
 }
 
 .v-btn--secondary {
   background: var(--bg-elevated);
   border-color: var(--border-default);
   color: var(--text-primary);
-}
-.v-btn--secondary:hover:not(:disabled) {
-  background: var(--bg-hover);
+  box-shadow: var(--shadow-control);
 }
 .v-btn--secondary[aria-pressed="true"] {
   background: var(--brand-soft);
@@ -107,19 +101,12 @@ withDefaults(
   background: var(--ai-soft);
   border-color: var(--ai-border);
   color: var(--ai-accent);
-}
-.v-btn--ai:hover:not(:disabled) {
-  background: rgba(155, 140, 250, 0.2);
-  color: #beb3ff;
+  box-shadow: var(--shadow-control);
 }
 
 .v-btn--tertiary {
   color: var(--text-secondary);
   padding: 0 var(--space-3);
-}
-.v-btn--tertiary:hover:not(:disabled) {
-  background: var(--bg-hover);
-  color: var(--text-primary);
 }
 
 .v-btn--destructive {
@@ -127,8 +114,27 @@ withDefaults(
   border-color: var(--error-border);
   color: var(--status-error);
 }
-.v-btn--destructive:hover:not(:disabled) {
-  background: rgba(240, 113, 120, 0.22);
+
+@media (hover: hover) {
+  .v-btn--primary:hover:not(:disabled) {
+    background: var(--brand-hover);
+    color: var(--brand-fg);
+  }
+  .v-btn--secondary:hover:not(:disabled) {
+    background: var(--bg-hover);
+  }
+  .v-btn--ai:hover:not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--text-1);
+  }
+  .v-btn--tertiary:hover:not(:disabled) {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+  .v-btn--destructive:hover:not(:disabled) {
+    background: var(--error-soft);
+    filter: brightness(1.08);
+  }
 }
 
 .v-btn__spinner {

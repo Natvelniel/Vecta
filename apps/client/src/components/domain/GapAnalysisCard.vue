@@ -20,7 +20,7 @@ const emit = defineEmits<{
 <template>
   <VCard compact style="margin-top: var(--space-6)">
     <div v-if="!analysis" class="v-gap-empty">
-      <div style="flex: 1; min-width: 240px">
+      <div style="flex: 1; min-width: 0; width: 100%">
         <div class="v-gap-title-row">
           <h3 class="t-section">Analisis Gap &amp; Saran CV</h3>
           <VBadge tone="ai">
@@ -135,7 +135,7 @@ const emit = defineEmits<{
 }
 .v-gap-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-8);
 }
 .v-clean-list {

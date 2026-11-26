@@ -330,6 +330,7 @@ function buildPayload(): SearchPreferences_Serialize {
   gap: var(--space-4);
   max-height: 76vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding-right: 2px;
 }
 .v-pref-group {

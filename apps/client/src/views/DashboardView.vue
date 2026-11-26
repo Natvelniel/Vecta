@@ -389,8 +389,10 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
   background: transparent;
   transition: background var(--dur-hover) var(--ease-state);
 }
-.v-list-row:hover {
-  background: var(--bg-elevated);
+@media (hover: hover) {
+  .v-list-row:hover {
+    background: var(--bg-elevated);
+  }
 }
 .v-list-row__inner {
   display: flex;
@@ -457,9 +459,11 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
   border: 1px solid var(--border-divider);
   background: var(--bg-primary);
 }
-.v-action-row:hover {
-  border-color: var(--brand-border);
-  background: var(--bg-hover);
+@media (hover: hover) {
+  .v-action-row:hover {
+    border-color: var(--brand-border);
+    background: var(--bg-hover);
+  }
 }
 .v-action-title {
   display: block;
@@ -494,8 +498,10 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
   background: var(--surface-1);
   color: var(--text-1);
 }
-.v-shortcut-card:hover {
-  border-color: var(--brand-border);
+@media (hover: hover) {
+  .v-shortcut-card:hover {
+    border-color: var(--brand-border);
+  }
 }
 @media (max-width: 1023px) {
   .v-page-container {

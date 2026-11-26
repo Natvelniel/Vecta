@@ -229,6 +229,7 @@ function saveInlineNote(job: NormalizedJobSummary) {
   padding: var(--space-4) var(--space-6) var(--space-8);
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .v-pipe-topbar {
   display: flex;

@@ -152,7 +152,7 @@ function handleNewProfile() {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--status-success);
+  background: var(--text-2);
   flex-shrink: 0;
 }
 .v-ps-name {
@@ -205,6 +205,7 @@ function handleNewProfile() {
   gap: 4px;
   max-height: 220px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .v-ps-item {
   display: flex;
@@ -247,10 +248,6 @@ function handleNewProfile() {
   align-items: center;
   justify-content: center;
 }
-.v-ps-del:hover {
-  color: var(--status-error);
-  background: var(--error-soft);
-}
 .v-ps-new {
   width: 100%;
   height: 34px;
@@ -265,7 +262,13 @@ function handleNewProfile() {
   align-items: center;
   gap: 6px;
 }
-.v-ps-new:hover {
-  border-color: var(--brand);
+@media (hover: hover) {
+  .v-ps-del:hover {
+    color: var(--status-error);
+    background: var(--error-soft);
+  }
+  .v-ps-new:hover {
+    border-color: var(--brand);
+  }
 }
 </style>

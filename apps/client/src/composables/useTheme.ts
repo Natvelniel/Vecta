@@ -21,9 +21,37 @@ function applyThemeToDom(theme: VectaTheme) {
   if (typeof document === "undefined") return;
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
+  // Clear cold-boot inline colors from index.html so CSS theme tokens drive html/body
+  document.documentElement.style.removeProperty("background-color");
+  document.documentElement.style.removeProperty("color");
+  if (document.body) {
+    document.body.style.removeProperty("background-color");
+    document.body.style.removeProperty("color");
+  }
 }
 
 applyThemeToDom(currentTheme.value);
+
+/**
+ * Temporarily suppresses CSS transitions during theme swaps so surface backgrounds
+ * and text never smear across intermediate frames (better-motion pattern).
+ */
+function runWithoutTransitions(commitFn: () => void) {
+  if (typeof document === "undefined") {
+    commitFn();
+    return;
+  }
+  const style = document.createElement("style");
+  style.append(document.createTextNode("*,*::before,*::after{transition:none !important}"));
+  document.head.append(style);
+  commitFn();
+  void document.body.offsetHeight;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      style.remove();
+    });
+  });
+}
 
 export function useTheme() {
   function setTheme(next: VectaTheme, origin?: { x: number; y: number }) {
@@ -41,8 +69,10 @@ export function useTheme() {
     };
 
     const commit = () => {
-      currentTheme.value = next;
-      applyThemeToDom(next);
+      runWithoutTransitions(() => {
+        currentTheme.value = next;
+        applyThemeToDom(next);
+      });
       try {
         window.localStorage.setItem(STORAGE_KEY, next);
       } catch {
@@ -68,8 +98,8 @@ export function useTheme() {
               ],
             },
             {
-              duration: 420,
-              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+              duration: 320,
+              easing: "cubic-bezier(0.2, 0, 0, 1)",
               pseudoElement: "::view-transition-new(root)",
             },
           );

@@ -23,6 +23,7 @@ import {
   formatRelativeDate,
   formatWorkMode,
 } from "@/lib/format";
+import { formatLocationClusterLabel } from "@/lib/locationClusters";
 import { ipc, IpcError, listenScrapeProgress, openExternalUrl } from "@/lib/ipc";
 import { shareOrDownloadPdf } from "@/lib/pdfShare";
 import PageHeader from "@/components/layout/PageHeader.vue";
@@ -30,6 +31,7 @@ import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VIcon from "@/components/ui/VIcon.vue";
 import VSkeleton from "@/components/ui/VSkeleton.vue";
+import LocationClusterSelect from "@/components/ui/LocationClusterSelect.vue";
 import JobListingRow from "@/components/domain/JobListingRow.vue";
 import MatchScorePanel from "@/components/domain/MatchScorePanel.vue";
 import GapAnalysisCard from "@/components/domain/GapAnalysisCard.vue";
@@ -72,6 +74,8 @@ const savingPrefs = ref(false);
 const manualModalRef = ref<InstanceType<typeof ManualJobModal> | null>(null);
 const mobileDetailOpen = ref(false);
 const filtersExpanded = ref(false);
+const mobileMenuOpen = ref(false);
+const mobileMenuRef = ref<HTMLElement | null>(null);
 const watchlistPopoverOpen = ref(false);
 const watchlistName = ref("");
 const aiBarDismissed = ref(false);
@@ -83,19 +87,6 @@ const WORK_MODE_OPTIONS: Array<{ id: WorkMode; label: string }> = [
   { id: "remote", label: "Remote" },
   { id: "hybrid", label: "Hybrid" },
   { id: "onsite", label: "Onsite" },
-];
-
-const LOCATION_CLUSTER_OPTIONS: Array<{ id: string; label: string }> = [
-  { id: "jabodetabek", label: "Jabodetabek" },
-  { id: "bandung_jabar", label: "Bandung & Jabar" },
-  { id: "surabaya_jatim", label: "Surabaya & Jatim" },
-  { id: "jogja_jateng", label: "Jogja & Jateng" },
-  { id: "bali_ntt", label: "Bali & NTT" },
-  { id: "sumatera", label: "Sumatera" },
-  { id: "kalimantan", label: "Kalimantan" },
-  { id: "sulawesi_timur", label: "Sulawesi & Timur" },
-  { id: "remote_indonesia", label: "Remote ID" },
-  { id: "luar_negeri", label: "Luar Negeri" },
 ];
 
 const SOURCE_OPTIONS: Array<{ id: JobSource; label: string }> = [
@@ -181,9 +172,25 @@ async function handleOpenPipelineDetail(jobId: string) {
   mobileDetailOpen.value = true;
 }
 
+function handleMobileMenuOutsideClick(e: MouseEvent) {
+  if (!mobileMenuOpen.value) return;
+  const target = e.target as Node | null;
+  if (mobileMenuRef.value && target && !mobileMenuRef.value.contains(target)) {
+    mobileMenuOpen.value = false;
+  }
+}
+
+function handleMobileMenuKeydown(e: KeyboardEvent) {
+  if (e.key === "Escape" && mobileMenuOpen.value) {
+    mobileMenuOpen.value = false;
+  }
+}
+
 onBeforeUnmount(() => {
   if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
   if (unlistenProgress) unlistenProgress();
+  window.removeEventListener("click", handleMobileMenuOutsideClick);
+  window.removeEventListener("keydown", handleMobileMenuKeydown);
 });
 
 function handleSearchInput(value: string) {
@@ -194,12 +201,20 @@ function handleSearchInput(value: string) {
   }, 220);
 }
 
+function handleLocationClustersChange(nextClusters: string[]) {
+  jobsStore.activeWatchlistId = null;
+  jobsStore.locationClusters = nextClusters;
+  void refreshFilters();
+}
+
 async function handleLoadMore() {
   if (!profileStore.userId) return;
   await jobsStore.loadMoreJobs(profileStore.userId);
 }
 
 onMounted(async () => {
+  window.addEventListener("click", handleMobileMenuOutsideClick);
+  window.addEventListener("keydown", handleMobileMenuKeydown);
   unlistenProgress = await listenScrapeProgress((evt) => {
     jobsStore.progress = evt;
   });
@@ -254,8 +269,7 @@ const activeFilterChips = computed(() => {
     chips.push({ key: `mode:${m}`, kind: "mode", value: m, label: formatWorkMode(m) });
   }
   for (const cl of jobsStore.locationClusters) {
-    const lbl = LOCATION_CLUSTER_OPTIONS.find((o) => o.id === cl)?.label ?? cl;
-    chips.push({ key: `loc:${cl}`, kind: "loc", value: cl, label: lbl });
+    chips.push({ key: `loc:${cl}`, kind: "loc", value: cl, label: formatLocationClusterLabel(cl) });
   }
   for (const src of jobsStore.sources) {
     chips.push({ key: `src:${src}`, kind: "src", value: src, label: formatJobSource(src) });
@@ -633,6 +647,7 @@ async function handleCreateRoadmapFromJob() {
 <template>
   <div class="v-jobs-shell">
     <PageHeader
+      class="v-jobs-desktop-header"
       title="Lowongan"
       compact-mobile
       :subtitle="`${jobsStore.jobs.length} lowongan · ${jobsStore.searchPreferences.location} · ${jobsStore.searchPreferences.sources.length} portal`"
@@ -679,13 +694,13 @@ async function handleCreateRoadmapFromJob() {
       <div class="v-ai-queue-bar__text">
         <VBadge tone="ai">
           <VIcon name="aiNode" :size="12" />
-          <span>Antrean AI</span>
+          <span>AI</span>
         </VBadge>
-        <span class="t-secondary">
+        <span class="t-secondary v-ai-queue-bar__copy">
           <strong class="t-num" style="color: var(--text-primary)">
             {{ jobsStore.pendingLocalCount }}
           </strong>
-          lowongan siap diperkaya AI
+          siap AI
         </span>
       </div>
       <div class="v-ai-queue-bar__actions">
@@ -695,7 +710,7 @@ async function handleCreateRoadmapFromJob() {
           :loading="jobsStore.runningAiQueue"
           @click="handleRunAiQueue"
         >
-          <VIcon name="aiNode" :size="13" />
+          <VIcon v-if="!jobsStore.runningAiQueue" name="aiNode" :size="13" />
           <span>Jalankan ({{ jobsStore.searchPreferences.ai_enrich_max_jobs }})</span>
         </VButton>
         <button
@@ -740,7 +755,7 @@ async function handleCreateRoadmapFromJob() {
       </VButton>
     </div>
 
-    <!-- Segmented Switch: Eksplorasi vs Lamaran Saya -->
+    <!-- Segmented Switch: Eksplorasi vs Lamaran Saya (+ Compact Mobile Primary Actions) -->
     <div class="v-jobs-mode-bar">
       <div class="v-jobs-tabs" role="tablist" aria-label="Mode tampilan lowongan">
         <button
@@ -751,7 +766,8 @@ async function handleCreateRoadmapFromJob() {
           :aria-selected="activeTab === 'explore'"
           @click="activeTab = 'explore'"
         >
-          Eksplorasi
+          <span>Eksplorasi</span>
+          <span class="v-jobs-tab-count v-jobs-tab-count--mobile t-num">{{ jobsStore.jobs.length }}</span>
         </button>
         <button
           type="button"
@@ -761,9 +777,63 @@ async function handleCreateRoadmapFromJob() {
           :aria-selected="activeTab === 'pipeline'"
           @click="activeTab = 'pipeline'"
         >
-          <span>Lamaran Saya</span>
+          <span>Lamaran</span>
           <span class="v-jobs-tab-count t-num">{{ pipelineCount }}</span>
         </button>
+      </div>
+
+      <div class="v-mobile-mode-actions">
+        <VButton
+          variant="primary"
+          size="compact"
+          :loading="jobsStore.scraping"
+          @click="handleRefreshScrape"
+        >
+          <VIcon v-if="!jobsStore.scraping" name="refresh" :size="14" />
+          <span>{{ jobsStore.scraping ? "Ambil..." : "Cari" }}</span>
+        </VButton>
+        <div ref="mobileMenuRef" class="v-mobile-menu-wrap">
+          <button
+            type="button"
+            class="v-overflow-btn"
+            :aria-expanded="mobileMenuOpen"
+            aria-label="Menu aksi lowongan"
+            @click="mobileMenuOpen = !mobileMenuOpen"
+          >
+            <VIcon name="moreVertical" :size="16" />
+          </button>
+          <Transition name="v-dialog-pop">
+            <div v-if="mobileMenuOpen" class="v-mobile-menu-pop" role="menu">
+              <button
+                type="button"
+                class="v-mobile-menu-item"
+                role="menuitem"
+                @click="mobileMenuOpen = false; preferencesOpen = true"
+              >
+                <VIcon name="sliders" :size="14" />
+                <span>Preferensi Pencarian</span>
+              </button>
+              <button
+                type="button"
+                class="v-mobile-menu-item"
+                role="menuitem"
+                @click="mobileMenuOpen = false; manualModalOpen = true"
+              >
+                <VIcon name="plus" :size="14" />
+                <span>Tempel Lowongan Manual</span>
+              </button>
+              <button
+                type="button"
+                class="v-mobile-menu-item"
+                role="menuitem"
+                @click="mobileMenuOpen = false; watchlistPopoverOpen = true"
+              >
+                <VIcon name="bookmark" :size="14" />
+                <span>Simpan Filter Saat Ini</span>
+              </button>
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -819,8 +889,12 @@ async function handleCreateRoadmapFromJob() {
             </button>
           </div>
 
-          <!-- Opportunity Watchlists Strip -->
-          <div class="v-watchlist-strip" aria-label="Watchlist pencarian tersimpan">
+          <!-- Opportunity Watchlists Strip (hidden on mobile when empty to declutter top feed) -->
+          <div
+            class="v-watchlist-strip"
+            :class="{ 'v-watchlist-strip--empty': jobsStore.watchlists.length === 0 }"
+            aria-label="Watchlist pencarian tersimpan"
+          >
             <div
               v-for="wl in jobsStore.watchlists"
               :key="wl.id"
@@ -842,7 +916,7 @@ async function handleCreateRoadmapFromJob() {
 
             <button
               type="button"
-              class="v-wl-add"
+              class="v-wl-add v-hide-xs"
               @click="watchlistPopoverOpen = !watchlistPopoverOpen"
             >
               <VIcon name="plus" :size="12" />
@@ -879,63 +953,50 @@ async function handleCreateRoadmapFromJob() {
           </div>
 
           <!-- Mobile Dimmed Backdrop for Bottom Sheet Filter -->
-          <div
-            v-if="filtersExpanded"
-            class="v-filter-backdrop"
-            aria-hidden="true"
-            @click="filtersExpanded = false"
-          />
+          <Transition name="v-backdrop-fade">
+            <div
+              v-if="filtersExpanded"
+              class="v-filter-backdrop"
+              aria-hidden="true"
+              @click="filtersExpanded = false"
+            />
+          </Transition>
 
-          <!-- Rich Multi-Select Filter Drawer (Desktop inline / Mobile Liquid Glass Bottom Sheet, ZERO Checkmarks) -->
-          <div v-if="filtersExpanded" class="v-filter-drawer liquid-glass" role="dialog" aria-label="Filter lowongan">
-            <div class="v-sheet-grab" aria-hidden="true" />
-            <div class="v-mf-group">
-              <span class="v-mf-label">MODE KERJA</span>
-              <div class="v-mf-pills">
-                <button
-                  type="button"
-                  class="v-mf-pill"
-                  :class="{ 'v-mf-pill--all': jobsStore.workModes.length === 0 }"
-                  @click="jobsStore.clearWorkModes(); refreshFilters()"
-                >
-                  Semua
-                </button>
-                <button
-                  v-for="opt in WORK_MODE_OPTIONS"
-                  :key="opt.id"
-                  type="button"
-                  class="v-mf-pill"
-                  :class="{ 'v-mf-pill--manual': jobsStore.workModes.includes(opt.id) }"
-                  @click="jobsStore.toggleWorkMode(opt.id); refreshFilters()"
-                >
-                  {{ opt.label }}
-                </button>
+          <!-- Rich Multi-Select Filter Drawer (Solid Architectural Surface + Searchable Location Dropdown) -->
+          <Transition name="v-sheet-slide">
+            <div v-if="filtersExpanded" class="v-filter-drawer" role="dialog" aria-label="Filter lowongan">
+              <div class="v-sheet-grab" aria-hidden="true" />
+              <div class="v-mf-group">
+                <span class="v-mf-label">MODE KERJA</span>
+                <div class="v-mf-pills">
+                  <button
+                    type="button"
+                    class="v-mf-pill"
+                    :class="{ 'v-mf-pill--all': jobsStore.workModes.length === 0 }"
+                    @click="jobsStore.clearWorkModes(); refreshFilters()"
+                  >
+                    Semua
+                  </button>
+                  <button
+                    v-for="opt in WORK_MODE_OPTIONS"
+                    :key="opt.id"
+                    type="button"
+                    class="v-mf-pill"
+                    :class="{ 'v-mf-pill--manual': jobsStore.workModes.includes(opt.id) }"
+                    @click="jobsStore.toggleWorkMode(opt.id); refreshFilters()"
+                  >
+                    {{ opt.label }}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div class="v-mf-group">
-              <span class="v-mf-label">LOKASI KLASTER</span>
-              <div class="v-mf-pills">
-                <button
-                  type="button"
-                  class="v-mf-pill"
-                  :class="{ 'v-mf-pill--all': jobsStore.locationClusters.length === 0 }"
-                  @click="jobsStore.clearLocationClusters(); refreshFilters()"
-                >
-                  Semua
-                </button>
-                <button
-                  v-for="loc in LOCATION_CLUSTER_OPTIONS"
-                  :key="loc.id"
-                  type="button"
-                  class="v-mf-pill"
-                  :class="{ 'v-mf-pill--manual': jobsStore.locationClusters.includes(loc.id) }"
-                  @click="jobsStore.toggleLocationCluster(loc.id); refreshFilters()"
-                >
-                  {{ loc.label }}
-                </button>
+              <div class="v-mf-group">
+                <span class="v-mf-label">LOKASI KLASTER (38 PROVINSI, REMOTE &amp; GLOBAL)</span>
+                <LocationClusterSelect
+                  :model-value="jobsStore.locationClusters"
+                  @update:model-value="handleLocationClustersChange"
+                />
               </div>
-            </div>
 
             <div class="v-mf-group">
               <span class="v-mf-label">PORTAL SUMBER</span>
@@ -1070,6 +1131,14 @@ async function handleCreateRoadmapFromJob() {
                 Reset
               </VButton>
               <VButton
+                variant="secondary"
+                size="compact"
+                @click="watchlistPopoverOpen = true; filtersExpanded = false"
+              >
+                <VIcon name="plus" :size="12" />
+                <span>Simpan</span>
+              </VButton>
+              <VButton
                 variant="primary"
                 size="compact"
                 style="margin-left: auto"
@@ -1078,7 +1147,8 @@ async function handleCreateRoadmapFromJob() {
                 Terapkan ({{ jobsStore.jobs.length }} hasil)
               </VButton>
             </div>
-          </div>
+            </div>
+          </Transition>
         </div>
 
         <div class="v-jobs-list">
@@ -1133,7 +1203,7 @@ async function handleCreateRoadmapFromJob() {
             </div>
           </div>
 
-          <TransitionGroup name="job-list" tag="div" class="v-jobs-list-inner">
+          <div class="v-jobs-list-inner">
             <JobListingRow
               v-for="job in jobsStore.jobs"
               :key="job.job_id"
@@ -1143,7 +1213,7 @@ async function handleCreateRoadmapFromJob() {
               @quick-save="handleQuickSave"
               @quick-dismiss="handleQuickDismiss"
             />
-          </TransitionGroup>
+          </div>
 
           <div v-if="jobsStore.hasMore && !jobsStore.loadingList" class="v-load-more">
             <VButton
@@ -1175,8 +1245,7 @@ async function handleCreateRoadmapFromJob() {
           </p>
         </div>
 
-        <Transition v-else name="detail-push" mode="out-in">
-          <div :key="jobsStore.selectedDetail.job_id" class="v-detail-inner">
+        <div v-else :key="jobsStore.selectedDetail.job_id" class="v-detail-inner">
           <div v-if="mobileDetailOpen" class="v-mobile-back">
             <VButton
               variant="tertiary"
@@ -1191,7 +1260,7 @@ async function handleCreateRoadmapFromJob() {
 
           <!-- Section 9.1: Title Most Prominent -->
           <div class="v-detail-head">
-            <div style="flex: 1; min-width: 260px">
+            <div style="flex: 1; min-width: 0; width: 100%">
               <div class="v-detail-title-row">
                 <h2 class="t-page">{{ jobsStore.selectedDetail.title }}</h2>
                 <VBadge
@@ -1504,8 +1573,7 @@ async function handleCreateRoadmapFromJob() {
             </summary>
             <pre class="v-raw-desc__body">{{ jobsStore.selectedDetail.raw_description }}</pre>
           </details>
-          </div>
-        </Transition>
+        </div>
       </section>
     </div>
 
@@ -1544,22 +1612,27 @@ async function handleCreateRoadmapFromJob() {
 }
 .v-jobs-mode-bar {
   flex-shrink: 0;
-  padding: 6px var(--space-8);
-  border-bottom: 1px solid var(--border-divider);
+  padding: var(--space-2) var(--space-8) var(--space-1);
   background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 .v-jobs-tabs {
   display: inline-flex;
-  gap: 4px;
+  gap: 3px;
   padding: 3px;
-  border-radius: var(--radius-control);
+  border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--surface-2);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
+  min-width: 0;
 }
 .v-jobs-tab {
   height: 30px;
   padding: 0 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 7px;
   border: 0;
   background: transparent;
   color: var(--text-2);
@@ -1568,16 +1641,84 @@ async function handleCreateRoadmapFromJob() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
+  transition: color 140ms ease-out, background-color 140ms ease-out, transform var(--dur-press) ease-out;
+}
+.v-jobs-tab:not(:disabled):active {
+  transform: scale(0.96);
 }
 .v-jobs-tab--active {
-  background: var(--brand);
-  color: var(--brand-fg);
+  background: var(--surface-1);
+  color: var(--text-1);
+  box-shadow: var(--shadow-control);
 }
 .v-jobs-tab-count {
   font-size: 11px;
   padding: 1px 6px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.v-jobs-tab-count--mobile {
+  display: none;
+}
+.v-mobile-mode-actions {
+  display: none;
+}
+.v-mobile-menu-wrap {
+  position: relative;
+}
+.v-overflow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-1);
+  box-shadow: var(--shadow-control);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 140ms ease-out, transform var(--dur-press) ease-out;
+}
+.v-overflow-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+.v-mobile-menu-pop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 210px;
+  padding: 6px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-overlay), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 45;
+}
+.v-mobile-menu-item {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: var(--radius-control);
+  border: 0;
+  background: transparent;
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  transition: background-color 140ms ease-out;
+}
+@media (hover: hover) {
+  .v-mobile-menu-item:hover {
+    background: var(--surface-hover);
+  }
 }
 .v-company-link {
   border: 0;
@@ -1590,9 +1731,11 @@ async function handleCreateRoadmapFromJob() {
   text-underline-offset: 3px;
   cursor: pointer;
 }
-.v-company-link:hover {
-  color: var(--brand-hover);
-  text-decoration-color: var(--brand-hover);
+@media (hover: hover) {
+  .v-company-link:hover {
+    color: var(--brand-hover);
+    text-decoration-color: var(--brand-hover);
+  }
 }
 .v-salary-market-chip {
   font-size: 11px;
@@ -1654,25 +1797,31 @@ async function handleCreateRoadmapFromJob() {
 }
 .v-ai-queue-bar {
   flex-shrink: 0;
-  padding: 10px var(--space-8);
+  padding: 8px var(--space-8);
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-divider);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .v-ai-queue-bar__text {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  flex-wrap: wrap;
+  min-width: 0;
+}
+.v-ai-queue-bar__copy {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .v-ai-queue-bar__actions {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex-shrink: 0;
 }
 .v-icon-dismiss {
   width: 30px;
@@ -1685,9 +1834,11 @@ async function handleCreateRoadmapFromJob() {
   align-items: center;
   justify-content: center;
 }
-.v-icon-dismiss:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .v-icon-dismiss:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
 }
 .v-detail-title-row {
   display: flex;
@@ -1701,9 +1852,12 @@ async function handleCreateRoadmapFromJob() {
   border-radius: var(--radius-card);
   border: 1px solid var(--border-default);
   background: var(--bg-secondary);
+  box-shadow: var(--shadow-surface);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  min-width: 0;
+  max-width: 100%;
 }
 .v-redflag-box {
   margin-top: var(--space-4);
@@ -1748,15 +1902,19 @@ async function handleCreateRoadmapFromJob() {
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
 }
 .v-note-input {
-  flex: 1;
-  min-width: 200px;
-  height: 34px;
+  flex: 1 1 160px;
+  min-width: 0;
+  max-width: 100%;
+  height: 36px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-control);
   border: 1px solid var(--border-input);
-  background: var(--bg-primary);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
   color: var(--text-primary);
   font-size: 13px;
 }
@@ -1799,8 +1957,9 @@ async function handleCreateRoadmapFromJob() {
   height: 40px;
   padding: 0 var(--space-2) 0 var(--space-3);
   border-radius: var(--radius-control);
-  border: 1px solid var(--border-input);
-  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1842,12 +2001,17 @@ async function handleCreateRoadmapFromJob() {
   border: 1px solid var(--border-default);
   background: var(--bg-elevated);
   color: var(--text-primary);
+  box-shadow: var(--shadow-control);
   font-size: 13px;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  transition: background-color 140ms ease-out, border-color 140ms ease-out, transform var(--dur-press) ease-out;
+}
+.v-filter-toggle:not(:disabled):active {
+  transform: scale(0.96);
 }
 .v-filter-toggle--active {
   background: var(--brand-soft);
@@ -1859,7 +2023,7 @@ async function handleCreateRoadmapFromJob() {
   padding: 0 5px;
   border-radius: var(--radius-full);
   background: var(--brand-primary);
-  color: #ffffff;
+  color: var(--brand-fg);
   font-size: 11px;
   font-weight: 600;
   display: inline-flex;
@@ -1949,8 +2113,14 @@ async function handleCreateRoadmapFromJob() {
   display: inline-flex;
   align-items: center;
 }
-.v-wl-del:hover {
-  color: var(--status-error);
+@media (hover: hover) {
+  .v-wl-del:hover {
+    color: var(--status-error);
+  }
+  .v-wl-add:hover {
+    border-color: var(--brand);
+    color: var(--text-1);
+  }
 }
 .v-wl-add {
   flex-shrink: 0;
@@ -1965,10 +2135,6 @@ async function handleCreateRoadmapFromJob() {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-}
-.v-wl-add:hover {
-  border-color: var(--brand);
-  color: var(--text-1);
 }
 .v-wl-form {
   display: flex;
@@ -2011,38 +2177,36 @@ async function handleCreateRoadmapFromJob() {
   color: var(--text-2);
   font-size: 12px;
   font-weight: 600;
-  transition:
-    background-color 150ms var(--ease-out),
-    border-color 150ms var(--ease-out),
-    color 150ms var(--ease-out),
-    transform 100ms ease;
+  transition: transform var(--dur-press) ease-out;
 }
-.v-mf-pill:hover {
-  background: var(--surface-hover);
-  color: var(--text-1);
+.v-mf-pill:not(:disabled):active {
+  transform: scale(0.96);
 }
-.v-mf-pill:active {
-  transform: scale(0.95);
-}
-/* Active "Semua" pill = Theme primary accent (Indigo Dark / Jet Black Light) */
+/* Active "Semua" pill = Quiet selected monochrome (never competes with primary CTA) */
 .v-mf-pill--all {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: var(--brand-fg);
+  background: var(--pill-all-bg);
+  border-color: var(--pill-all-border);
+  color: var(--pill-all-fg);
 }
-.v-mf-pill--all:hover {
-  background: var(--brand-hover);
-  color: var(--brand-fg);
-}
-/* Active Manual Multi-Select Pill = Distinct Emerald Green (ZERO checkmarks) */
+/* Active Manual Multi-Select Pill = Calibrated Pine Emerald WCAG AA (ZERO checkmarks) */
 .v-mf-pill--manual {
   background: var(--filter-active-bg);
   border-color: var(--filter-active-border);
   color: var(--filter-active-fg);
 }
-.v-mf-pill--manual:hover {
-  background: var(--filter-active-hover);
-  color: var(--filter-active-fg);
+@media (hover: hover) {
+  .v-mf-pill:hover {
+    background: var(--surface-hover);
+    color: var(--text-1);
+  }
+  .v-mf-pill--all:hover {
+    background: var(--pill-all-bg);
+    color: var(--pill-all-fg);
+  }
+  .v-mf-pill--manual:hover {
+    background: var(--filter-active-hover);
+    color: var(--filter-active-fg);
+  }
 }
 .v-jobs-list-inner {
   display: flex;
@@ -2104,6 +2268,9 @@ async function handleCreateRoadmapFromJob() {
   border: 1px solid var(--border-divider);
   border-radius: var(--radius-card);
   background: var(--bg-secondary);
+  box-shadow: var(--shadow-surface);
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
 }
 .v-raw-desc__summary {
@@ -2121,8 +2288,10 @@ async function handleCreateRoadmapFromJob() {
 .v-raw-desc__summary::-webkit-details-marker {
   display: none;
 }
-.v-raw-desc__summary:hover {
-  background: var(--bg-elevated);
+@media (hover: hover) {
+  .v-raw-desc__summary:hover {
+    background: var(--bg-elevated);
+  }
 }
 .v-raw-desc__body {
   margin: 0;
@@ -2135,6 +2304,7 @@ async function handleCreateRoadmapFromJob() {
   color: var(--text-secondary);
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .v-jobs-list {
   flex: 1;
@@ -2151,10 +2321,15 @@ async function handleCreateRoadmapFromJob() {
 .v-jobs-detail {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   overflow-y: auto;
+  overflow-x: clip;
+  touch-action: pan-y;
   padding: var(--space-6) var(--space-10) var(--space-12);
 }
 .v-detail-inner {
+  min-width: 0;
+  width: 100%;
   max-width: 780px;
   margin: 0 auto;
 }
@@ -2172,12 +2347,15 @@ async function handleCreateRoadmapFromJob() {
   justify-content: space-between;
   gap: var(--space-5);
   flex-wrap: wrap;
+  min-width: 0;
 }
 .v-detail-actions {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  flex-shrink: 0;
+  flex-wrap: wrap;
+  flex-shrink: 1;
+  max-width: 100%;
 }
 .v-missing-head {
   display: flex;
@@ -2235,8 +2413,10 @@ async function handleCreateRoadmapFromJob() {
   font-size: 12px;
   font-weight: 500;
 }
-.v-gap-chip__add:hover {
-  background: rgba(240, 184, 90, 0.18);
+@media (hover: hover) {
+  .v-gap-chip__add:hover {
+    background: var(--warning-soft);
+  }
 }
 
 @media (max-width: 1279px) {
@@ -2258,8 +2438,31 @@ async function handleCreateRoadmapFromJob() {
 }
 
 @media (max-width: 1023px) {
+  .v-jobs-desktop-header {
+    display: none;
+  }
   .v-jobs-mode-bar {
-    padding: 6px var(--space-4);
+    padding: 8px var(--space-3) 4px;
+    border-bottom: 1px solid var(--border-divider);
+  }
+  .v-jobs-tab {
+    padding: 0 10px;
+  }
+  .v-jobs-tab-count--mobile {
+    display: inline-flex;
+  }
+  .v-mobile-mode-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .v-watchlist-strip--empty {
+    display: none;
+  }
+  .v-jobs-filters {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 0;
   }
   .v-hide-xs {
     display: none;
@@ -2269,8 +2472,7 @@ async function handleCreateRoadmapFromJob() {
     position: fixed;
     inset: 0;
     z-index: 60;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.56);
   }
   .v-sheet-grab {
     display: block;
@@ -2288,12 +2490,13 @@ async function handleCreateRoadmapFromJob() {
     bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     z-index: 61;
     max-height: calc(100dvh - 152px);
-    padding: 12px var(--space-4) 12px;
+    padding: 14px var(--space-4) 12px;
     border-radius: 20px;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-overlay);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-overlay), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     background: var(--surface-1);
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .v-filter-drawer__foot {
     position: sticky;
@@ -2305,27 +2508,41 @@ async function handleCreateRoadmapFromJob() {
   .v-jobs-shell {
     height: auto;
     min-height: 100%;
-    overflow: visible;
+    max-width: 100%;
+    overflow-x: clip;
   }
   .v-jobs-split {
-    overflow: visible;
+    overflow-x: clip;
+    max-width: 100%;
     flex: none;
   }
   .v-jobs-banner,
   .v-progress-bar,
   .v-ai-queue-bar {
-    padding: var(--space-2) var(--space-4);
+    padding: 6px var(--space-3);
   }
   .v-jobs-rail {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     border-right: 0;
-    overflow: visible;
+    overflow-x: clip;
   }
   .v-jobs-list {
     overflow: visible;
   }
   .v-jobs-detail {
-    padding: var(--space-5) var(--space-4) var(--space-10);
+    padding: var(--space-4) var(--space-3) var(--space-10);
+  }
+  .v-detail-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  .v-detail-actions :deep(.v-btn) {
+    width: 100%;
+    min-width: 0;
   }
   .v-mobile-back {
     display: block;

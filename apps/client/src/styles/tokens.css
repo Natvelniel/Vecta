@@ -40,71 +40,88 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* Core Dual-Theme Tokens (Obsidian Studio Monochrome) */
+  /* Monochrome Architectural Obsidian (Pure Graphite + 1 Calibrated Pine Emerald) */
   --bg: #09090b;
-  --surface-1: #121215;
-  --surface-2: #18181b;
-  --surface-hover: #222226;
-  --border: #27272a;
-  --border-strong: #3f3f46;
+  --surface-recessed: #050507;
+  --surface-1: #141418;
+  --surface-2: #1c1c21;
+  --surface-hover: #26262c;
+  --border: #28282e;
+  --border-strong: #6c6c78;
 
-  --text-1: #fafafa;
-  --text-2: #a1aaB8;
-  --text-3: #71717a;
+  --text-1: #f4f4f5;
+  --text-2: #a8a8b2;
+  --text-3: #8c8c98;
 
-  --brand: #5e6ad2;
-  --brand-hover: #6e7bf2;
-  --brand-active: #4c57bd;
-  --brand-fg: #ffffff;
-  --brand-soft: rgba(94, 106, 210, 0.16);
-  --brand-border: rgba(94, 106, 210, 0.38);
+  /* High-contrast monochrome primary action */
+  --brand: #f4f4f5;
+  --brand-hover: #ffffff;
+  --brand-active: #d4d4d8;
+  --brand-fg: #09090b;
+  --brand-soft: rgba(255, 255, 255, 0.08);
+  --brand-border: rgba(255, 255, 255, 0.22);
 
-  /* Multi-Filter Manual Pill Accent (Emerald Green - clearly distinct from "Semua") */
-  --filter-active-bg: #059669;
-  --filter-active-hover: #10b981;
+  /* Quiet "Semua" Pill State (never fights primary CTA) */
+  --pill-all-bg: #26262b;
+  --pill-all-border: rgba(255, 255, 255, 0.34);
+  --pill-all-fg: #f4f4f5;
+
+  /* Multi-Filter Manual Pill Accent (Deep Pine Emerald, 5.48:1 WCAG AA with #FFFFFF) */
+  --filter-active-bg: #047857;
+  --filter-active-hover: #059669;
   --filter-active-fg: #ffffff;
-  --filter-active-tint: rgba(16, 185, 129, 0.16);
-  --filter-active-border: rgba(52, 211, 153, 0.48);
+  --filter-active-tint: rgba(16, 185, 129, 0.14);
+  --filter-active-border: #10b981;
 
-  /* Liquid Glass Controls (Floating Dock, Sticky Search Bar, Overlays) */
-  --glass-bg: rgba(18, 18, 22, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.11);
+  /* Architectural Liquid Glass (ONLY for Floating Bottom Navigation Pill) */
+  --glass-bg: rgba(20, 20, 24, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.12);
   --glass-specular: rgba(255, 255, 255, 0.16);
-  --glass-pill: rgba(94, 106, 210, 0.24);
-  --glass-pill-border: rgba(255, 255, 255, 0.18);
-  --glass-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  --glass-pill: rgba(255, 255, 255, 0.11);
+  --glass-pill-border: rgba(255, 255, 255, 0.16);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 16px 40px -8px rgba(0, 0, 0, 0.70);
 
-  --ambient-glow-1: rgba(94, 106, 210, 0.14);
-  --ambient-glow-2: rgba(52, 211, 153, 0.08);
+  /* 5-Layer Architectural Depth Tokens */
+  --shadow-recessed: inset 0 1px 2px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-surface:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 4px 14px -4px rgba(0, 0, 0, 0.48);
+  --shadow-surface-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 8px 22px -6px rgba(0, 0, 0, 0.56);
+  --shadow-control: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 1px 2px rgba(0, 0, 0, 0.42);
+  --shadow-topbar: 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 12px rgba(0, 0, 0, 0.28);
 
-  /* Legacy Aliases (Preserves existing components cleanly) */
+  /* Legacy Aliases */
   --brand-primary: var(--brand);
   --bg-primary: var(--bg);
   --bg-secondary: var(--surface-1);
   --bg-elevated: var(--surface-1);
   --bg-hover: var(--surface-hover);
   --border-default: var(--border);
-  --border-divider: rgba(63, 63, 70, 0.55);
+  --border-divider: rgba(255, 255, 255, 0.08);
   --border-input: var(--border-strong);
   --text-primary: var(--text-1);
   --text-secondary: var(--text-2);
   --text-muted: var(--text-3);
 
-  /* SEMANTIC */
+  /* SEMANTIC (calibrated contrast on #131315 & soft tints, ZERO indigo/violet slop) */
   --status-success: #34d399;
   --status-warning: #fbbf24;
   --status-error: #f87171;
-  --status-info: #60a5fa;
-  --ai-accent: #a78bfa;
+  --status-info: #d4d4d8;
+  --ai-accent: #e4e4e7;
 
-  --ai-soft: rgba(167, 139, 250, 0.14);
-  --ai-border: rgba(167, 139, 250, 0.32);
-  --success-soft: rgba(52, 211, 153, 0.14);
-  --warning-soft: rgba(251, 191, 36, 0.14);
-  --warning-border: rgba(251, 191, 36, 0.30);
+  --ai-soft: rgba(255, 255, 255, 0.06);
+  --ai-border: rgba(255, 255, 255, 0.20);
+  --success-soft: rgba(52, 211, 153, 0.13);
+  --warning-soft: rgba(251, 191, 36, 0.13);
+  --warning-border: rgba(251, 191, 36, 0.32);
   --error-soft: rgba(248, 113, 113, 0.14);
-  --error-border: rgba(248, 113, 113, 0.32);
-  --info-soft: rgba(96, 165, 250, 0.14);
+  --error-border: rgba(248, 113, 113, 0.34);
+  --info-soft: rgba(255, 255, 255, 0.07);
 
   /* TYPOGRAPHY */
   --font-primary: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -129,57 +146,77 @@
   --radius-full: 9999px;
 
   /* MOTION */
-  --dur-press: 110ms;
-  --dur-hover: 160ms;
-  --dur-dropdown: 200ms;
-  --dur-dialog: 240ms;
-  --dur-page: 240ms;
+  --dur-press: 150ms;
+  --dur-hover: 140ms;
+  --dur-dropdown: 180ms;
+  --dur-sheet-in: 240ms;
+  --dur-sheet-out: 140ms;
+  --dur-dialog: 200ms;
+  --dur-page: 160ms;
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-state: ease-in-out;
+  --ease-spring: cubic-bezier(0.2, 0, 0, 1);
+  --ease-state: ease-out;
 
-  --shadow-overlay: 0 20px 48px rgba(0, 0, 0, 0.58);
+  --shadow-overlay: 0 24px 56px -12px rgba(0, 0, 0, 0.76);
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
 
-  /* Swiss Alabaster & Jet Black */
-  --bg: #f5f6f8;
+  /* Swiss Architectural Alabaster & Jet Ink */
+  --bg: #f3f4f6;
+  --surface-recessed: #e6e7eb;
   --surface-1: #ffffff;
-  --surface-2: #edeff3;
-  --surface-hover: #e4e7ee;
-  --border: #dfe3eb;
-  --border-strong: #c7cedb;
+  --surface-2: #ececef;
+  --surface-hover: #e2e2e7;
+  --border: #e0e0e6;
+  --border-strong: #7e7e8a;
 
-  --text-1: #0d0e12;
-  --text-2: #4f5565;
-  --text-3: #7d8597;
+  --text-1: #111113;
+  --text-2: #4c4c54;
+  --text-3: #64646e;
 
-  --brand: #0d0e12;
-  --brand-hover: #242731;
+  /* High-contrast monochrome primary action */
+  --brand: #111113;
+  --brand-hover: #27272a;
   --brand-active: #000000;
   --brand-fg: #ffffff;
-  --brand-soft: rgba(13, 14, 18, 0.08);
-  --brand-border: rgba(13, 14, 18, 0.24);
+  --brand-soft: rgba(17, 17, 19, 0.07);
+  --brand-border: rgba(17, 17, 19, 0.24);
 
-  /* Multi-Filter Manual Pill Accent (Emerald-Teal - contrasts crisply against Jet Black "Semua") */
-  --filter-active-bg: #0d9488;
-  --filter-active-hover: #0f766e;
+  /* Quiet "Semua" Pill State (never fights primary CTA) */
+  --pill-all-bg: #e4e4ea;
+  --pill-all-border: #4c4c54;
+  --pill-all-fg: #111113;
+
+  /* Multi-Filter Manual Pill Accent (Deep Pine Emerald, 5.48:1 WCAG AA with #FFFFFF) */
+  --filter-active-bg: #047857;
+  --filter-active-hover: #065f46;
   --filter-active-fg: #ffffff;
-  --filter-active-tint: rgba(13, 148, 136, 0.13);
-  --filter-active-border: rgba(13, 148, 136, 0.38);
+  --filter-active-tint: rgba(4, 120, 87, 0.10);
+  --filter-active-border: rgba(4, 120, 87, 0.36);
 
-  /* Liquid Glass Controls (Frosted Translucent Paper) */
-  --glass-bg: rgba(255, 255, 255, 0.76);
-  --glass-border: rgba(13, 14, 18, 0.09);
-  --glass-specular: rgba(255, 255, 255, 0.92);
-  --glass-pill: rgba(13, 14, 18, 0.08);
-  --glass-pill-border: rgba(13, 14, 18, 0.14);
-  --glass-shadow: 0 12px 32px rgba(13, 14, 18, 0.10);
+  /* Architectural Liquid Glass (ONLY for Floating Bottom Navigation Pill) */
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(17, 17, 19, 0.10);
+  --glass-specular: rgba(255, 255, 255, 0.95);
+  --glass-pill: rgba(17, 17, 19, 0.08);
+  --glass-pill-border: rgba(17, 17, 19, 0.12);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 12px 32px -6px rgba(17, 17, 19, 0.14);
 
-  --ambient-glow-1: rgba(13, 148, 136, 0.08);
-  --ambient-glow-2: rgba(94, 106, 210, 0.07);
+  /* 5-Layer Architectural Depth Tokens */
+  --shadow-recessed: inset 0 1px 2px rgba(17, 17, 19, 0.08), 0 1px 0 rgba(255, 255, 255, 0.75);
+  --shadow-surface:
+    0 0 0 1px rgba(17, 17, 19, 0.06),
+    0 1px 3px 0 rgba(17, 17, 19, 0.06),
+    0 4px 12px -4px rgba(17, 17, 19, 0.05);
+  --shadow-surface-hover:
+    0 0 0 1px rgba(17, 17, 19, 0.11),
+    0 3px 8px -2px rgba(17, 17, 19, 0.09),
+    0 8px 18px -6px rgba(17, 17, 19, 0.06);
+  --shadow-control: 0 0 0 1px rgba(17, 17, 19, 0.08), 0 1px 2px rgba(17, 17, 19, 0.07);
+  --shadow-topbar: 0 1px 3px rgba(17, 17, 19, 0.06);
 
   /* Aliases */
   --brand-primary: var(--brand);
@@ -188,27 +225,27 @@
   --bg-elevated: var(--surface-1);
   --bg-hover: var(--surface-hover);
   --border-default: var(--border);
-  --border-divider: rgba(203, 209, 220, 0.65);
+  --border-divider: rgba(17, 17, 19, 0.08);
   --border-input: var(--border-strong);
   --text-primary: var(--text-1);
   --text-secondary: var(--text-2);
   --text-muted: var(--text-3);
 
-  /* SEMANTIC (high contrast on light alabaster) */
-  --status-success: #0d9488;
-  --status-warning: #d97706;
-  --status-error: #dc2626;
-  --status-info: #2563eb;
-  --ai-accent: #6d28d9;
+  /* SEMANTIC (100% WCAG 2.1 AA >= 4.5:1 on white & soft tints) */
+  --status-success: #065f46;
+  --status-warning: #92400e;
+  --status-error: #b91c1c;
+  --status-info: #4c4c54;
+  --ai-accent: #18181b;
 
-  --ai-soft: rgba(109, 40, 217, 0.10);
-  --ai-border: rgba(109, 40, 217, 0.28);
-  --success-soft: rgba(13, 148, 136, 0.12);
+  --ai-soft: rgba(17, 17, 19, 0.05);
+  --ai-border: rgba(17, 17, 19, 0.18);
+  --success-soft: rgba(4, 120, 87, 0.10);
   --warning-soft: rgba(217, 119, 6, 0.12);
-  --warning-border: rgba(217, 119, 6, 0.30);
-  --error-soft: rgba(220, 38, 38, 0.10);
-  --error-border: rgba(220, 38, 38, 0.28);
-  --info-soft: rgba(37, 99, 235, 0.10);
+  --warning-border: rgba(146, 64, 14, 0.28);
+  --error-soft: rgba(185, 28, 28, 0.10);
+  --error-border: rgba(185, 28, 28, 0.28);
+  --info-soft: rgba(17, 17, 19, 0.06);
 
-  --shadow-overlay: 0 20px 44px rgba(13, 14, 18, 0.14);
+  --shadow-overlay: 0 24px 48px -10px rgba(17, 17, 19, 0.16);
 }

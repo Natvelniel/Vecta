@@ -139,6 +139,7 @@ function formatSalaryMillion(val: number | null | undefined): string {
   max-width: 520px;
   max-height: 84vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   border-radius: var(--radius-dialog);
   background: var(--surface-1);
   border: 1px solid var(--glass-border);

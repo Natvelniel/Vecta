@@ -657,9 +657,11 @@ async function handleSaveProfile() {
   min-width: 0;
   transition: border-color 140ms ease, background-color 140ms ease, transform 110ms ease;
 }
-.v-prodi-card:hover {
-  border-color: var(--brand);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .v-prodi-card:hover {
+    border-color: var(--brand);
+    background: var(--surface-hover);
+  }
 }
 .v-prodi-card:active {
   transform: scale(0.985);
@@ -853,11 +855,13 @@ async function handleSaveProfile() {
   overflow-wrap: anywhere;
   transition: background var(--dur-hover) var(--ease-state), border-color var(--dur-hover) var(--ease-state);
 }
-.v-kw-btn:hover {
-  background: var(--bg-hover);
+@media (hover: hover) {
+  .v-kw-btn:hover {
+    background: var(--bg-hover);
+  }
 }
 .v-kw-btn[aria-pressed="true"] {
-  background: rgba(36, 59, 117, 0.42);
+  background: var(--brand-soft);
   border-color: var(--brand-border);
 }
 .v-kw-btn__top {

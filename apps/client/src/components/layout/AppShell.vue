@@ -38,15 +38,10 @@ const activeDockIndex = computed(() =>
   mobileDockItems.findIndex((item) => route.path === item.to),
 );
 
-const bouncePath = ref<string | null>(null);
 watch(
   () => route.path,
-  (nextPath) => {
-    bouncePath.value = nextPath;
-    setTimeout(() => {
-      if (bouncePath.value === nextPath) bouncePath.value = null;
-    }, 360);
-    updateDesktopIndicator();
+  () => {
+    void updateDesktopIndicator();
   },
 );
 
@@ -76,11 +71,8 @@ onMounted(() => {
 
 <template>
   <div class="v-shell">
-    <!-- Subtle ambient gradient backdrop behind translucent Liquid Glass surfaces -->
-    <div class="v-ambient" aria-hidden="true" />
-
-    <!-- Mobile Top Micro-Bar (< 1024px) -->
-    <header class="v-mobile-topbar liquid-glass">
+    <!-- Mobile Top Micro-Bar (< 1024px): Solid Architectural Surface -->
+    <header class="v-mobile-topbar">
       <RouterLink to="/dashboard" class="v-brand-link">
         <VIcon name="mark" :size="20" />
         <span class="v-brand-wordmark">Vecta</span>
@@ -146,7 +138,7 @@ onMounted(() => {
             class="v-nav-item"
             :aria-current="route.path === item.to ? 'page' : undefined"
           >
-            <span :class="{ 'animate-nav-bounce': bouncePath === item.to }" class="v-nav-icon">
+            <span class="v-nav-icon">
               <VIcon :name="item.icon" :size="17" />
             </span>
             <span>{{ item.label }}</span>
@@ -214,7 +206,7 @@ onMounted(() => {
           class="v-mobile-tab"
           :aria-current="route.path === item.to ? 'page' : undefined"
         >
-          <span :class="{ 'animate-nav-bounce': bouncePath === item.to }" class="v-dock-icon">
+          <span class="v-dock-icon">
             <VIcon :name="item.icon" :size="20" />
           </span>
           <span class="v-dock-label">{{ item.short }}</span>
@@ -238,16 +230,6 @@ onMounted(() => {
   background: var(--bg);
 }
 
-.v-ambient {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(620px 360px at 14% 8%, var(--ambient-glow-1), transparent 70%),
-    radial-gradient(540px 340px at 86% 88%, var(--ambient-glow-2), transparent 72%);
-}
-
 .v-sidebar {
   position: relative;
   z-index: 2;
@@ -267,6 +249,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   text-decoration: none;
+  color: var(--text-1);
 }
 .v-brand-bar {
   padding: var(--space-2) var(--space-3) var(--space-5);
@@ -295,8 +278,8 @@ onMounted(() => {
   border: 1px solid var(--glass-pill-border);
   box-shadow: inset 0 1px 0 var(--glass-specular);
   transition:
-    transform 300ms var(--ease-spring),
-    height 200ms var(--ease-spring);
+    transform 260ms var(--ease-snappy),
+    height 180ms var(--ease-snappy);
   pointer-events: none;
   z-index: 0;
 }
@@ -319,9 +302,6 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-.v-nav-item:hover {
-  color: var(--text-1);
 }
 .v-nav-item[aria-current="page"] {
   color: var(--text-1);
@@ -372,14 +352,23 @@ onMounted(() => {
   color: var(--text-2);
   font-size: 12.5px;
   font-weight: 500;
-  transition: background-color 150ms ease, color 150ms ease, transform 110ms ease;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    transform var(--dur-press) ease-out;
 }
-.v-theme-toggle:hover {
-  background: var(--surface-hover);
-  color: var(--text-1);
+.v-theme-toggle:not(:disabled):active {
+  transform: scale(0.96);
 }
-.v-theme-toggle:active {
-  transform: scale(0.98);
+
+@media (hover: hover) {
+  .v-nav-item:hover {
+    color: var(--text-1);
+  }
+  .v-theme-toggle:hover {
+    background: var(--surface-hover);
+    color: var(--text-1);
+  }
 }
 
 .v-workspace {
@@ -403,6 +392,8 @@ onMounted(() => {
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  touch-action: pan-y;
+  overscroll-behavior-x: none;
   display: flex;
   flex-direction: column;
 }
@@ -427,24 +418,23 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 48px;
+    min-height: calc(50px + env(safe-area-inset-top, 0px));
     padding: env(safe-area-inset-top, 0px) var(--space-3) 0 var(--space-4);
-    border-top: 0;
-    border-left: 0;
-    border-right: 0;
-    border-radius: 0;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-topbar);
     flex-shrink: 0;
   }
 
   .v-mobile-actions {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 6px;
   }
 
   .v-icon-btn {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-control);
     border: 0;
     background: transparent;
@@ -452,14 +442,19 @@ onMounted(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 140ms ease, color 140ms ease, transform 100ms ease;
+    transition:
+      background-color 140ms ease-out,
+      color 140ms ease-out,
+      transform var(--dur-press) ease-out;
   }
-  .v-icon-btn:hover {
-    background: var(--surface-hover);
-    color: var(--text-1);
+  @media (hover: hover) {
+    .v-icon-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-1);
+    }
   }
-  .v-icon-btn:active {
-    transform: scale(0.92);
+  .v-icon-btn:not(:disabled):active {
+    transform: scale(0.96);
   }
 
   .v-workspace {
@@ -504,7 +499,7 @@ onMounted(() => {
     background: var(--glass-pill);
     border: 1px solid var(--glass-pill-border);
     box-shadow: inset 0 1px 0 var(--glass-specular);
-    transition: transform 320ms var(--ease-spring);
+    transition: transform 260ms var(--ease-snappy);
     pointer-events: none;
     z-index: 0;
   }
@@ -521,11 +516,11 @@ onMounted(() => {
     min-width: 0;
     text-decoration: none;
     color: var(--text-2);
-    transition: color 160ms ease, transform 100ms ease;
+    transition: color 140ms ease-out, transform var(--dur-press) ease-out;
     -webkit-tap-highlight-color: transparent;
   }
   .v-mobile-tab:active {
-    transform: scale(0.94);
+    transform: scale(0.96);
   }
   .v-mobile-tab[aria-current="page"] {
     color: var(--text-1);

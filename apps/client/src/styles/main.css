@@ -33,12 +33,20 @@
     box-sizing: border-box;
   }
 
+  html {
+    scroll-padding-block-start: 64px;
+  }
+
   html, body, #app {
     height: 100%;
     max-width: 100%;
     overflow-x: clip;
     margin: 0;
     padding: 0;
+  }
+
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -51,7 +59,6 @@
     caret-color: var(--brand-hover);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    transition: background-color 220ms var(--ease-out), color 180ms ease-out;
   }
 
   ::selection {
@@ -168,93 +175,51 @@
   mix-blend-mode: normal;
 }
 
-/* 1. Directional Page Depth Transitions */
-.page-forward-enter-active,
-.page-forward-leave-active,
-.page-back-enter-active,
-.page-back-leave-active {
+/* Crisp GPU-only Backdrop, Bottom Sheet & Dialog Transitions (Zero Bounce) */
+.v-backdrop-fade-enter-active {
+  transition: opacity 180ms ease-out;
+}
+.v-backdrop-fade-leave-active {
+  transition: opacity 140ms ease-out;
+}
+.v-backdrop-fade-enter-from,
+.v-backdrop-fade-leave-to {
+  opacity: 0;
+}
+
+.v-sheet-slide-enter-active {
   transition:
-    opacity 220ms var(--ease-spring),
-    transform 240ms var(--ease-spring);
+    opacity var(--dur-sheet-in) var(--ease-snappy),
+    transform var(--dur-sheet-in) var(--ease-snappy);
 }
-.page-forward-enter-from {
-  opacity: 0;
-  transform: translate3d(18px, 0, 0) scale(0.992);
-}
-.page-forward-leave-to {
-  opacity: 0;
-  transform: translate3d(-14px, 0, 0) scale(0.992);
-}
-.page-back-enter-from {
-  opacity: 0;
-  transform: translate3d(-18px, 0, 0) scale(0.992);
-}
-.page-back-leave-to {
-  opacity: 0;
-  transform: translate3d(14px, 0, 0) scale(0.992);
-}
-
-/* 2. Mobile Detail Sheet Depth Push */
-.detail-push-enter-active,
-.detail-push-leave-active {
+.v-sheet-slide-leave-active {
   transition:
-    opacity 220ms var(--ease-spring),
-    transform 240ms var(--ease-spring);
+    opacity var(--dur-sheet-out) ease-out,
+    transform var(--dur-sheet-out) ease-out;
 }
-.detail-push-enter-from,
-.detail-push-leave-to {
+.v-sheet-slide-enter-from {
   opacity: 0;
-  transform: translate3d(0, 20px, 0) scale(0.985);
+  transform: translate3d(0, 16px, 0);
+}
+.v-sheet-slide-leave-to {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
 }
 
-/* 3. Job Feed FLIP List Transitions */
-.job-list-move {
-  transition: transform 320ms var(--ease-spring);
+.v-dialog-pop-enter-active {
+  transition:
+    opacity var(--dur-dialog) var(--ease-snappy),
+    transform var(--dur-dialog) var(--ease-snappy);
 }
-.job-list-enter-active {
-  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-spring);
+.v-dialog-pop-leave-active {
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms ease-out;
 }
-.job-list-leave-active {
-  transition: opacity 160ms ease-in, transform 160ms ease-in;
-}
-.job-list-enter-from {
+.v-dialog-pop-enter-from,
+.v-dialog-pop-leave-to {
   opacity: 0;
-  transform: translateY(10px) scale(0.985);
-}
-.job-list-leave-to {
-  opacity: 0;
-  transform: scale(0.97);
-}
-
-/* 4. Bookmark Pop + Nav Bounce + Diagonal Shimmer */
-@keyframes vecta-pop {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.28);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-.animate-bookmark-pop {
-  animation: vecta-pop 300ms var(--ease-spring);
-}
-
-@keyframes vecta-nav-bounce {
-  0% {
-    transform: scale(0.86) translateY(2px);
-  }
-  55% {
-    transform: scale(1.12) translateY(-1.5px);
-  }
-  100% {
-    transform: scale(1) translateY(0);
-  }
-}
-.animate-nav-bounce {
-  animation: vecta-nav-bounce 340ms var(--ease-spring);
+  transform: translate3d(0, 10px, 0);
 }
 
 @keyframes vecta-shimmer {

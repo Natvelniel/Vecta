@@ -11,7 +11,9 @@ use crate::core::analytics::{
 use crate::core::local_matcher::{taxonomy_seed_skills, LocalSkillEntry};
 use crate::core::matching::compute_hybrid_match;
 use crate::core::native_scraper::quality::{JobRedFlag, PortalLinkRef};
-use crate::core::opportunity::extract_opportunity_metadata;
+use crate::core::opportunity::{
+    expand_location_cluster_filter, extract_opportunity_metadata, normalize_location_cluster,
+};
 use crate::error::AppError;
 use crate::models::competency::{
     CompanySnapshot, CompetencyMapResponse, CompetencySkillItem, RoleJobCount,
@@ -380,6 +382,52 @@ impl Database {
 
             mig_result?;
             fk_restore?;
+        }
+
+        let has_v6: bool = self.with_conn(|conn| {
+            conn.query_row(
+                "SELECT 1 FROM schema_migrations WHERE version = 6",
+                [],
+                |_| Ok(true),
+            )
+            .optional()
+            .map(|o| o.unwrap_or(false))
+            .map_err(|e| db_err("Gagal memeriksa versi migrasi 6", e))
+        })?;
+
+        if !has_v6 {
+            self.with_tx(|tx| {
+                let existing: Vec<(String, Option<String>, String)> = {
+                    let mut stmt = tx
+                        .prepare("SELECT id, location, work_mode FROM jobs")
+                        .map_err(|e| db_err("Gagal membaca jobs untuk backfill kluster v6", e))?;
+                    let rows = stmt
+                        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
+                        .map_err(|e| db_err("Gagal iterasi backfill kluster v6", e))?;
+                    let mut buf = Vec::new();
+                    for row in rows {
+                        buf.push(row.map_err(|e| db_err("Gagal parse baris backfill kluster v6", e))?);
+                    }
+                    buf
+                };
+
+                for (id, loc, wm_str) in existing {
+                    let cluster =
+                        normalize_location_cluster(loc.as_deref(), WorkMode::from_db_str(&wm_str));
+                    tx.execute(
+                        "UPDATE jobs SET location_cluster = ?1 WHERE id = ?2",
+                        params![cluster, id],
+                    )
+                    .map_err(|e| db_err("Gagal update kluster lokasi v6", e))?;
+                }
+
+                tx.execute(
+                    "INSERT OR IGNORE INTO schema_migrations (version, name) VALUES (?1, ?2)",
+                    params![6i64, "006_granular_location_clusters"],
+                )
+                .map_err(|e| db_err("Gagal mencatat versi migrasi 6", e))?;
+                Ok(())
+            })?;
         }
         Ok(())
     }
@@ -1440,10 +1488,13 @@ impl Database {
                 bind.push(Box::new(source.as_str().to_string()));
             }
             if let Some(clusters) = filter.location_clusters.as_ref().filter(|v| !v.is_empty()) {
-                let placeholders = vec!["?"; clusters.len()].join(", ");
-                sql.push_str(&format!(" AND j.location_cluster IN ({placeholders})"));
-                for cl in clusters {
-                    bind.push(Box::new(cl.trim().to_lowercase()));
+                let expanded = expand_location_cluster_filter(clusters);
+                if !expanded.is_empty() {
+                    let placeholders = vec!["?"; expanded.len()].join(", ");
+                    sql.push_str(&format!(" AND j.location_cluster IN ({placeholders})"));
+                    for cl in expanded {
+                        bind.push(Box::new(cl));
+                    }
                 }
             }
             if let Some(types) = filter.opportunity_types.as_ref().filter(|v| !v.is_empty()) {
@@ -3085,8 +3136,18 @@ impl Database {
                 p_idx += 1;
             }
             if let Some(cluster) = clean_cluster {
-                sql.push_str(&format!(" AND location_cluster = ?{p_idx}"));
-                params_vec.push(Box::new(cluster.to_string()));
+                let expanded = expand_location_cluster_filter(&[cluster.to_string()]);
+                if !expanded.is_empty() {
+                    let placeholders: Vec<String> = expanded
+                        .iter()
+                        .enumerate()
+                        .map(|(idx, _)| format!("?{}", p_idx + idx))
+                        .collect();
+                    sql.push_str(&format!(" AND location_cluster IN ({})", placeholders.join(", ")));
+                    for cl in expanded {
+                        params_vec.push(Box::new(cl));
+                    }
+                }
             }
 
             let mut stmt = conn
@@ -3402,7 +3463,7 @@ mod tests {
             .expect("query pragmas");
 
         assert_eq!(fk, 1);
-        assert_eq!(mig_count, 5);
+        assert_eq!(mig_count, 6);
     }
 
     #[test]
