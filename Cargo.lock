@@ -7731,11 +7731,8 @@ version = "0.5.0"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
- "candle-core",
- "candle-nn",
  "chrono",
  "keyring",
- "memmap2",
  "pdf-extract",
  "reqwest 0.12.28",
  "rusqlite",
@@ -7757,8 +7754,22 @@ dependencies = [
  "typst-pdf",
  "url",
  "uuid",
+ "vecta-neural",
  "vecta-taxonomy",
  "zip 2.6.1",
+]
+
+[[package]]
+name = "vecta-neural"
+version = "0.1.0"
+dependencies = [
+ "candle-core",
+ "candle-nn",
+ "memmap2",
+ "serde_json",
+ "sha2 0.10.9",
+ "tokenizers 0.21.4",
+ "vecta-taxonomy",
 ]
 
 [[package]]

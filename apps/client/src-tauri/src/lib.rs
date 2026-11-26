@@ -86,7 +86,7 @@ pub fn typescript_exporter() -> Typescript {
 #[cfg(target_os = "android")]
 fn extract_android_neural_assets(app_data_dir: &std::path::Path) -> Option<PathBuf> {
     use std::fs::{self, File};
-    use std::io::{self, Read};
+    use std::io;
 
     let dest_dir = app_data_dir.join("models").join("neural-v2");
     if let Err(e) = fs::create_dir_all(&dest_dir) {

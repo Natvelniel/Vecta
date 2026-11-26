@@ -53,7 +53,7 @@ jobs:
           python -m pip install --upgrade pip numpy
           python scripts/fetch_offline_ai_model.py
           python scripts/build_neural_v2_pack.py
-          cargo run --release --manifest-path apps/client/src-tauri/Cargo.toml --bin build_semantic_index
+          cargo run --release -p vecta-neural --bin build_semantic_index -- --pack-dir apps/client/src-tauri/resources/models/neural-v2
 
       - name: Install frontend dependencies
         working-directory: apps/client
@@ -159,7 +159,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip numpy
           python3 scripts/build_neural_v2_pack.py
-          cargo run --release --manifest-path apps/client/src-tauri/Cargo.toml --bin build_semantic_index
+          cargo run --release -p vecta-neural --bin build_semantic_index -- --pack-dir apps/client/src-tauri/resources/models/neural-v2
 
       - name: Install frontend dependencies
         working-directory: apps/client
@@ -203,6 +203,28 @@ jobs:
             exit 1
           fi
           echo "Found raw APK: $RAW_APK"
+
+          RAW_APK="$RAW_APK" python3 - <<'PY'
+          import os, pathlib, zipfile
+          raw_apk = pathlib.Path(os.environ["RAW_APK"])
+          pack_dir = pathlib.Path("apps/client/src-tauri/resources/models/neural-v2")
+          required = ["e5-base.vtxr", "mmarco-reranker.vtxr", "semantic_index.vidx", "tokenizer.json", "manifest.json"]
+          with zipfile.ZipFile(raw_apk, "r") as zf:
+              names = set(zf.namelist())
+          has_e5 = any(n.endswith("/e5-base.vtxr") or n == "assets/models/neural-v2/e5-base.vtxr" for n in names)
+          if not has_e5:
+              print("Injecting neural-v2 pack uncompressed into APK assets/models/neural-v2/...")
+              with zipfile.ZipFile(raw_apk, "a") as zf:
+                  for fn in required:
+                      src = pack_dir / fn
+                      assert src.exists(), f"Missing neural pack file: {src}"
+                      zf.write(src, arcname=f"assets/models/neural-v2/{fn}", compress_type=zipfile.ZIP_STORED)
+          with zipfile.ZipFile(raw_apk, "r") as zf:
+              all_names = zf.namelist()
+              for fn in required[:-1]:
+                  assert any(n.endswith(f"/{fn}") for n in all_names), f"APK missing bundled asset: {fn}"
+          print("Verified APK bundles neural-v2 pack cleanly:", len(all_names), "entries")
+          PY
 
           BUILD_TOOLS="${ANDROID_BUILD_TOOLS}"
           ALIGNED_APK="$RUNNER_TEMP/vecta-aligned.apk"
