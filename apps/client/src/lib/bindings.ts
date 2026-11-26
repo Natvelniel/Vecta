@@ -31,11 +31,12 @@ export const commands = {
 	saveMasterCv: (cv: MasterCvProfile, options?: InvokeOptions) => typedError<MasterCvProfile, AppError>(__TAURI_INVOKE("save_master_cv", { cv }, options)),
 	exportTailoredAtsPdf: (userId: string, jobId: string | null, language: string, options?: InvokeOptions) => typedError<AtsExportResult, AppError>(__TAURI_INVOKE("export_tailored_ats_pdf", { userId, jobId, language }, options)),
 	ingestManualJob: (userId: string, titleHint: string | null, url: string | null, rawText: string, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("ingest_manual_job", { userId, titleHint, url, rawText }, options)),
-	runScrapeForActiveKeywords: (userId: string, sources: string[], limitPerQuery: number, options?: InvokeOptions) => typedError<ScrapeRunReport, AppError>(__TAURI_INVOKE("run_scrape_for_active_keywords", { userId, sources, limitPerQuery }, options)),
-	scrapeAndStoreJobs: (userId: string, prefs: SearchPreferences_Deserialize, options?: InvokeOptions) => typedError<ScrapeRunReport, AppError>(__TAURI_INVOKE("scrape_and_store_jobs", { userId, prefs }, options)),
+	runScrapeForActiveKeywords: (userId: string, sources: string[], limitPerQuery: number, options?: InvokeOptions) => typedError<ScrapeRunReport_Serialize, AppError>(__TAURI_INVOKE("run_scrape_for_active_keywords", { userId, sources, limitPerQuery }, options)),
+	scrapeAndStoreJobs: (userId: string, prefs: SearchPreferences_Deserialize, options?: InvokeOptions) => typedError<ScrapeRunReport_Serialize, AppError>(__TAURI_INVOKE("scrape_and_store_jobs", { userId, prefs }, options)),
 	rerankTopJobs: (userId: string, topN: number | null, options?: InvokeOptions) => typedError<number, AppError>(__TAURI_INVOKE("rerank_top_jobs", { userId, topN }, options)),
 	runAiMatchingQueue: (userId: string, maxJobs: number, rpmLimit: number, options?: InvokeOptions) => typedError<AiMatchRunReport, AppError>(__TAURI_INVOKE("run_ai_matching_queue", { userId, maxJobs, rpmLimit }, options)),
 	enrichJobWithAi: (userId: string, jobId: string, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("enrich_job_with_ai", { userId, jobId }, options)),
+	enrichJobDescriptionFromSource: (userId: string, jobId: string, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("enrich_job_description_from_source", { userId, jobId }, options)),
 	listRankedJobs: (userId: string, filter: JobFilterInput_Deserialize, options?: InvokeOptions) => typedError<JobMatchSummary_Serialize[], AppError>(__TAURI_INVOKE("list_ranked_jobs", { userId, filter }, options)),
 	getJobDetail: (userId: string, jobId: string, options?: InvokeOptions) => typedError<JobMatchDetail_Serialize, AppError>(__TAURI_INVOKE("get_job_detail", { userId, jobId }, options)),
 	toggleSaveJob: (userId: string, jobId: string, options?: InvokeOptions) => typedError<boolean, AppError>(__TAURI_INVOKE("toggle_save_job", { userId, jobId }, options)),
@@ -554,7 +555,7 @@ export type JobRedFlag = {
 	message: string,
 };
 
-export type JobSource = "linkedin" | "glints" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "manual";
+export type JobSource = "linkedin" | "glints" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "karirhub" | "remotive" | "manual";
 
 export type LocalAiModelStatus = LocalAiModelStatus_Serialize | LocalAiModelStatus_Deserialize;
 
@@ -610,6 +611,13 @@ export type PortalLinkRef_Deserialize = {
 export type PortalLinkRef_Serialize = {
 	source: string,
 	url: string | null,
+};
+
+export type PortalScrapeStatus = {
+	source: string,
+	status: string,
+	jobs_found: number,
+	latency_ms: number,
 };
 
 export type PrioritizedGap = {
@@ -809,13 +817,26 @@ export type ScrapeKeywordItem_Serialize = {
 	last_scraped_at: string | null,
 };
 
-export type ScrapeRunReport = {
+export type ScrapeRunReport = ScrapeRunReport_Serialize | ScrapeRunReport_Deserialize;
+
+export type ScrapeRunReport_Deserialize = {
 	total_fetched: number,
 	newly_ingested: number,
 	skipped_duplicates: number,
 	failed_extractions: number,
 	pending_local_count: number,
 	warnings: ScrapeWarningItem[],
+	portal_statuses?: PortalScrapeStatus[],
+};
+
+export type ScrapeRunReport_Serialize = {
+	total_fetched: number,
+	newly_ingested: number,
+	skipped_duplicates: number,
+	failed_extractions: number,
+	pending_local_count: number,
+	warnings: ScrapeWarningItem[],
+	portal_statuses: PortalScrapeStatus[],
 };
 
 export type ScrapeWarningItem = {

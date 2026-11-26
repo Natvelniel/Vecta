@@ -20,9 +20,22 @@ useTheme();
 
 const bootstrapped = ref(false);
 
+const DOCK_ORDER = ["/dashboard", "/onboarding", "/jobs", "/cv", "/competency"];
+const routeTransitionName = ref<"v-route-forward" | "v-route-backward" | "v-route-fade">("v-route-fade");
+
 const isFirstRunChrome = computed(
   () => route.path === "/onboarding" && route.query.firstRun === "1",
 );
+
+router.beforeEach((to, from) => {
+  const fromIdx = DOCK_ORDER.indexOf(from.path);
+  const toIdx = DOCK_ORDER.indexOf(to.path);
+  if (fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
+    routeTransitionName.value = toIdx > fromIdx ? "v-route-forward" : "v-route-backward";
+  } else {
+    routeTransitionName.value = "v-route-fade";
+  }
+});
 
 onMounted(async () => {
   registerApiKeyMissingHandler(() => {
@@ -38,7 +51,6 @@ onMounted(async () => {
     settingsStore.loadOfflineEngineStatus(),
     profileStore.loadActiveProfile(),
   ]);
-  bootstrapped.value = true;
 
   const skipped = sessionStorage.getItem("vecta:skipped_onboarding") === "1";
   const needsOnboarding = !profileStore.activeProfile && !skipped;
@@ -46,6 +58,7 @@ onMounted(async () => {
   if (needsOnboarding && route.path === "/dashboard") {
     await router.replace({ path: "/onboarding" });
   }
+  bootstrapped.value = true;
 });
 </script>
 
@@ -60,7 +73,13 @@ onMounted(async () => {
   </div>
 
   <AppShell v-else>
-    <RouterView />
+    <RouterView v-slot="{ Component, route: viewRoute }">
+      <Transition :name="routeTransitionName">
+        <KeepAlive :max="6">
+          <component :is="Component" :key="String(viewRoute.name ?? viewRoute.path)" />
+        </KeepAlive>
+      </Transition>
+    </RouterView>
   </AppShell>
 </template>
 

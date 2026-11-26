@@ -11,6 +11,7 @@ const props = defineProps<{
   open: boolean;
   preferences: SearchPreferences_Serialize;
   saving?: boolean;
+  portalStatuses?: Record<string, { status: string; jobs_found: number; latency_ms: number }>;
 }>();
 
 const emit = defineEmits<{
@@ -31,17 +32,25 @@ const QUICK_CITIES = [
 ];
 const PORTALS = [
   { id: "jobstreet", label: "JobStreet", hint: "Multi-halaman" },
-  { id: "linkedin", label: "LinkedIn", hint: "Guest" },
+  { id: "linkedin", label: "LinkedIn", hint: "Guest Detail" },
   { id: "kalibrr", label: "Kalibrr", hint: "Lintas Jurusan" },
   { id: "dealls", label: "Dealls", hint: "Indonesia" },
-  { id: "indeed", label: "Indeed", hint: "RSS / Worker" },
-  { id: "glints", label: "Glints", hint: "Worker Opsional" },
+  { id: "karirhub", label: "Karirhub", hint: "Kemnaker RI" },
+  { id: "remotive", label: "Remotive", hint: "Remote WFA" },
 ];
+
+function portalHealthView(id: string): { dot: string; label: string } {
+  const entry = props.portalStatuses?.[id];
+  if (!entry) return { dot: "idle", label: "Siap" };
+  if (entry.status === "ok") return { dot: "ok", label: "Aktif" };
+  if (entry.status === "degraded") return { dot: "warn", label: "Lambat" };
+  return { dot: "down", label: "Gangguan" };
+}
 
 const draft = reactive<SearchPreferences_Serialize>({
   location: "Indonesia",
   locations: ["Indonesia"],
-  sources: ["jobstreet", "linkedin", "kalibrr", "dealls"],
+  sources: ["jobstreet", "linkedin", "kalibrr", "dealls", "karirhub"],
   limit_per_query: 25,
   max_pages: 2,
   posted_within_days: 14,
@@ -204,8 +213,14 @@ function buildPayload(): SearchPreferences_Serialize {
             :aria-pressed="draft.sources.includes(p.id)"
             @click="togglePortal(p.id)"
           >
-            <span class="v-portal-btn__name">{{ p.label }}</span>
-            <span class="t-meta">{{ p.hint }}</span>
+            <div class="v-portal-btn__left">
+              <span class="v-portal-btn__name">{{ p.label }}</span>
+              <span class="t-meta">{{ p.hint }}</span>
+            </div>
+            <span class="v-portal-health" :data-state="portalHealthView(p.id).dot">
+              <span class="v-portal-dot" aria-hidden="true" />
+              <span>{{ portalHealthView(p.id).label }}</span>
+            </span>
           </button>
         </div>
       </div>
@@ -395,21 +410,62 @@ function buildPayload(): SearchPreferences_Serialize {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 10px var(--space-3);
   border-radius: var(--radius-control);
   border: 1px solid var(--border-default);
   background: var(--bg-primary);
   color: var(--text-secondary);
   text-align: left;
+  min-width: 0;
 }
 .v-portal-btn[aria-pressed="true"] {
   background: var(--brand-soft);
   border-color: var(--brand-border);
   color: var(--text-primary);
 }
+.v-portal-btn__left {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
 .v-portal-btn__name {
   font-size: 13px;
   font-weight: 600;
+}
+.v-portal-health {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.v-portal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.v-portal-health[data-state="ok"] {
+  color: var(--status-success);
+}
+.v-portal-health[data-state="ok"] .v-portal-dot {
+  background: var(--status-success);
+}
+.v-portal-health[data-state="warn"] {
+  color: var(--status-warning);
+}
+.v-portal-health[data-state="warn"] .v-portal-dot {
+  background: var(--status-warning);
+}
+.v-portal-health[data-state="down"] {
+  color: var(--text-3);
+}
+.v-portal-health[data-state="down"] .v-portal-dot {
+  background: var(--status-error);
 }
 .v-pref-grid {
   display: grid;

@@ -13,6 +13,8 @@ pub enum JobSource {
     Indeed,
     Kalibrr,
     Dealls,
+    Karirhub,
+    Remotive,
     Manual,
 }
 
@@ -25,6 +27,8 @@ impl JobSource {
             Self::Indeed => "indeed",
             Self::Kalibrr => "kalibrr",
             Self::Dealls => "dealls",
+            Self::Karirhub => "karirhub",
+            Self::Remotive => "remotive",
             Self::Manual => "manual",
         }
     }
@@ -37,6 +41,8 @@ impl JobSource {
             "indeed" => Self::Indeed,
             "kalibrr" => Self::Kalibrr,
             "dealls" => Self::Dealls,
+            "karirhub" => Self::Karirhub,
+            "remotive" => Self::Remotive,
             _ => Self::Manual,
         }
     }
@@ -349,6 +355,14 @@ pub struct ScrapeWarningItem {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub struct PortalScrapeStatus {
+    pub source: String,
+    pub status: String,
+    pub jobs_found: u32,
+    pub latency_ms: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 pub struct ScrapeRunReport {
     pub total_fetched: u32,
     pub newly_ingested: u32,
@@ -356,6 +370,8 @@ pub struct ScrapeRunReport {
     pub failed_extractions: u32,
     pub pending_local_count: u32,
     pub warnings: Vec<ScrapeWarningItem>,
+    #[serde(default)]
+    pub portal_statuses: Vec<PortalScrapeStatus>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -403,6 +419,7 @@ impl Default for SearchPreferences {
                 "linkedin".into(),
                 "kalibrr".into(),
                 "dealls".into(),
+                "karirhub".into(),
             ],
             limit_per_query: 25,
             max_pages: 2,

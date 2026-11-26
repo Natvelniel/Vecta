@@ -54,6 +54,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         jobs::rerank_top_jobs,
         jobs::run_ai_matching_queue,
         jobs::enrich_job_with_ai,
+        jobs::enrich_job_description_from_source,
         jobs::list_ranked_jobs,
         jobs::get_job_detail,
         jobs::toggle_save_job,
@@ -262,6 +263,7 @@ mod tests {
             "rerank_top_jobs",
             "run_ai_matching_queue",
             "enrich_job_with_ai",
+            "enrich_job_description_from_source",
             "list_ranked_jobs",
             "get_job_detail",
             "toggle_save_job",
@@ -284,7 +286,7 @@ mod tests {
             "quick_add_user_skill",
         ];
 
-        assert_eq!(expected_commands.len(), 51);
+        assert_eq!(expected_commands.len(), 52);
         for cmd in expected_commands {
             assert!(
                 content.contains(cmd),

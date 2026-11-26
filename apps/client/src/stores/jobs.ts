@@ -6,8 +6,9 @@ import type {
   EnrichmentStatus,
   JobFilterInput_Deserialize,
   JobSource,
+  PortalScrapeStatus,
   SavedWatchlistItem_Serialize,
-  ScrapeRunReport,
+  ScrapeRunReport_Serialize,
   SearchPreferences_Serialize,
   WorkMode,
 } from "@/lib/bindings";
@@ -26,7 +27,7 @@ export type JobSortBy = "score" | "newest" | "salary_desc";
 const DEFAULT_PREFS: SearchPreferences_Serialize = {
   location: "Indonesia",
   locations: ["Indonesia"],
-  sources: ["jobstreet", "linkedin", "kalibrr", "dealls"],
+  sources: ["jobstreet", "linkedin", "kalibrr", "dealls", "karirhub"],
   limit_per_query: 25,
   max_pages: 2,
   posted_within_days: 14,
@@ -66,6 +67,7 @@ export const useJobsStore = defineStore("jobs", () => {
   const loadingList = ref(false);
   const loadingMore = ref(false);
   const loadingDetail = ref(false);
+  const enrichingDescription = ref(false);
   const scraping = ref(false);
   const runningAiQueue = ref(false);
   const enrichingJob = ref(false);
@@ -75,7 +77,8 @@ export const useJobsStore = defineStore("jobs", () => {
   const ingestingManual = ref(false);
 
   const progress = ref<ScrapeProgressEvent | null>(null);
-  const lastScrapeReport = ref<ScrapeRunReport | null>(null);
+  const lastScrapeReport = ref<ScrapeRunReport_Serialize | null>(null);
+  const portalStatuses = ref<Record<string, PortalScrapeStatus>>({});
   const lastAiReport = ref<AiMatchRunReport | null>(null);
   const error = ref<string | null>(null);
 
@@ -378,7 +381,7 @@ export const useJobsStore = defineStore("jobs", () => {
   async function runScrape(
     userId: string,
     overridePrefs?: SearchPreferences_Serialize,
-  ): Promise<ScrapeRunReport | null> {
+  ): Promise<ScrapeRunReport_Serialize | null> {
     scraping.value = true;
     error.value = null;
     progress.value = { stage: "starting", message: "Menyiapkan penarikan lowongan...", current: 0, total: 1 };
@@ -386,6 +389,11 @@ export const useJobsStore = defineStore("jobs", () => {
       const prefs = overridePrefs ?? searchPreferences.value;
       const report = await ipc.scrapeAndStoreJobs(userId, prefs);
       lastScrapeReport.value = report;
+      const nextStatuses: Record<string, PortalScrapeStatus> = { ...portalStatuses.value };
+      for (const st of report.portal_statuses ?? []) {
+        nextStatuses[st.source] = st;
+      }
+      portalStatuses.value = nextStatuses;
       await loadJobs(userId);
       return report;
     } catch (e) {
@@ -394,6 +402,27 @@ export const useJobsStore = defineStore("jobs", () => {
     } finally {
       scraping.value = false;
       progress.value = null;
+    }
+  }
+
+  async function enrichJobDescription(userId: string, jobId: string): Promise<boolean> {
+    enrichingDescription.value = true;
+    try {
+      const detail = await ipc.enrichJobDescriptionFromSource(userId, jobId);
+      if (selectedDetail.value && selectedDetail.value.job_id === jobId) {
+        selectedDetail.value = detail;
+      }
+      const item = jobs.value.find((j) => j.job_id === jobId);
+      if (item) {
+        item.final_score = detail.final_score;
+        item.matched_skills_count = detail.matched_skills.length;
+        item.missing_skills_count = detail.missing_skills.length;
+      }
+      return true;
+    } catch {
+      return false;
+    } finally {
+      enrichingDescription.value = false;
     }
   }
 
@@ -532,6 +561,7 @@ export const useJobsStore = defineStore("jobs", () => {
     loadingList,
     loadingMore,
     loadingDetail,
+    enrichingDescription,
     scraping,
     runningAiQueue,
     enrichingJob,
@@ -541,6 +571,7 @@ export const useJobsStore = defineStore("jobs", () => {
     ingestingManual,
     progress,
     lastScrapeReport,
+    portalStatuses,
     lastAiReport,
     error,
     toggleWorkMode,
@@ -567,6 +598,7 @@ export const useJobsStore = defineStore("jobs", () => {
     toggleSave,
     updateApplication,
     runScrape,
+    enrichJobDescription,
     runAiMatchingQueue,
     enrichSingleJob,
     ingestManual,

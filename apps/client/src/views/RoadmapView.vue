@@ -338,9 +338,15 @@ const isLocalRoadmap = computed(() => {
   font-weight: 500;
   transition: background var(--dur-hover) var(--ease-state), color var(--dur-hover) var(--ease-state);
 }
-.v-progress-toggle:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+.v-progress-toggle:not(:disabled):active,
+.v-kw-pill:not(:disabled):active {
+  transform: scale(0.96);
+}
+@media (hover: hover) {
+  .v-progress-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
 }
 .v-progress-toggle[aria-pressed="true"] {
   background: var(--info-soft);
@@ -376,9 +382,11 @@ const isLocalRoadmap = computed(() => {
   font-weight: 500;
   transition: background var(--dur-hover) var(--ease-state), color var(--dur-hover) var(--ease-state);
 }
-.v-kw-pill:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .v-kw-pill:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
 }
 @media (max-width: 1023px) {
   .v-narrow-container {

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import type { SalaryBenchmarkSummary } from "@/lib/bindings";
-import { formatLocationClusterLabel } from "@/lib/locationClusters";
+import {
+  formatLocationClusterLabel,
+  formatLocationClusterShortLabel,
+} from "@/lib/locationClusters";
 import { ipc } from "@/lib/ipc";
 import VCard from "@/components/ui/VCard.vue";
 
@@ -83,9 +86,10 @@ const medianPct = computed(() => {
         type="button"
         class="v-sb-pill"
         :class="{ 'v-sb-pill--manual': selectedCluster === cl.location_cluster }"
+        :title="formatCluster(cl.location_cluster)"
         @click="selectedCluster = cl.location_cluster; fetchBenchmark()"
       >
-        {{ formatCluster(cl.location_cluster) }}
+        {{ formatLocationClusterShortLabel(cl.location_cluster) }}
       </button>
     </div>
 
@@ -138,14 +142,29 @@ const medianPct = computed(() => {
   margin-top: var(--space-3);
 }
 .v-sb-pill {
-  height: 28px;
-  padding: 0 10px;
+  min-height: 32px;
+  height: auto;
+  max-width: 100%;
+  padding: 5px 11px;
   border-radius: var(--radius-control);
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--text-2);
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.3;
+  display: inline-flex;
+  align-items: center;
+  text-align: left;
+  white-space: normal;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out,
+    color 140ms ease-out,
+    transform var(--dur-press) ease-out;
+}
+.v-sb-pill:not(:disabled):active {
+  transform: scale(0.96);
 }
 .v-sb-pill--all {
   background: var(--pill-all-bg);

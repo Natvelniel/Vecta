@@ -80,9 +80,59 @@ const watchlistPopoverOpen = ref(false);
 const watchlistName = ref("");
 const aiBarDismissed = ref(false);
 const noteDraft = ref("");
+const jobsListRef = ref<HTMLElement | null>(null);
+const ptrDistance = ref(0);
+const ptrReady = computed(() => ptrDistance.value >= 56);
+let ptrStartX = 0;
+let ptrStartY = 0;
+let ptrTracking = false;
+const attemptedDetailEnrich = new Set<string>();
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 let unlistenProgress: (() => void) | null = null;
 let unlistenRerank: (() => void) | null = null;
+
+function isListAtScrollTop(): boolean {
+  const el = jobsListRef.value;
+  if (!el) return false;
+  if (el.scrollTop > 2) return false;
+  const mainEl = el.closest(".v-main") as HTMLElement | null;
+  return (mainEl?.scrollTop ?? 0) <= 2;
+}
+
+function onListTouchStart(e: TouchEvent) {
+  if (jobsStore.scraping || e.touches.length !== 1) return;
+  if (!isListAtScrollTop()) return;
+  const touch = e.touches[0];
+  ptrStartX = touch.clientX;
+  ptrStartY = touch.clientY;
+  ptrTracking = true;
+  ptrDistance.value = 0;
+}
+
+function onListTouchMove(e: TouchEvent) {
+  if (!ptrTracking || e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  const dx = touch.clientX - ptrStartX;
+  const dy = touch.clientY - ptrStartY;
+  if (ptrDistance.value === 0 && (Math.abs(dx) > Math.abs(dy) * 1.15 || dy < -6)) {
+    ptrTracking = false;
+    ptrDistance.value = 0;
+    return;
+  }
+  if (dy > 0 && (isListAtScrollTop() || ptrDistance.value > 0)) {
+    ptrDistance.value = Math.min(82, Math.round(dy * 0.45));
+  }
+}
+
+function onListTouchEnd() {
+  if (!ptrTracking) return;
+  ptrTracking = false;
+  const shouldRefresh = ptrDistance.value >= 56 && !jobsStore.scraping;
+  ptrDistance.value = 0;
+  if (shouldRefresh) {
+    void handleRefreshScrape();
+  }
+}
 
 const WORK_MODE_OPTIONS: Array<{ id: WorkMode; label: string }> = [
   { id: "remote", label: "Remote" },
@@ -95,6 +145,8 @@ const SOURCE_OPTIONS: Array<{ id: JobSource; label: string }> = [
   { id: "linkedin", label: "LinkedIn" },
   { id: "kalibrr", label: "Kalibrr" },
   { id: "dealls", label: "Dealls" },
+  { id: "karirhub", label: "Karirhub" },
+  { id: "remotive", label: "Remotive" },
   { id: "glints", label: "Glints" },
   { id: "indeed", label: "Indeed" },
   { id: "manual", label: "Manual" },
@@ -124,10 +176,142 @@ const SORT_OPTIONS: Array<{ id: JobSortBy; label: string }> = [
   { id: "salary_desc", label: "Gaji Tertinggi" },
 ];
 
+const ENRICHABLE_DESC_SOURCES = new Set<JobSource>(["jobstreet", "linkedin", "karirhub"]);
+
+const canEnrichDetailFromSource = computed(() => {
+  const detail = jobsStore.selectedDetail;
+  return (
+    !!detail &&
+    ENRICHABLE_DESC_SOURCES.has(detail.source) &&
+    !!detail.url
+  );
+});
+
+type DescBlock = { kind: "list"; items: string[] } | { kind: "p"; text: string };
+type DescSection = { title: string | null; blocks: DescBlock[] };
+
+const KNOWN_DESC_HEADING = /^(ringkasan|deskripsi|kualifikasi|persyaratan|tanggung jawab|benefit|fasilitas|kriteria|keahlian|skills?|about(?: the (?:role|job|company))?|responsibilities|requirements|qualifications|what you(?:'ll| will) do|who we(?:'re| are) looking for|benefits?|perks?|industri|pendidikan|gaji|pengalaman|lokasi|kategori|detail tambahan)\b/i;
+
+const parsedDescriptionSections = computed<DescSection[]>(() => {
+  const raw = jobsStore.selectedDetail?.raw_description ?? "";
+  const cleaned = raw.replace(/\r\n?/g, "\n").trim();
+  if (!cleaned) return [];
+
+  const sections: DescSection[] = [];
+  let current: DescSection = { title: null, blocks: [] };
+
+  const pushParagraph = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    current.blocks.push({ kind: "p", text: trimmed });
+  };
+  const pushBullet = (item: string) => {
+    const trimmed = item.trim();
+    if (!trimmed) return;
+    const last = current.blocks[current.blocks.length - 1];
+    if (last && last.kind === "list") {
+      last.items.push(trimmed);
+    } else {
+      current.blocks.push({ kind: "list", items: [trimmed] });
+    }
+  };
+  const startSection = (title: string) => {
+    if (current.title !== null || current.blocks.length > 0) {
+      sections.push(current);
+    }
+    current = { title: title.replace(/[:\s]+$/, ""), blocks: [] };
+  };
+
+  let paraBuf: string[] = [];
+  const flushPara = () => {
+    if (paraBuf.length > 0) {
+      pushParagraph(paraBuf.join(" "));
+      paraBuf = [];
+    }
+  };
+
+  for (const rawLine of cleaned.split("\n")) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushPara();
+      continue;
+    }
+
+    const bulletMatch = line.match(/^(?:[-*•▪●]|(?:\d{1,2}[.)]))\s+(.+)$/);
+    if (bulletMatch) {
+      flushPara();
+      pushBullet(bulletMatch[1]);
+      continue;
+    }
+
+    const headingInline = line.match(/^([A-Za-zÀ-ÿ0-9 /&(),'-]{2,48}):\s*(.*)$/);
+    if (headingInline) {
+      const label = headingInline[1].trim();
+      const rest = headingInline[2].trim();
+      if (!rest || KNOWN_DESC_HEADING.test(label) || label.length <= 26) {
+        flushPara();
+        startSection(label);
+        if (rest) {
+          if (rest.includes(" | ")) {
+            rest.split(" | ").forEach((item) => pushBullet(item));
+          } else {
+            paraBuf.push(rest);
+          }
+        }
+        continue;
+      }
+    }
+
+    if (KNOWN_DESC_HEADING.test(line) && line.length <= 44 && !/[.!?]$/.test(line)) {
+      flushPara();
+      startSection(line);
+      continue;
+    }
+
+    paraBuf.push(line);
+  }
+  flushPara();
+  if (current.title !== null || current.blocks.length > 0) {
+    sections.push(current);
+  }
+  return sections;
+});
+
+async function handleEnrichDescriptionFromSource() {
+  if (!profileStore.userId || !jobsStore.selectedDetail) return;
+  const ok = await jobsStore.enrichJobDescription(
+    profileStore.userId,
+    jobsStore.selectedDetail.job_id,
+  );
+  if (ok) {
+    toast.show("Deskripsi lengkap berhasil dimuat.", { tone: "success" });
+  } else {
+    toast.show(
+      friendlyActionMessage(
+        jobsStore.error,
+        "Deskripsi lengkap belum tersedia dari portal sumber.",
+      ),
+      { tone: "info" },
+    );
+  }
+}
+
 watch(
   () => jobsStore.selectedDetail,
   (detail) => {
     noteDraft.value = detail?.user_notes ?? "";
+    if (
+      detail &&
+      profileStore.userId &&
+      detail.raw_description.trim().length < 400 &&
+      ENRICHABLE_DESC_SOURCES.has(detail.source) &&
+      !!detail.url &&
+      !attemptedDetailEnrich.has(detail.job_id) &&
+      !jobsStore.enrichingDescription
+    ) {
+      attemptedDetailEnrich.add(detail.job_id);
+      void jobsStore.enrichJobDescription(profileStore.userId, detail.job_id);
+    }
     if (detail && (detail.salary_min_idr || detail.salary_max_idr)) {
       ipc
         .getSalaryBenchmark(detail.normalized_role, null)
@@ -239,20 +423,6 @@ onMounted(async () => {
   }
 });
 
-const uniqueScrapeWarnings = computed(() => {
-  const warnings = jobsStore.lastScrapeReport?.warnings ?? [];
-  const bySource = new Map<string, { source: string; count: number; sample: string }>();
-  for (const w of warnings) {
-    const existing = bySource.get(w.source);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      bySource.set(w.source, { source: w.source, count: 1, sample: w.message });
-    }
-  }
-  return Array.from(bySource.values());
-});
-
 const activeFilterCount = computed(() => {
   let count = 0;
   if (jobsStore.roleFilter) count += 1;
@@ -352,8 +522,12 @@ const progressPercent = computed(() => {
   return Math.min(100, Math.round((p.current / p.total) * 100));
 });
 
-function dismissScrapeWarnings() {
-  jobsStore.lastScrapeReport = null;
+function friendlyActionMessage(raw: string | null | undefined, fallback: string): string {
+  if (!raw) return fallback;
+  if (/https?:\/\/|error sending request|status \d{3}|rustls|dns/i.test(raw)) {
+    return fallback;
+  }
+  return raw;
 }
 
 const roleOptions = computed(() => {
@@ -398,7 +572,10 @@ async function handleSavePreferences(prefs: SearchPreferences_Serialize, runImme
   const ok = await jobsStore.saveSearchPreferences(prefs);
   savingPrefs.value = false;
   if (!ok) {
-    toast.show(jobsStore.error ?? "Gagal menyimpan preferensi pencarian.", { tone: "error" });
+    toast.show(
+      friendlyActionMessage(jobsStore.error, "Preferensi belum dapat disimpan. Coba ulangi."),
+      { tone: "info" },
+    );
     return;
   }
   preferencesOpen.value = false;
@@ -423,13 +600,27 @@ async function handleRefreshScrape() {
   }
   const report = await jobsStore.runScrape(profileStore.userId);
   if (report) {
+    if (report.warnings.length > 0) {
+      console.debug("[vecta::scraper] partial warnings suppressed from UI:", report.warnings);
+    }
     const aiNote = jobsStore.searchPreferences.ai_enrich_enabled
       ? " + AI Matching selesai."
       : " (0 token Gemini).";
     toast.show(
-      `Selesai: ${report.newly_ingested} lowongan baru tersimpan lokal, ${report.skipped_duplicates} duplikat dilewati${aiNote}`,
-      { tone: report.warnings.length > 0 ? "warning" : "success" },
+      `Selesai: ${report.newly_ingested} lowongan baru tersimpan, ${report.skipped_duplicates} duplikat dilewati${aiNote}`,
+      { tone: "success" },
     );
+  } else {
+    if (jobsStore.error) {
+      console.debug("[vecta::scraper] network error suppressed from UI:", jobsStore.error);
+    }
+    toast.show("Koneksi portal sedang lambat. Coba lagi sebentar atau tempel lowongan manual.", {
+      tone: "info",
+      actionLabel: "Tempel Manual",
+      onAction: () => {
+        manualModalOpen.value = true;
+      },
+    });
   }
 }
 
@@ -439,10 +630,13 @@ async function handleRunAiQueue() {
   if (report) {
     toast.show(
       `AI Matching selesai: ${report.enriched_jobs} lowongan diperkaya (${report.api_calls_used} req Gemini), ${report.remaining_local_jobs} tersisa lokal.`,
-      { tone: report.failed_jobs > 0 ? "warning" : "success" },
+      { tone: report.failed_jobs > 0 ? "info" : "success" },
     );
   } else if (jobsStore.error) {
-    toast.show(jobsStore.error, { tone: "error" });
+    toast.show(
+      friendlyActionMessage(jobsStore.error, "Pemrosesan AI tertunda. Coba lagi sebentar."),
+      { tone: "info" },
+    );
   }
 }
 
@@ -454,7 +648,10 @@ async function handleEnrichSingleJob() {
       tone: "success",
     });
   } else if (jobsStore.error) {
-    toast.show(jobsStore.error, { tone: "error" });
+    toast.show(
+      friendlyActionMessage(jobsStore.error, "Pengayaan AI sedang tidak tersedia."),
+      { tone: "info" },
+    );
   }
 }
 
@@ -502,7 +699,7 @@ async function handleGenerateApplyKit(language: "id" | "en", forceRefresh: boole
       tone: "success",
     });
   } else if (jobsStore.error) {
-    toast.show(jobsStore.error, { tone: "error" });
+    toast.show(friendlyActionMessage(jobsStore.error, "Bahan lamaran belum dapat dibuat. Coba lagi."), { tone: "info" });
   }
 }
 
@@ -533,7 +730,7 @@ async function handleExportTailoredPdf() {
       );
     }
   } else if (profileStore.error) {
-    toast.show(profileStore.error, { tone: "error" });
+    toast.show(friendlyActionMessage(profileStore.error, "Ekspor PDF belum berhasil. Coba lagi."), { tone: "info" });
   }
 }
 
@@ -586,7 +783,7 @@ async function handleQuickAddSkill(skillId: number, skillName: string) {
       { tone: "success" },
     );
   } catch (e) {
-    toast.show(e instanceof IpcError ? e.message : "Gagal menambahkan skill.", { tone: "error" });
+    toast.show(friendlyActionMessage(e instanceof IpcError ? e.message : null, "Gagal menambahkan skill."), { tone: "info" });
   }
 }
 
@@ -646,7 +843,7 @@ async function handleCreateRoadmapFromJob() {
     });
     router.push("/roadmap");
   } else if (roadmapStore.error) {
-    toast.show(roadmapStore.error, { tone: "error" });
+    toast.show(friendlyActionMessage(roadmapStore.error, "Roadmap belum dapat disusun. Coba lagi."), { tone: "info" });
   }
 }
 </script>
@@ -731,37 +928,6 @@ async function handleCreateRoadmapFromJob() {
       </div>
     </div>
 
-    <div v-if="jobsStore.error" class="v-jobs-banner" role="alert">
-      <span class="t-secondary" style="color: var(--status-warning)">
-        {{ jobsStore.error }}
-      </span>
-      <VButton variant="secondary" size="compact" @click="manualModalOpen = true">
-        Gunakan Tempel Manual
-      </VButton>
-    </div>
-
-    <div
-      v-if="uniqueScrapeWarnings.length > 0"
-      class="v-jobs-banner"
-      role="status"
-    >
-      <span class="t-secondary" style="color: var(--status-warning)">
-        Peringatan parsial scraper:
-        {{
-          uniqueScrapeWarnings
-            .map((w) =>
-              w.count > 1
-                ? `${w.source} (${w.count}x): ${w.sample}`
-                : `${w.source}: ${w.sample}`,
-            )
-            .join(" · ")
-        }}
-      </span>
-      <VButton variant="tertiary" size="compact" @click="dismissScrapeWarnings">
-        Tutup
-      </VButton>
-    </div>
-
     <!-- Segmented Switch: Eksplorasi vs Lamaran Saya (+ Compact Mobile Primary Actions) -->
     <div class="v-jobs-mode-bar">
       <div class="v-jobs-tabs" role="tablist" aria-label="Mode tampilan lowongan">
@@ -773,7 +939,7 @@ async function handleCreateRoadmapFromJob() {
           :aria-selected="activeTab === 'explore'"
           @click="activeTab = 'explore'"
         >
-          <span>Eksplorasi</span>
+          <span class="v-jobs-tab-label">Eksplorasi</span>
           <span class="v-jobs-tab-count v-jobs-tab-count--mobile t-num">{{ jobsStore.jobs.length }}</span>
         </button>
         <button
@@ -784,7 +950,7 @@ async function handleCreateRoadmapFromJob() {
           :aria-selected="activeTab === 'pipeline'"
           @click="activeTab = 'pipeline'"
         >
-          <span>Lamaran</span>
+          <span class="v-jobs-tab-label">Lamaran</span>
           <span class="v-jobs-tab-count t-num">{{ pipelineCount }}</span>
         </button>
       </div>
@@ -793,11 +959,12 @@ async function handleCreateRoadmapFromJob() {
         <VButton
           variant="primary"
           size="compact"
+          class="v-mobile-scrape-btn"
           :loading="jobsStore.scraping"
           @click="handleRefreshScrape"
         >
           <VIcon v-if="!jobsStore.scraping" name="refresh" :size="14" />
-          <span>{{ jobsStore.scraping ? "Ambil..." : "Cari" }}</span>
+          <span>{{ jobsStore.scraping ? "Muat" : "Cari" }}</span>
         </VButton>
         <div ref="mobileMenuRef" class="v-mobile-menu-wrap">
           <button
@@ -1158,15 +1325,41 @@ async function handleCreateRoadmapFromJob() {
           </Transition>
         </div>
 
-        <div class="v-jobs-list">
-          <div v-if="jobsStore.loadingList" class="v-list-skeleton" aria-busy="true" aria-label="Memuat daftar lowongan">
-            <div v-for="n in 4" :key="n" class="v-skel-row">
-              <div style="display: flex; justify-content: space-between; gap: 12px">
+        <div
+          ref="jobsListRef"
+          class="v-jobs-list"
+          @touchstart.passive="onListTouchStart"
+          @touchmove.passive="onListTouchMove"
+          @touchend="onListTouchEnd"
+          @touchcancel="onListTouchEnd"
+        >
+          <div
+            v-if="ptrDistance > 6"
+            class="v-ptr-indicator"
+            :class="{ 'v-ptr-indicator--ready': ptrReady }"
+            :style="{ height: `${Math.min(52, ptrDistance)}px` }"
+            aria-live="polite"
+          >
+            <VIcon name="refresh" :size="14" :class="{ 'v-ptr-spin': ptrReady }" />
+            <span>{{ ptrReady ? "Lepas untuk muat ulang" : "Tarik ke bawah untuk perbarui" }}</span>
+          </div>
+
+          <div
+            v-if="jobsStore.loadingList || (jobsStore.scraping && jobsStore.jobs.length === 0)"
+            class="v-list-skeleton"
+            aria-busy="true"
+            aria-label="Memuat daftar lowongan"
+          >
+            <div v-for="n in 5" :key="n" class="v-skel-row">
+              <div class="v-skel-row__top">
                 <VSkeleton width="68%" height="16px" />
-                <VSkeleton width="36px" height="16px" />
+                <VSkeleton width="40px" height="18px" />
               </div>
-              <VSkeleton width="52%" height="12px" />
-              <VSkeleton width="40%" height="12px" />
+              <VSkeleton width="54%" height="12px" />
+              <div class="v-skel-row__chips">
+                <VSkeleton width="64px" height="18px" />
+                <VSkeleton width="76px" height="18px" />
+              </div>
             </div>
           </div>
 
@@ -1267,7 +1460,7 @@ async function handleCreateRoadmapFromJob() {
 
           <!-- Section 9.1: Title Most Prominent -->
           <div class="v-detail-head">
-            <div style="flex: 1; min-width: 0; width: 100%">
+            <div style="flex: 1 1 320px; min-width: 0; width: 100%">
               <div class="v-detail-title-row">
                 <h2 class="t-page">{{ jobsStore.selectedDetail.title }}</h2>
                 <VBadge
@@ -1573,16 +1766,61 @@ async function handleCreateRoadmapFromJob() {
             :job-id="jobsStore.selectedDetail.job_id"
           />
 
-          <details
-            v-if="jobsStore.selectedDetail.raw_description"
-            class="v-raw-desc"
-          >
-            <summary class="v-raw-desc__summary">
-              <span>Lihat Deskripsi Lowongan Asli</span>
-              <span class="t-meta">Teks bersih lokal</span>
-            </summary>
-            <pre class="v-raw-desc__body">{{ jobsStore.selectedDetail.raw_description }}</pre>
-          </details>
+          <section class="v-desc-reader" aria-label="Deskripsi Lowongan">
+            <div class="v-desc-reader__head">
+              <div class="v-desc-reader__title-group">
+                <h3 class="t-card">Deskripsi Lowongan</h3>
+                <span class="t-meta v-desc-reader__meta">
+                  {{
+                    jobsStore.selectedDetail.raw_description.trim().length >= 400
+                      ? "Teks lengkap lokal"
+                      : "Ringkasan lokal"
+                  }}
+                </span>
+              </div>
+              <VButton
+                v-if="canEnrichDetailFromSource"
+                variant="tertiary"
+                size="compact"
+                :loading="jobsStore.enrichingDescription"
+                @click="handleEnrichDescriptionFromSource"
+              >
+                Muat Info Lengkap
+              </VButton>
+            </div>
+
+            <div
+              v-if="jobsStore.enrichingDescription && !jobsStore.selectedDetail.raw_description.trim()"
+              class="v-desc-reader__body"
+              aria-busy="true"
+            >
+              <VSkeleton width="94%" height="14px" />
+              <VSkeleton width="88%" height="14px" />
+              <VSkeleton width="72%" height="14px" />
+            </div>
+
+            <div v-else-if="parsedDescriptionSections.length > 0" class="v-desc-reader__body">
+              <div
+                v-for="(sec, idx) in parsedDescriptionSections"
+                :key="idx"
+                class="v-desc-reader__section"
+              >
+                <h4 v-if="sec.title" class="v-desc-reader__heading">{{ sec.title }}</h4>
+                <template v-for="(blk, bIdx) in sec.blocks" :key="bIdx">
+                  <ul v-if="blk.kind === 'list'" class="v-desc-reader__list">
+                    <li v-for="(item, iIdx) in blk.items" :key="iIdx">{{ item }}</li>
+                  </ul>
+                  <p v-else class="v-desc-reader__para">{{ blk.text }}</p>
+                </template>
+              </div>
+            </div>
+
+            <div v-else class="v-desc-reader__body">
+              <p class="v-desc-reader__para t-meta">
+                Deskripsi belum tersedia dari portal sumber.
+              </p>
+            </div>
+          </section>
         </div>
       </section>
     </div>
@@ -1598,6 +1836,7 @@ async function handleCreateRoadmapFromJob() {
     <SearchPreferencesDrawer
       :open="preferencesOpen"
       :preferences="jobsStore.searchPreferences"
+      :portal-statuses="jobsStore.portalStatuses"
       :saving="savingPrefs"
       @close="preferencesOpen = false"
       @save="handleSavePreferences"
@@ -2273,7 +2512,41 @@ async function handleCreateRoadmapFromJob() {
 .v-load-more {
   padding-top: var(--space-2);
 }
-.v-raw-desc {
+.v-skel-row__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v-skel-row__chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+.v-ptr-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-radius: var(--radius-control);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-divider);
+  overflow: hidden;
+  transition: color 120ms var(--ease-standard), border-color 120ms var(--ease-standard);
+}
+.v-ptr-indicator--ready {
+  color: var(--text-primary);
+  border-color: var(--border-card);
+}
+.v-ptr-spin {
+  transform: rotate(180deg);
+  transition: transform 160ms var(--ease-out-expo);
+}
+.v-desc-reader {
   margin-top: var(--space-6);
   border: 1px solid var(--border-divider);
   border-radius: var(--radius-card);
@@ -2283,38 +2556,59 @@ async function handleCreateRoadmapFromJob() {
   max-width: 100%;
   overflow: hidden;
 }
-.v-raw-desc__summary {
+.v-desc-reader__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
   padding: var(--space-4) var(--space-5);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  list-style: none;
+  border-bottom: 1px solid var(--border-divider);
 }
-.v-raw-desc__summary::-webkit-details-marker {
-  display: none;
+.v-desc-reader__title-group {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
 }
-@media (hover: hover) {
-  .v-raw-desc__summary:hover {
-    background: var(--bg-elevated);
-  }
+.v-desc-reader__meta {
+  font-size: 12px;
 }
-.v-raw-desc__body {
-  margin: 0;
-  padding: 0 var(--space-5) var(--space-5);
-  border-top: 1px solid var(--border-divider);
-  padding-top: var(--space-4);
+.v-desc-reader__body {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
   font-family: var(--font-primary);
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.65;
   color: var(--text-secondary);
-  white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
+}
+.v-desc-reader__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.v-desc-reader__heading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.v-desc-reader__para {
+  margin: 0;
+}
+.v-desc-reader__list {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 .v-jobs-list {
   flex: 1;
@@ -2452,11 +2746,36 @@ async function handleCreateRoadmapFromJob() {
     display: none;
   }
   .v-jobs-mode-bar {
-    padding: 8px var(--space-3) 4px;
+    padding: 8px 12px 6px;
+    gap: 8px;
+    flex-wrap: nowrap;
     border-bottom: 1px solid var(--border-divider);
   }
+  .v-jobs-tabs {
+    flex: 1 1 0;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+  }
   .v-jobs-tab {
-    padding: 0 10px;
+    height: 32px;
+    min-width: 0;
+    padding: 0 6px;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+    overflow: hidden;
+  }
+  .v-jobs-tab-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .v-jobs-tab-count {
+    font-size: 10.5px;
+    padding: 1px 5px;
+    flex-shrink: 0;
   }
   .v-jobs-tab-count--mobile {
     display: inline-flex;
@@ -2466,6 +2785,10 @@ async function handleCreateRoadmapFromJob() {
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
+  }
+  .v-mobile-scrape-btn {
+    min-width: 72px;
+    padding: 0 10px;
   }
   .v-watchlist-strip--empty {
     display: none;

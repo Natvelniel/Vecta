@@ -49,6 +49,8 @@ const V5_MIGRATION_SQL: &str =
     include_str!("../../../../../shared/migrations/005_opportunity_intelligence.sql");
 const V7_MIGRATION_SQL: &str =
     include_str!("../../../../../shared/migrations/007_neural_v2_multifacet_and_reranker.sql");
+const V8_MIGRATION_SQL: &str =
+    include_str!("../../../../../shared/migrations/008_scraper_v4_portals.sql");
 
 const PRAGMAS_SQL: &str = "
 PRAGMA foreign_keys = ON;
@@ -490,6 +492,51 @@ impl Database {
                 .map_err(|e| db_err("Gagal mencatat versi migrasi 7", e))?;
                 Ok(())
             })?;
+        }
+
+        let has_v8: bool = self.with_conn(|conn| {
+            conn.query_row(
+                "SELECT 1 FROM schema_migrations WHERE version = 8",
+                [],
+                |_| Ok(true),
+            )
+            .optional()
+            .map(|o| o.unwrap_or(false))
+            .map_err(|e| db_err("Gagal memeriksa versi migrasi 8", e))
+        })?;
+
+        if !has_v8 {
+            let mut guard = self
+                .conn
+                .lock()
+                .map_err(|_| AppError::db_error("Database mutex poisoned"))?;
+            guard
+                .execute_batch("PRAGMA foreign_keys = OFF;")
+                .map_err(|e| db_err("Gagal menonaktifkan FK sementara untuk migrasi 008", e))?;
+
+            let mig_result = (|| -> Result<(), AppError> {
+                let tx = guard
+                    .transaction()
+                    .map_err(|e| db_err("Gagal memulai transaksi migrasi 008", e))?;
+                tx.execute_batch(V8_MIGRATION_SQL).map_err(|e| {
+                    db_err("Gagal menjalankan migrasi 008_scraper_v4_portals", e)
+                })?;
+                tx.execute(
+                    "INSERT OR IGNORE INTO schema_migrations (version, name) VALUES (?1, ?2)",
+                    params![8i64, "008_scraper_v4_portals"],
+                )
+                .map_err(|e| db_err("Gagal mencatat versi migrasi 8", e))?;
+                tx.commit()
+                    .map_err(|e| db_err("Gagal commit migrasi 008", e))?;
+                Ok(())
+            })();
+
+            let fk_restore = guard
+                .execute_batch("PRAGMA foreign_keys = ON;")
+                .map_err(|e| db_err("Gagal mengaktifkan kembali FK pasca migrasi 008", e));
+
+            mig_result?;
+            fk_restore?;
         }
         Ok(())
     }
@@ -1367,6 +1414,65 @@ impl Database {
                 skills: skill_rows,
             })
         })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn update_job_enriched_description(
+        &self,
+        job_id: &str,
+        raw_description: &str,
+        work_mode: WorkMode,
+        experience_level: ExperienceLevel,
+        domain_slug: &str,
+        quality_score: f64,
+        red_flags_json: &str,
+        skill_pairs: &[(i64, RequirementType)],
+        emb_context: Option<&[u8]>,
+    ) -> Result<Option<JobMatchRecord>, AppError> {
+        self.with_tx(|tx| {
+            tx.execute(
+                "UPDATE jobs
+                 SET raw_description = ?1,
+                     work_mode = CASE WHEN work_mode = 'unknown' THEN ?2 ELSE work_mode END,
+                     experience_level = CASE WHEN experience_level = 'unknown' THEN ?3 ELSE experience_level END,
+                     domain_slug = ?4,
+                     quality_score = ?5,
+                     red_flags_json = ?6,
+                     emb_context = COALESCE(?7, emb_context)
+                 WHERE id = ?8",
+                params![
+                    raw_description,
+                    work_mode.as_str(),
+                    experience_level.as_str(),
+                    if domain_slug.is_empty() { "umum_lintas_bidang" } else { domain_slug },
+                    quality_score,
+                    if red_flags_json.is_empty() { "[]" } else { red_flags_json },
+                    emb_context,
+                    job_id,
+                ],
+            )
+            .map_err(|e| db_err("Gagal memperbarui deskripsi penuh lowongan", e))?;
+
+            for &(skill_id, req_type) in skill_pairs {
+                let weight = req_type.default_weight();
+                tx.execute(
+                    "INSERT INTO job_skills (job_id, skill_id, requirement_type, weight)
+                     VALUES (?1, ?2, ?3, ?4)
+                     ON CONFLICT(job_id, skill_id) DO UPDATE SET
+                        requirement_type = CASE
+                            WHEN job_skills.requirement_type = 'mandatory' OR excluded.requirement_type = 'mandatory'
+                            THEN 'mandatory'
+                            ELSE 'nice_to_have'
+                        END,
+                        weight = MAX(job_skills.weight, excluded.weight)",
+                    params![job_id, skill_id, req_type.as_str(), weight],
+                )
+                .map_err(|e| db_err("Gagal memperbarui skill hasil deskripsi penuh", e))?;
+            }
+            Ok(())
+        })?;
+
+        self.load_job_for_matching(job_id)
     }
 
     pub fn apply_ai_enrichment_to_job(
@@ -3779,7 +3885,62 @@ mod tests {
             .expect("query pragmas");
 
         assert_eq!(fk, 1);
-        assert_eq!(mig_count, 7);
+        assert_eq!(mig_count, 8);
+    }
+
+    #[test]
+    fn migration_v8_allows_karirhub_remotive_and_preserves_matches() {
+        let db = Database::open_in_memory().expect("db");
+        let prof = db
+            .save_profile_atomic(&sample_profile_input(), None)
+            .expect("profile");
+        let mut kh = sample_job("job-kh-1", "kh-123", "Graphic Designer");
+        kh.source = JobSource::Karirhub;
+        db.insert_job_with_skills(&kh, &[]).expect("karirhub insert");
+        let mut rm = sample_job("job-rm-1", "rm-456", "UI Designer");
+        rm.source = JobSource::Remotive;
+        db.insert_job_with_skills(&rm, &[]).expect("remotive insert");
+        db.upsert_job_matches(&[JobMatchUpsert {
+            user_id: prof.id.clone(),
+            job_id: "job-kh-1".into(),
+            vector_score: 0.8,
+            skill_overlap_score: 0.7,
+            level_score: 1.0,
+            final_score: 0.82,
+            domain_score: Some(0.9),
+            reranker_score: None,
+            match_explanation_json: "[]".into(),
+            matched_skills_json: "[]".into(),
+            missing_skills_json: "[]".into(),
+        }])
+        .expect("match");
+
+        // Re-running migration 008 logic after clearing version=8 simulates upgrading v7 -> v8 with FK rows present
+        db.with_conn(|conn| {
+            conn.execute("DELETE FROM schema_migrations WHERE version = 8", [])
+                .map_err(|e| AppError::db_error(e.to_string()))?;
+            Ok(())
+        })
+        .expect("clear v8");
+        db.run_migrations().expect("re-run v8 migration");
+
+        let detail = db.get_job_detail(&prof.id, "job-kh-1").expect("detail must survive v8");
+        assert_eq!(detail.source, JobSource::Karirhub);
+        let detail_rm = db
+            .update_job_enriched_description(
+                "job-rm-1",
+                "Deskripsi lengkap pekerjaan desain UI dan Motion Graphics untuk platform digital.",
+                WorkMode::Remote,
+                ExperienceLevel::Junior,
+                "komunikasi_desain_media",
+                0.98,
+                "[]",
+                &[],
+                None,
+            )
+            .expect("enrich desc")
+            .expect("record exists");
+        assert_eq!(detail_rm.job_id, "job-rm-1");
     }
 
     #[test]

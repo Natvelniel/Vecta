@@ -233,6 +233,20 @@ export function formatLocationClusterLabel(slug: string): string {
   return CLUSTER_LABEL_MAP.get(clean) ?? LEGACY_CLUSTER_LABELS[clean] ?? slug;
 }
 
+const SHORT_CLUSTER_LABELS: Record<string, string> = {
+  remote_indonesia: "Remote ID",
+  luar_negeri_remote: "Remote Global",
+};
+
+export function formatLocationClusterShortLabel(slug: string): string {
+  const clean = slug.trim().toLowerCase();
+  if (SHORT_CLUSTER_LABELS[clean]) {
+    return SHORT_CLUSTER_LABELS[clean];
+  }
+  const full = formatLocationClusterLabel(slug);
+  return full.replace(/\s*\([^)]*\)\s*/g, "").trim() || full;
+}
+
 export function groupLocationClusters(
   items: LocationClusterOption[],
 ): Array<{ group: string; items: LocationClusterOption[] }> {

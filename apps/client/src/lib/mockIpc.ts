@@ -24,7 +24,7 @@ import type {
   SalaryBenchmarkSummary,
   SavedWatchlistItem_Serialize,
   ScrapeKeywordItem_Serialize,
-  ScrapeRunReport,
+  ScrapeRunReport_Serialize,
   SearchPreferences_Deserialize,
   SearchPreferences_Serialize,
   SkillImpactItem,
@@ -87,7 +87,7 @@ let masterCvState: MasterCvProfile = {
 let searchPrefsState: SearchPreferences_Serialize = {
   location: "Indonesia",
   locations: ["Indonesia", "Jakarta", "Bandung"],
-  sources: ["jobstreet", "linkedin", "kalibrr", "dealls"],
+  sources: ["jobstreet", "linkedin", "kalibrr", "dealls", "karirhub"],
   limit_per_query: 25,
   max_pages: 2,
   posted_within_days: 14,
@@ -173,7 +173,7 @@ const mockProfilesList: UserProfileDetail_Serialize[] = [activeProfile];
 
 interface MockJobRecord {
   job_id: string;
-  source: "linkedin" | "glints" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "manual";
+  source: "linkedin" | "glints" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "karirhub" | "remotive" | "manual";
   external_id: string;
   url: string | null;
   title: string;
@@ -870,13 +870,41 @@ export const mockCommands = {
     mockJobs.unshift(rec);
     return computeJobDetail(rec);
   },
-  async runScrapeForActiveKeywords(_userId: string, _sources: string[], _limitPerQuery: number): Promise<ScrapeRunReport> {
+  async runScrapeForActiveKeywords(_userId: string, _sources: string[], _limitPerQuery: number): Promise<ScrapeRunReport_Serialize> {
     const pending = mockJobs.filter((j) => j.enrichment_status === "local_only" && j.application_status !== "dismissed").length;
-    return { total_fetched: 12, newly_ingested: 0, skipped_duplicates: 12, failed_extractions: 0, pending_local_count: pending, warnings: [] };
+    return {
+      total_fetched: 12,
+      newly_ingested: 0,
+      skipped_duplicates: 12,
+      failed_extractions: 0,
+      pending_local_count: pending,
+      warnings: [],
+      portal_statuses: [
+        { source: "jobstreet", status: "ok", jobs_found: 5, latency_ms: 420 },
+        { source: "linkedin", status: "ok", jobs_found: 4, latency_ms: 610 },
+        { source: "kalibrr", status: "ok", jobs_found: 2, latency_ms: 290 },
+        { source: "dealls", status: "ok", jobs_found: 1, latency_ms: 260 },
+        { source: "karirhub", status: "ok", jobs_found: 3, latency_ms: 190 },
+      ],
+    };
   },
-  async scrapeAndStoreJobs(_userId: string, _prefs: SearchPreferences_Deserialize): Promise<ScrapeRunReport> {
+  async scrapeAndStoreJobs(_userId: string, _prefs: SearchPreferences_Deserialize): Promise<ScrapeRunReport_Serialize> {
     const pending = mockJobs.filter((j) => j.enrichment_status === "local_only" && j.application_status !== "dismissed").length;
-    return { total_fetched: 18, newly_ingested: 0, skipped_duplicates: 18, failed_extractions: 0, pending_local_count: pending, warnings: [] };
+    return {
+      total_fetched: 18,
+      newly_ingested: 0,
+      skipped_duplicates: 18,
+      failed_extractions: 0,
+      pending_local_count: pending,
+      warnings: [],
+      portal_statuses: [
+        { source: "jobstreet", status: "ok", jobs_found: 7, latency_ms: 410 },
+        { source: "linkedin", status: "ok", jobs_found: 5, latency_ms: 580 },
+        { source: "kalibrr", status: "ok", jobs_found: 3, latency_ms: 270 },
+        { source: "dealls", status: "ok", jobs_found: 2, latency_ms: 245 },
+        { source: "karirhub", status: "ok", jobs_found: 4, latency_ms: 175 },
+      ],
+    };
   },
   async runAiMatchingQueue(_userId: string, maxJobs: number, _rpmLimit: number): Promise<AiMatchRunReport> {
     const targets = mockJobs
@@ -900,6 +928,26 @@ export const mockCommands = {
     const found = mockJobs.find((j) => j.job_id === jobId) ?? mockJobs[0];
     found.enrichment_status = "ai_enriched";
     found.role_summary = found.role_summary || "Diperkaya on-demand dengan AI Matching.";
+    return computeJobDetail(found);
+  },
+  async enrichJobDescriptionFromSource(_userId: string, jobId: string): Promise<JobMatchDetail_Serialize> {
+    const found = mockJobs.find((j) => j.job_id === jobId) ?? mockJobs[0];
+    if (found.raw_description.length < 400) {
+      found.raw_description = [
+        "Deskripsi Pekerjaan:",
+        `- Mengembangkan dan memelihara layanan backend utama untuk ${found.company} dengan standar reliabilitas tinggi.`,
+        "- Merancang skema penyimpanan lokal serta mengoptimalkan query agar latensi tetap rendah.",
+        "- Berkolaborasi bersama tim produk, QA, dan infrastruktur dalam siklus rilis terstruktur.",
+        "",
+        "Kualifikasi:",
+        "- Pengalaman membangun API backend yang aman, terdokumentasi rapi, dan mudah diuji.",
+        "- Memahami kontrol versi Git, pengelolaan basis data relasional, serta dasar containerization.",
+        "",
+        "Benefit & Info Tambahan:",
+        "- Tunjangan kerja fleksibel dan asuransi kesehatan menyeluruh.",
+        "- Program pengembangan karier dan dukungan sertifikasi teknis berkala.",
+      ].join("\n");
+    }
     return computeJobDetail(found);
   },
   async updateJobApplication(

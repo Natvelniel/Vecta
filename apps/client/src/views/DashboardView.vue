@@ -137,34 +137,34 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
       </VCard>
 
       <template v-else>
-        <!-- Quiet Unboxed Metrics Strip (Section 2.3: no redundant stat cards) -->
+        <!-- Quiet Architectural Metrics Strip -->
         <div class="v-metrics-strip">
-          <div>
-            <div class="t-meta">Lowongan Cocok (&ge; 75%)</div>
-            <div class="t-display t-num" style="margin-top: var(--space-2)">
+          <div class="v-metric-cell">
+            <div class="t-meta v-metric-label">Cocok (&ge; 75%)</div>
+            <div class="t-display t-num v-metric-val">
               {{ highFitCount }}
             </div>
-            <div class="t-meta" style="margin-top: 6px">
-              dari {{ jobsStore.jobs.length }} lowongan tersimpan
+            <div class="t-meta v-metric-sub">
+              dari {{ jobsStore.jobs.length }} lowongan
             </div>
           </div>
 
-          <div>
-            <div class="t-meta">Lamaran Aktif</div>
-            <div class="t-display t-num" style="margin-top: var(--space-2); color: var(--status-success)">
+          <div class="v-metric-cell">
+            <div class="t-meta v-metric-label">Lamaran Aktif</div>
+            <div class="t-display t-num v-metric-val" style="color: var(--status-success)">
               {{ appliedCount }}
             </div>
-            <div class="t-meta" style="margin-top: 6px">
-              {{ interviewCount }} tahap interview · {{ jobsStore.pendingLocalCount }} antrean AI
+            <div class="t-meta v-metric-sub">
+              {{ interviewCount }} interview · {{ jobsStore.pendingLocalCount }} antrean
             </div>
           </div>
 
-          <div>
-            <div class="t-meta">Progres Roadmap Aktif</div>
-            <div class="t-display t-num" style="margin-top: var(--space-2); color: var(--brand-hover)">
+          <div class="v-metric-cell">
+            <div class="t-meta v-metric-label">Progres Roadmap</div>
+            <div class="t-display t-num v-metric-val" style="color: var(--brand-hover)">
               {{ activeRoadmapProgress }}%
             </div>
-            <div class="t-meta" style="margin-top: 6px">{{ activeRoadmapStepRatio }}</div>
+            <div class="t-meta v-metric-sub">{{ activeRoadmapStepRatio }}</div>
           </div>
         </div>
 
@@ -235,11 +235,11 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
 
           <section>
             <div class="v-col-head">
-              <h2 class="t-section">Langkah Belajar Berikutnya</h2>
+              <h2 class="t-section v-col-title">Langkah Roadmap</h2>
               <VButton
                 variant="tertiary"
                 size="compact"
-                style="margin-right: -12px"
+                class="v-col-action"
                 @click="router.push('/roadmap')"
               >
                 Buka Roadmap
@@ -285,14 +285,15 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
           </section>
         </div>
 
-        <!-- Perlu Tindakan Hari Ini + Mobile Quick Shortcuts -->
+        <!-- Tindakan Hari Ini + Mobile Quick Shortcuts -->
         <div class="v-dash-extra">
           <VCard>
             <div class="v-col-head" style="margin-bottom: var(--space-2)">
-              <h2 class="t-section">Perlu Tindakan Hari Ini</h2>
+              <h2 class="t-section v-col-title">Tindakan Hari Ini</h2>
               <VButton
                 variant="tertiary"
                 size="compact"
+                class="v-col-action"
                 @click="router.push({ path: '/jobs', query: { tab: 'pipeline' } })"
               >
                 Buka Pipeline
@@ -322,17 +323,21 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
 
           <div class="v-mobile-shortcuts">
             <button type="button" class="v-shortcut-card" @click="router.push('/roadmap')">
-              <VIcon name="roadmap" :size="18" />
-              <div style="text-align: left">
-                <strong style="display: block; font-size: 13.5px; color: var(--text-1)">Roadmap Belajar</strong>
-                <span class="t-meta">Lokal 0 Token &amp; AI</span>
+              <span class="v-shortcut-icon">
+                <VIcon name="roadmap" :size="18" />
+              </span>
+              <div class="v-shortcut-copy">
+                <strong class="v-shortcut-title">Roadmap Belajar</strong>
+                <span class="t-meta v-shortcut-sub">0 Token &amp; AI</span>
               </div>
             </button>
             <button type="button" class="v-shortcut-card" @click="router.push('/cv')">
-              <VIcon name="cv" :size="18" />
-              <div style="text-align: left">
-                <strong style="display: block; font-size: 13.5px; color: var(--text-1)">Studio CV ATS</strong>
-                <span class="t-meta">Live Preview A4</span>
+              <span class="v-shortcut-icon">
+                <VIcon name="cv" :size="18" />
+              </span>
+              <div class="v-shortcut-copy">
+                <strong class="v-shortcut-title">Studio CV ATS</strong>
+                <span class="t-meta v-shortcut-sub">Pratinjau A4</span>
               </div>
             </button>
           </div>
@@ -361,6 +366,15 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
   padding-bottom: var(--space-8);
   border-bottom: 1px solid var(--border-divider);
 }
+.v-metric-cell {
+  min-width: 0;
+}
+.v-metric-val {
+  margin-top: var(--space-2);
+}
+.v-metric-sub {
+  margin-top: 6px;
+}
 .v-dash-columns {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
@@ -369,9 +383,18 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
 }
 .v-col-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: var(--space-3);
   margin-bottom: var(--space-3);
+}
+.v-col-title {
+  min-width: 0;
+}
+.v-col-action {
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-right: -8px;
 }
 .v-col-list {
   display: flex;
@@ -413,10 +436,11 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
   gap: var(--space-2);
 }
 .v-col-empty {
-  padding: var(--space-6);
+  padding: var(--space-5);
   border-radius: var(--radius-card);
-  border: 1px solid var(--border-divider);
+  border: 1px solid var(--border-default);
   background: var(--bg-elevated);
+  box-shadow: var(--shadow-surface);
 }
 .v-dash-pills {
   display: flex;
@@ -485,18 +509,58 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
 }
 .v-mobile-shortcuts {
   display: none;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 .v-shortcut-card {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
   border-radius: var(--radius-card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-default);
   background: var(--surface-1);
+  box-shadow: var(--shadow-surface);
   color: var(--text-1);
+  text-align: left;
+  transition: border-color var(--dur-hover) var(--ease-state), transform var(--dur-press) ease-out;
+}
+.v-shortcut-card:active {
+  transform: scale(0.96);
+}
+.v-shortcut-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-control);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-1);
+}
+.v-shortcut-copy {
+  min-width: 0;
+  width: 100%;
+}
+.v-shortcut-title {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v-shortcut-sub {
+  display: block;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 @media (hover: hover) {
   .v-shortcut-card:hover {
@@ -505,12 +569,35 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
 }
 @media (max-width: 1023px) {
   .v-page-container {
-    padding: var(--space-5) var(--space-4) var(--space-10);
+    padding: var(--space-4) var(--space-4) var(--space-10);
   }
-  .v-metrics-strip,
+  .v-metrics-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 12px 10px;
+    border-bottom: 0;
+    border-radius: var(--radius-card);
+    background: var(--surface-recessed);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-recessed);
+  }
+  .v-metric-cell {
+    text-align: left;
+    padding: 0 4px;
+  }
+  .v-metric-val {
+    font-size: 22px;
+    margin-top: 2px;
+  }
+  .v-metric-sub {
+    font-size: 10.5px;
+    line-height: 1.3;
+    margin-top: 2px;
+  }
   .v-dash-columns {
     grid-template-columns: 1fr;
     gap: var(--space-6);
+    margin-top: var(--space-6);
   }
   .v-mobile-shortcuts {
     display: grid;

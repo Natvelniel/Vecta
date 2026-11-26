@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use url::{Host, Url};
 
 use crate::error::AppError;
-use crate::models::job::ScrapeWarningItem;
+use crate::models::job::{PortalScrapeStatus, ScrapeWarningItem};
 use crate::models::profile::WorkerHealth;
 
 /// Validate and normalize the Python Scraper Worker base URL.
@@ -103,6 +103,8 @@ pub struct WorkerScrapeResponse {
     pub jobs: Vec<WorkerScrapedJob>,
     pub stats: WorkerScrapeStats,
     pub warnings: Vec<ScrapeWarningItem>,
+    #[serde(default)]
+    pub portal_statuses: Vec<PortalScrapeStatus>,
 }
 
 #[async_trait]

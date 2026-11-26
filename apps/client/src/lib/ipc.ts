@@ -27,7 +27,7 @@ import {
   type SalaryBenchmarkSummary,
   type SavedWatchlistItem_Serialize,
   type ScrapeKeywordItem_Serialize,
-  type ScrapeRunReport,
+  type ScrapeRunReport_Serialize,
   type SearchPreferences_Deserialize,
   type SearchPreferences_Serialize,
   type SkillImpactItem,
@@ -338,7 +338,7 @@ export const ipc = {
     userId: string,
     sources: string[],
     limitPerQuery: number,
-  ): Promise<ScrapeRunReport> {
+  ): Promise<ScrapeRunReport_Serialize> {
     if (isMockMode()) {
       return (await getMockBackend()).runScrapeForActiveKeywords(userId, sources, limitPerQuery);
     }
@@ -348,7 +348,7 @@ export const ipc = {
   async scrapeAndStoreJobs(
     userId: string,
     prefs: SearchPreferences_Deserialize,
-  ): Promise<ScrapeRunReport> {
+  ): Promise<ScrapeRunReport_Serialize> {
     if (isMockMode()) {
       return (await getMockBackend()).scrapeAndStoreJobs(userId, prefs);
     }
@@ -370,6 +370,16 @@ export const ipc = {
     const raw = isMockMode()
       ? await (await getMockBackend()).enrichJobWithAi(userId, jobId)
       : unwrapResult(await commands.enrichJobWithAi(userId, jobId));
+    return normalizeJobDetail(raw);
+  },
+
+  async enrichJobDescriptionFromSource(
+    userId: string,
+    jobId: string,
+  ): Promise<NormalizedJobDetail> {
+    const raw = isMockMode()
+      ? await (await getMockBackend()).enrichJobDescriptionFromSource(userId, jobId)
+      : unwrapResult(await commands.enrichJobDescriptionFromSource(userId, jobId));
     return normalizeJobDetail(raw);
   },
 

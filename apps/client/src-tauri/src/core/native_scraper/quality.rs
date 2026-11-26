@@ -87,6 +87,9 @@ pub fn assess_job_quality(
                 || ul.contains("linkedin")
                 || ul.contains("kalibrr")
                 || ul.contains("dealls")
+                || ul.contains("karirhub")
+                || ul.contains("kemnaker.go.id")
+                || ul.contains("remotive")
                 || ul.contains("indeed")
                 || ul.contains("glints")
         })
@@ -132,7 +135,27 @@ pub fn assess_job_quality(
 }
 
 fn canonicalize_key_part(input: &str) -> String {
-    let lower = input.to_lowercase();
+    let mut lower = input.to_lowercase();
+    for marker in [
+        "(remote)",
+        "(hybrid)",
+        "(onsite)",
+        "(wfa)",
+        "(wfh)",
+        "(fresh graduate)",
+        "[urgent]",
+        "[remote]",
+        "- jakarta",
+        "- bandung",
+        "- surabaya",
+        "- yogyakarta",
+        "- bali",
+        "- medan",
+        "- semarang",
+        "- indonesia",
+    ] {
+        lower = lower.replace(marker, " ");
+    }
     let cleaned: String = lower
         .chars()
         .map(|c| if c.is_alphanumeric() { c } else { ' ' })
@@ -172,15 +195,17 @@ pub struct PortalLinkRef {
 }
 
 /// Merge duplicate jobs fetched across multiple portals (e.g., same PT + title on JobStreet & LinkedIn)
-/// while keeping the richest description and recording alternate portal links.
+/// while keeping the richest description, preserving salary if present on either duplicate,
+/// and recording alternate portal links.
 pub fn deduplicate_cross_portal<T>(
-    items: Vec<T>,
+    mut items: Vec<T>,
     key_fn: impl Fn(&T) -> (String, String, String, String, Option<String>, String),
+    mut merge_extra: impl FnMut(&mut T, &T),
 ) -> Vec<(T, Vec<PortalLinkRef>)> {
     let mut kept: Vec<(T, Vec<PortalLinkRef>, HashSet<String>)> = Vec::new();
     let mut bucket: HashMap<(String, String), Vec<usize>> = HashMap::new();
 
-    for item in items {
+    for mut item in items.drain(..) {
         let (company, title, _location, source, url, desc) = key_fn(&item);
         let key = (canonicalize_key_part(&company), canonicalize_key_part(&title));
         let shingles = token_shingles(&desc);
@@ -204,8 +229,11 @@ pub fn deduplicate_cross_portal<T>(
             }
             let existing_desc_len = key_fn(existing_item).5.len();
             if desc.len() > existing_desc_len {
+                merge_extra(&mut item, existing_item);
                 *existing_item = item;
                 *existing_shingles = shingles;
+            } else {
+                merge_extra(existing_item, &item);
             }
         } else {
             let new_idx = kept.len();
@@ -280,16 +308,20 @@ mod tests {
             },
         ];
 
-        let merged = deduplicate_cross_portal(jobs, |j| {
-            (
-                j.company.clone(),
-                j.title.clone(),
-                "Bandung".into(),
-                j.source.clone(),
-                j.url.clone(),
-                j.desc.clone(),
-            )
-        });
+        let merged = deduplicate_cross_portal(
+            jobs,
+            |j| {
+                (
+                    j.company.clone(),
+                    j.title.clone(),
+                    "Bandung".into(),
+                    j.source.clone(),
+                    j.url.clone(),
+                    j.desc.clone(),
+                )
+            },
+            |_, _| {},
+        );
         assert_eq!(merged.len(), 1);
         assert_eq!(merged[0].0.source, "linkedin");
         assert_eq!(merged[0].1.len(), 1);

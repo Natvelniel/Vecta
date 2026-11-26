@@ -45,8 +45,8 @@ use crate::error::{AppError, ErrorCode};
 use crate::models::job::{
     AiMatchRunReport, ApplicationStatus, ApplyKitResult, EnrichmentStatus, GapAnalysis,
     InterviewPrepKit, JobExtractionResult, JobFilterInput, JobMatchDetail, JobMatchSummary,
-    JobSource, RequirementType, ScrapeProgressEvent, ScrapeRunReport, ScrapeWarningItem,
-    SearchPreferences,
+    JobSource, PortalScrapeStatus, RequirementType, ScrapeProgressEvent, ScrapeRunReport,
+    ScrapeWarningItem, SearchPreferences,
 };
 use crate::state::AppState;
 
@@ -402,6 +402,7 @@ pub async fn run_scrape_for_active_keywords_impl(
         failed_extractions,
         pending_local_count,
         warnings,
+        portal_statuses: worker_resp.portal_statuses,
     })
 }
 
@@ -452,13 +453,13 @@ pub async fn scrape_and_store_jobs_impl(
         .filter(|s| {
             matches!(
                 s.as_str(),
-                "linkedin" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "glints"
+                "linkedin" | "jobstreet" | "indeed" | "kalibrr" | "dealls" | "karirhub" | "remotive" | "glints"
             )
         })
         .collect();
     if clean_sources.is_empty() {
         return Err(AppError::validation_error(
-            "Pilih minimal satu portal lowongan (JobStreet, LinkedIn, Kalibrr, Dealls, Indeed, atau Glints).",
+            "Pilih minimal satu portal lowongan (JobStreet, LinkedIn, Kalibrr, Dealls, Karirhub, atau Remotive).",
         ));
     }
 
@@ -496,6 +497,7 @@ pub async fn scrape_and_store_jobs_impl(
 
     let mut all_scraped_jobs = Vec::new();
     let mut all_warnings = Vec::new();
+    let mut status_acc: HashMap<String, PortalScrapeStatus> = HashMap::new();
     for loc in &locations {
         let worker_req = WorkerScrapeRequest {
             queries: queries.clone(),
@@ -508,21 +510,48 @@ pub async fn scrape_and_store_jobs_impl(
         };
         let resp = state.active_scraper().scrape(&worker_url, &worker_req).await?;
         all_warnings.extend(resp.warnings);
+        for st in resp.portal_statuses {
+            let entry = status_acc.entry(st.source.clone()).or_insert_with(|| st.clone());
+            if entry.jobs_found != st.jobs_found || entry.status != st.status {
+                entry.jobs_found += st.jobs_found;
+                entry.latency_ms = entry.latency_ms.max(st.latency_ms);
+                if st.status == "ok" && entry.status != "ok" {
+                    entry.status = "degraded".into();
+                } else if st.status == "degraded" && entry.status == "ok" {
+                    entry.status = "degraded".into();
+                } else if st.status == "unreachable" && entry.jobs_found > 0 {
+                    entry.status = "degraded".into();
+                }
+            }
+        }
         all_scraped_jobs.extend(resp.jobs);
     }
 
-    // Cross-portal deduplication (e.g. same PT + title on JobStreet & LinkedIn -> merged card with alternate links)
+    let portal_statuses: Vec<PortalScrapeStatus> = clean_sources
+        .iter()
+        .filter_map(|src| status_acc.remove(src))
+        .collect();
+
+    // Cross-portal deduplication (e.g. same PT + title on JobStreet & LinkedIn -> merged card with alternate links & salary)
     let raw_fetched = all_scraped_jobs.len() as u32;
-    let merged_jobs = deduplicate_cross_portal(all_scraped_jobs, |j| {
-        (
-            j.company.clone(),
-            j.title.clone(),
-            j.location.clone().unwrap_or_default(),
-            j.source.clone(),
-            j.url.clone(),
-            j.raw_description.clone(),
-        )
-    });
+    let merged_jobs = deduplicate_cross_portal(
+        all_scraped_jobs,
+        |j| {
+            (
+                j.company.clone(),
+                j.title.clone(),
+                j.location.clone().unwrap_or_default(),
+                j.source.clone(),
+                j.url.clone(),
+                j.raw_description.clone(),
+            )
+        },
+        |target, other| {
+            if target.salary_text.is_none() && other.salary_text.is_some() {
+                target.salary_text = other.salary_text.clone();
+            }
+        },
+    );
     let cross_portal_dupes = raw_fetched.saturating_sub(merged_jobs.len() as u32);
 
     // Ensure 23-domain Indonesian skill taxonomy exists in SQLite for 0-token local extraction
@@ -756,6 +785,7 @@ pub async fn scrape_and_store_jobs_impl(
         failed_extractions: 0,
         pending_local_count,
         warnings: all_warnings,
+        portal_statuses,
     })
 }
 
@@ -1370,6 +1400,117 @@ pub async fn enrich_job_with_ai(
     enrich_job_with_ai_impl(&state, user_id, job_id).await
 }
 
+/// On-demand full description enrichment from public portal endpoints (0 Gemini tokens).
+pub async fn enrich_job_description_from_source_impl(
+    state: &AppState,
+    user_id: String,
+    job_id: String,
+) -> Result<JobMatchDetail, AppError> {
+    let profile_match = state
+        .db
+        .get_profile_for_matching(&user_id)?
+        .ok_or_else(|| {
+            AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
+        })?;
+    let profile_detail = state
+        .db
+        .get_profile_by_id(&user_id)?
+        .ok_or_else(|| {
+            AppError::validation_error(format!("Profil pengguna '{user_id}' tidak ditemukan."))
+        })?;
+    let detail = state.db.get_job_detail(&user_id, &job_id)?;
+    let src_str = detail.source.as_str();
+    if !matches!(src_str, "jobstreet" | "linkedin" | "karirhub") {
+        return Ok(detail);
+    }
+
+    let fetched = match state
+        .native_client
+        .fetch_full_description(src_str, &detail.external_id, detail.url.as_deref())
+        .await
+    {
+        Ok(Some(text)) => text,
+        _ => return Ok(detail),
+    };
+
+    if fetched.chars().count() <= detail.raw_description.chars().count() + 40 {
+        return Ok(detail);
+    }
+
+    state.db.ensure_seed_skills()?;
+    let skill_catalog = state.db.list_all_skills_for_local_matching()?;
+    let work_mode = infer_work_mode(&detail.title, detail.location.as_deref(), &fetched);
+    let exp_level = infer_experience_level(&detail.title, &fetched);
+    let universal = extract_universal_job_metadata(
+        &detail.title,
+        &fetched,
+        Some(&detail.normalized_role),
+        &skill_catalog,
+    );
+    let quality = assess_job_quality(
+        &detail.title,
+        &detail.company,
+        &fetched,
+        detail.salary_text.as_deref(),
+        detail.url.as_deref(),
+    );
+    let red_flags_json =
+        serde_json::to_string(&quality.red_flags).unwrap_or_else(|_| "[]".into());
+    let emb_context = if state.local_embedder.is_ready() {
+        let job_text = format!("{} {}", detail.title, fetched);
+        state
+            .local_embedder
+            .embed_passage(&job_text)
+            .map(|v| encode_embedding_i8(&v))
+    } else {
+        None
+    };
+
+    if let Some(mut job_rec) = state.db.update_job_enriched_description(
+        &job_id,
+        &fetched,
+        work_mode,
+        exp_level,
+        &universal.dominant_domain,
+        quality.quality_score,
+        &red_flags_json,
+        &universal.skill_ids,
+        emb_context.as_deref(),
+    )? {
+        job_rec.emb_context = emb_context.or(job_rec.emb_context);
+        let user_skill_names: Vec<String> = profile_detail
+            .skills
+            .iter()
+            .map(|s| s.canonical_name.clone())
+            .collect();
+        let user_summary = profile_detail.summary.unwrap_or_default();
+        let kw_ctx = compute_local_keyword_relevance(
+            &user_summary,
+            &profile_detail.target_roles,
+            &user_skill_names,
+            &detail.title,
+            &fetched,
+            detail.location.as_deref(),
+            detail.location.as_deref(),
+        );
+        let computed = compute_local_hybrid_match(&profile_match, &job_rec, kw_ctx);
+        let upsert = to_match_upsert(&user_id, &job_id, &computed)?;
+        state.db.upsert_job_matches(&[upsert])?;
+    }
+
+    state.db.get_job_detail(&user_id, &job_id)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn enrich_job_description_from_source(
+    state: State<'_, AppState>,
+    user_id: String,
+    job_id: String,
+) -> Result<JobMatchDetail, AppError> {
+    enrich_job_description_from_source_impl(&state, user_id, job_id).await
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn update_job_application(
@@ -1570,6 +1711,7 @@ mod tests {
                 duration_ms: 120,
             },
             warnings: vec![],
+            portal_statuses: vec![],
         });
 
         let state = build_test_state(Some("AIzaSyTESTKEY1234"), Arc::clone(&gemini), worker);
@@ -1631,6 +1773,7 @@ mod tests {
                 code: "RATE_LIMITED".into(),
                 message: "HTTP 429 pada Glints".into(),
             }],
+            portal_statuses: vec![],
         });
 
         let state = build_test_state(Some("AIzaSyTESTKEY1234"), gemini, worker);
@@ -1793,6 +1936,7 @@ mod tests {
                 duration_ms: 10,
             },
             warnings: vec![],
+            portal_statuses: vec![],
         });
 
         let state = Arc::new(build_test_state(
@@ -1898,6 +2042,7 @@ mod tests {
                 duration_ms: 15,
             },
             warnings: vec![],
+            portal_statuses: vec![],
         });
 
         let state = build_test_state(None, Arc::clone(&gemini), Arc::clone(&worker));

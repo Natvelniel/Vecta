@@ -417,8 +417,8 @@ async function handleSaveProfile() {
                   :title="sk.evidence || 'Klik untuk ubah tingkat kemahiran'"
                   @click="cycleSkill(idx)"
                 >
-                  <span>{{ sk.canonical_name }}</span>
-                  <span class="t-meta">{{ formatProficiency(sk.proficiency) }}</span>
+                  <span class="v-skill-edit__name">{{ sk.canonical_name }}</span>
+                  <span class="v-skill-edit__level">{{ formatProficiency(sk.proficiency) }}</span>
                 </button>
                 <button
                   type="button"
@@ -786,18 +786,37 @@ async function handleSaveProfile() {
 .v-skill-edit__main {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: 10px;
+  flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
-  min-height: 36px;
-  padding: 4px var(--space-3);
+  min-height: 38px;
+  padding: 7px 10px 7px 12px;
   border: 0;
   background: transparent;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
   text-align: left;
+}
+.v-skill-edit__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.35;
+}
+.v-skill-edit__level {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  color: var(--text-2);
 }
 .v-skill-edit__main:hover {
   background: var(--bg-hover);
@@ -806,7 +825,8 @@ async function handleSaveProfile() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
+  flex-shrink: 0;
+  width: 34px;
   border: 0;
   border-left: 1px solid var(--border-divider);
   background: transparent;
@@ -917,6 +937,11 @@ async function handleSaveProfile() {
   .v-page-container,
   .v-narrow-wrap {
     padding: var(--space-4) var(--space-3) var(--space-8);
+  }
+}
+@media (max-width: 639px) {
+  .v-skill-edit {
+    width: 100%;
   }
 }
 </style>

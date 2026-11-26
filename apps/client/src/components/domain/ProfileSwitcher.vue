@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useProfileStore } from "@/stores/profile";
 import { useJobsStore } from "@/stores/jobs";
@@ -22,9 +22,24 @@ const toast = useToast();
 
 const open = ref(false);
 
+function handleEscapeKey(e: KeyboardEvent) {
+  if (e.key === "Escape" && open.value) {
+    open.value = false;
+  }
+}
+
+onMounted(() => window.addEventListener("keydown", handleEscapeKey));
+onBeforeUnmount(() => window.removeEventListener("keydown", handleEscapeKey));
+
 const activeLabel = computed(
   () => profileStore.activeProfile?.profile_name || "Profil Utama",
 );
+
+function sanitizeProfileError(raw: string | null | undefined, fallback: string): string {
+  if (!raw) return fallback;
+  if (/https?:\/\/|sqlite|panic|stack/i.test(raw)) return fallback;
+  return raw;
+}
 
 async function refreshWorkspaceForUser(uid: string) {
   await Promise.all([
@@ -46,7 +61,9 @@ async function handleSwitch(profileId: string) {
       tone: "success",
     });
   } else if (profileStore.error) {
-    toast.show(profileStore.error, { tone: "error" });
+    toast.show(sanitizeProfileError(profileStore.error, "Belum dapat beralih profil."), {
+      tone: "info",
+    });
   }
 }
 
@@ -56,7 +73,9 @@ async function handleDelete(profileId: string, name: string) {
     await refreshWorkspaceForUser(profileStore.userId);
     toast.show(`Profil "${name}" dihapus.`, { tone: "info" });
   } else if (profileStore.error) {
-    toast.show(profileStore.error, { tone: "error" });
+    toast.show(sanitizeProfileError(profileStore.error, "Profil tidak dapat dihapus saat ini."), {
+      tone: "info",
+    });
   }
 }
 
@@ -85,9 +104,18 @@ function handleNewProfile() {
       <VIcon name="chevronDown" :size="13" />
     </button>
 
-    <div v-if="open" class="v-ps-backdrop" @click="open = false" />
+    <Transition name="v-backdrop-fade">
+      <div v-if="open" class="v-ps-backdrop" @click="open = false" />
+    </Transition>
 
-    <div v-if="open" class="v-ps-menu liquid-glass" role="menu" aria-label="Daftar jalur profil">
+    <Transition :name="compact ? 'v-ps-center-pop' : 'v-dialog-pop'">
+      <div
+        v-if="open"
+        class="v-ps-menu"
+        :class="{ 'v-ps-menu--compact': compact }"
+        role="menu"
+        aria-label="Daftar jalur profil"
+      >
       <div class="v-ps-menu-head t-meta">Jalur Profil Tersimpan</div>
       <div class="v-ps-list">
         <div
@@ -119,12 +147,15 @@ function handleNewProfile() {
         <span>Buat Profil Jalur Baru</span>
       </button>
     </div>
+    </Transition>
   </div>
 </template>
 
 <style scoped>
 .v-ps-wrap {
   position: relative;
+  min-width: 0;
+  flex-shrink: 1;
 }
 .v-ps-trigger {
   width: 100%;
@@ -142,11 +173,19 @@ function handleNewProfile() {
 }
 .v-ps-trigger--compact {
   width: auto;
-  max-width: 132px;
+  max-width: 146px;
+  min-width: 0;
   height: 32px;
-  padding: 0 8px;
+  padding: 0 10px;
   gap: 6px;
   font-size: 12px;
+  justify-content: center;
+}
+@media (max-width: 390px) {
+  .v-ps-trigger--compact {
+    max-width: 132px;
+    padding: 0 8px;
+  }
 }
 .v-ps-dot {
   width: 7px;
@@ -184,16 +223,33 @@ function handleNewProfile() {
   z-index: 55;
   padding: 8px;
   border-radius: var(--radius-card);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border);
   background: var(--surface-1);
-  box-shadow: var(--shadow-overlay);
+  box-shadow: var(--shadow-overlay), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.v-ps-trigger--compact + .v-ps-backdrop + .v-ps-menu {
-  left: auto;
-  right: 0;
+.v-ps-menu--compact {
+  position: fixed;
+  top: calc(54px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  right: auto;
+  width: min(320px, calc(100vw - 24px));
+  max-width: min(320px, calc(100vw - 24px));
+  transform: translate3d(-50%, 0, 0);
+  transform-origin: top center;
+}
+.v-ps-center-pop-enter-active {
+  transition: opacity 180ms cubic-bezier(0.22, 1, 0.36, 1), transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v-ps-center-pop-leave-active {
+  transition: opacity 130ms ease-out, transform 130ms ease-out;
+}
+.v-ps-center-pop-enter-from,
+.v-ps-center-pop-leave-to {
+  opacity: 0;
+  transform: translate3d(-50%, 8px, 0);
 }
 .v-ps-menu-head {
   padding: 2px 6px;

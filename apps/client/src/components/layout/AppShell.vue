@@ -38,10 +38,55 @@ const activeDockIndex = computed(() =>
   mobileDockItems.findIndex((item) => route.path === item.to),
 );
 
+const lastDockIndex = ref(Math.max(0, activeDockIndex.value));
+const capsuleGlide = ref(true);
+const mainScrollRef = ref<HTMLElement | null>(null);
+const routeScrollMemory = new Map<string, number>();
+
+function scrollContainerToTop(el: HTMLElement | null) {
+  if (!el) return;
+  const reduced =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (typeof el.scrollTo === "function") {
+    el.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  } else {
+    el.scrollTop = 0;
+  }
+}
+
+function handleDockTabClick(to: string, event: MouseEvent) {
+  if (route.path !== to) return;
+  event.preventDefault();
+  scrollContainerToTop(mainScrollRef.value);
+  const innerList = mainScrollRef.value?.querySelector<HTMLElement>(".v-jobs-list") ?? null;
+  scrollContainerToTop(innerList);
+}
+
+watch(
+  activeDockIndex,
+  (nextIdx, prevIdx) => {
+    if (nextIdx >= 0) {
+      capsuleGlide.value = prevIdx !== undefined && prevIdx >= 0;
+      lastDockIndex.value = nextIdx;
+    } else {
+      capsuleGlide.value = false;
+    }
+  },
+  { immediate: true },
+);
+
 watch(
   () => route.path,
-  () => {
+  async (nextPath, prevPath) => {
+    if (prevPath && mainScrollRef.value) {
+      routeScrollMemory.set(prevPath, mainScrollRef.value.scrollTop);
+    }
     void updateDesktopIndicator();
+    await nextTick();
+    if (mainScrollRef.value) {
+      mainScrollRef.value.scrollTop = routeScrollMemory.get(nextPath) ?? 0;
+    }
   },
 );
 
@@ -71,14 +116,16 @@ onMounted(() => {
 
 <template>
   <div class="v-shell">
-    <!-- Mobile Top Micro-Bar (< 1024px): Solid Architectural Surface -->
+    <!-- Mobile Top Micro-Bar (< 1024px): Symmetric 3-Zone Architectural Bar -->
     <header class="v-mobile-topbar">
       <RouterLink to="/dashboard" class="v-brand-link">
-        <VIcon name="mark" :size="20" />
+        <VIcon name="mark" :size="13" />
         <span class="v-brand-wordmark">Vecta</span>
       </RouterLink>
-      <div class="v-mobile-actions">
+      <div class="v-mobile-center">
         <ProfileSwitcher compact />
+      </div>
+      <div class="v-mobile-actions">
         <button
           type="button"
           class="v-icon-btn"
@@ -95,7 +142,9 @@ onMounted(() => {
           :title="theme === 'dark' ? 'Tema Putih' : 'Tema Hitam'"
           @click="toggleTheme"
         >
-          <VIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="17" />
+          <Transition name="v-theme-icon-swap" mode="out-in">
+            <VIcon :key="theme" :name="theme === 'dark' ? 'sun' : 'moon'" :size="17" />
+          </Transition>
         </button>
         <button
           type="button"
@@ -113,7 +162,7 @@ onMounted(() => {
     <aside class="v-sidebar" aria-label="Navigasi utama">
       <div>
         <RouterLink to="/dashboard" class="v-brand-bar">
-          <VIcon name="mark" :size="21" />
+          <VIcon name="mark" :size="15" />
           <span class="v-brand-wordmark">Vecta</span>
         </RouterLink>
 
@@ -183,7 +232,7 @@ onMounted(() => {
 
     <!-- Main Workspace -->
     <div class="v-workspace">
-      <main class="v-main">
+      <main ref="mainScrollRef" class="v-main">
         <slot />
       </main>
     </div>
@@ -192,11 +241,14 @@ onMounted(() => {
     <div class="v-dock-wrap">
       <nav class="v-mobile-dock liquid-glass" aria-label="Navigasi seluler">
         <div
-          v-if="activeDockIndex >= 0"
           class="v-dock-capsule"
+          :class="{
+            'v-dock-capsule--hidden': activeDockIndex < 0,
+            'v-dock-capsule--instant': !capsuleGlide,
+          }"
           aria-hidden="true"
           :style="{
-            transform: `translate3d(${activeDockIndex * 100}%, 0, 0)`,
+            transform: `translate3d(${lastDockIndex * 100}%, 0, 0)`,
           }"
         />
         <RouterLink
@@ -205,6 +257,7 @@ onMounted(() => {
           :to="item.to"
           class="v-mobile-tab"
           :aria-current="route.path === item.to ? 'page' : undefined"
+          @click="handleDockTabClick(item.to, $event)"
         >
           <span class="v-dock-icon">
             <VIcon :name="item.icon" :size="20" />
@@ -415,26 +468,50 @@ onMounted(() => {
     position: sticky;
     top: 0;
     z-index: 30;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
+    gap: 6px;
     min-height: calc(50px + env(safe-area-inset-top, 0px));
-    padding: env(safe-area-inset-top, 0px) var(--space-3) 0 var(--space-4);
+    padding: env(safe-area-inset-top, 0px) 8px 0 12px;
     background: var(--surface-1);
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow-topbar);
     flex-shrink: 0;
   }
 
+  .v-brand-link {
+    gap: 6px;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  .v-brand-wordmark {
+    font-size: 14.5px;
+    white-space: nowrap;
+  }
+
+  .v-mobile-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+  }
+
   .v-mobile-actions {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: flex-end;
+    gap: 0;
+    min-width: 0;
+    flex-shrink: 0;
   }
 
   .v-icon-btn {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    min-width: 34px;
+    min-height: 44px;
+    height: 44px;
+    flex-shrink: 0;
     border-radius: var(--radius-control);
     border: 0;
     background: transparent;
@@ -464,7 +541,7 @@ onMounted(() => {
   }
 
   .v-main {
-    padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
   .v-dock-wrap {
@@ -499,9 +576,18 @@ onMounted(() => {
     background: var(--glass-pill);
     border: 1px solid var(--glass-pill-border);
     box-shadow: inset 0 1px 0 var(--glass-specular);
-    transition: transform 260ms var(--ease-snappy);
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 160ms ease-out;
+    will-change: transform, opacity;
     pointer-events: none;
     z-index: 0;
+  }
+  .v-dock-capsule--hidden {
+    opacity: 0;
+  }
+  .v-dock-capsule--instant {
+    transition: opacity 160ms ease-out;
   }
 
   .v-mobile-tab {
@@ -531,6 +617,10 @@ onMounted(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .v-mobile-tab[aria-current="page"] .v-dock-icon {
+    transform: translateY(-1px) scale(1.06);
   }
 
   .v-dock-label {

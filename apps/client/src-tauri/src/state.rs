@@ -32,6 +32,7 @@ pub struct AppState {
     pub gemini: Arc<dyn GeminiProvider>,
     pub worker: Arc<dyn WorkerClient>,
     pub native_scraper: Arc<dyn WorkerClient>,
+    pub native_client: Arc<NativeScraperClient>,
     pub local_embedder: Arc<LocalEmbedder>,
     pub rpm_limiter: Arc<RpmRateLimiter>,
     pub font_dirs: Vec<PathBuf>,
@@ -82,13 +83,15 @@ impl AppState {
             .collect();
 
         let local_embedder = Arc::new(LocalEmbedder::discover_and_load(&model_dirs));
+        let native_client = Arc::new(NativeScraperClient::new()?);
 
         Ok(Self {
             db,
             secrets: Arc::new(OsKeyringStore::new(data_dir)),
             gemini: Arc::new(HttpGeminiClient::new()?),
             worker: Arc::new(HttpWorkerClient::new()?),
-            native_scraper: Arc::new(NativeScraperClient::new()?),
+            native_scraper: Arc::clone(&native_client) as Arc<dyn WorkerClient>,
+            native_client,
             local_embedder,
             rpm_limiter: Arc::new(RpmRateLimiter::default()),
             font_dirs,
@@ -202,6 +205,7 @@ pub mod test_support {
         GapAnalysisPromptInput, GeminiProvider, RoadmapPromptInput,
     };
     use crate::core::keychain::InMemorySecretStore;
+    use crate::core::native_scraper::NativeScraperClient;
     use crate::core::rate_limiter::RpmRateLimiter;
     use crate::core::worker::{
         WorkerClient, WorkerScrapeRequest, WorkerScrapeResponse, WorkerScrapeStats,
@@ -470,6 +474,7 @@ pub mod test_support {
                         duration_ms: 5,
                     },
                     warnings: vec![],
+                    portal_statuses: vec![],
                 })),
                 health_ok: true,
                 last_health_url: Mutex::new(None),
@@ -526,6 +531,7 @@ pub mod test_support {
             gemini,
             worker: Arc::clone(&worker) as Arc<dyn WorkerClient>,
             native_scraper: worker as Arc<dyn WorkerClient>,
+            native_client: Arc::new(NativeScraperClient::new().expect("native client")),
             local_embedder: Arc::new(crate::core::local_embedder::LocalEmbedder::empty()),
             rpm_limiter: Arc::new(RpmRateLimiter::new(Duration::from_millis(1))),
             font_dirs: vec![font_dir],

@@ -88,6 +88,10 @@ export function formatJobSource(source: JobSource): string {
       return "Kalibrr";
     case "dealls":
       return "Dealls";
+    case "karirhub":
+      return "Karirhub";
+    case "remotive":
+      return "Remotive";
     case "manual":
       return "Manual";
   }

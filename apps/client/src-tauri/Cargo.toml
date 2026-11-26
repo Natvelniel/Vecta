@@ -1,6 +1,6 @@
 [package]
 name = "vecta"
-version = "0.5.0"
+version = "0.5.1"
 description = "Vecta local-first AI career intelligence core engine"
 authors = ["Vecta"]
 edition = "2021"
@@ -17,7 +17,7 @@ async-trait = "0.1"
 base64 = "0.22"
 chrono = { version = "0.4", features = ["serde"] }
 pdf-extract = "0.7"
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "gzip", "brotli", "deflate", "http2"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
 scraper = "0.22"
 serde = { version = "1", features = ["derive"] }

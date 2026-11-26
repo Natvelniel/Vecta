@@ -222,6 +222,49 @@
   transform: translate3d(0, 10px, 0);
 }
 
+/* Spatial directional enter-only route transitions (zero blank frames, synced with dock capsule) */
+.v-route-fade-enter-active,
+.v-route-forward-enter-active,
+.v-route-backward-enter-active {
+  transition:
+    opacity 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.v-route-fade-leave-active,
+.v-route-forward-leave-active,
+.v-route-backward-leave-active {
+  display: none;
+}
+.v-route-fade-enter-from {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+}
+.v-route-forward-enter-from {
+  opacity: 0;
+  transform: translate3d(14px, 0, 0);
+}
+.v-route-backward-enter-from {
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0);
+}
+
+/* Crisp Sun / Moon morph transition on theme button */
+.v-theme-icon-swap-enter-active,
+.v-theme-icon-swap-leave-active {
+  transition:
+    opacity 140ms cubic-bezier(0.2, 0, 0, 1),
+    transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+.v-theme-icon-swap-enter-from {
+  opacity: 0;
+  transform: scale(0.7) rotate(-25deg);
+}
+.v-theme-icon-swap-leave-to {
+  opacity: 0;
+  transform: scale(0.7) rotate(25deg);
+}
+
 @keyframes vecta-shimmer {
   0% {
     background-position: -200% 0;

@@ -159,7 +159,7 @@ async function handleImportBackupFile(event: Event) {
             </span>
             <span>
               <strong style="display: block; color: var(--text-1)">Hitam · Obsidian Studio</strong>
-              <span class="t-meta">Fokus nyaman · Aksen indigo &amp; emerald</span>
+              <span class="t-meta">Monokrom gelap · Aksen emerald</span>
             </span>
           </button>
 
@@ -175,7 +175,7 @@ async function handleImportBackupFile(event: Event) {
             </span>
             <span>
               <strong style="display: block; color: var(--text-1)">Putih · Swiss Alabaster</strong>
-              <span class="t-meta">Bersih &amp; cerah · Hitam pekat &amp; teal</span>
+              <span class="t-meta">Alabaster bersih · Kontras tajam</span>
             </span>
           </button>
         </div>

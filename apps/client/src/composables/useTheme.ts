@@ -34,7 +34,7 @@ applyThemeToDom(currentTheme.value);
 
 /**
  * Temporarily suppresses CSS transitions during theme swaps so surface backgrounds
- * and text never smear across intermediate frames (better-motion pattern).
+ * and text never smear or stutter across intermediate frames (better-motion pattern).
  */
 function runWithoutTransitions(commitFn: () => void) {
   if (typeof document === "undefined") {
@@ -53,8 +53,15 @@ function runWithoutTransitions(commitFn: () => void) {
   });
 }
 
+function isMobileWebView(): boolean {
+  if (typeof window === "undefined") return false;
+  const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const androidUa = typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
+  return coarse || androidUa;
+}
+
 export function useTheme() {
-  function setTheme(next: VectaTheme, origin?: { x: number; y: number }) {
+  function setTheme(next: VectaTheme, _origin?: { x: number; y: number }) {
     if (next === currentTheme.value) {
       applyThemeToDom(next);
       return;
@@ -80,25 +87,21 @@ export function useTheme() {
       }
     };
 
-    if (typeof document !== "undefined" && docAny.startViewTransition && !prefersReduced) {
-      const x = origin?.x ?? window.innerWidth / 2;
-      const y = origin?.y ?? window.innerHeight / 2;
-      const maxR = Math.hypot(
-        Math.max(x, window.innerWidth - x),
-        Math.max(y, window.innerHeight - y),
-      );
+    // On mobile WebView, avoid full-viewport ViewTransition clip-path/bitmap churn for zero-jank frame swaps.
+    // On desktop, use a fast GPU opacity-only crossfade (never clipPath circle).
+    if (
+      typeof document !== "undefined" &&
+      !isMobileWebView() &&
+      docAny.startViewTransition &&
+      !prefersReduced
+    ) {
       const transition = docAny.startViewTransition(commit);
       transition.ready
         .then(() => {
           document.documentElement.animate(
+            { opacity: [0, 1] },
             {
-              clipPath: [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${maxR}px at ${x}px ${y}px)`,
-              ],
-            },
-            {
-              duration: 320,
+              duration: 160,
               easing: "cubic-bezier(0.2, 0, 0, 1)",
               pseudoElement: "::view-transition-new(root)",
             },
