@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from "vue";
+import { useBackOverlay } from "@/composables/useBackOverlay";
 import VIcon from "./VIcon.vue";
 
 const props = defineProps<{
@@ -10,6 +11,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "close"): void;
 }>();
+
+useBackOverlay(toRef(props, "open"), () => emit("close"), "vdialog");
 
 const panelRef = ref<HTMLElement | null>(null);
 let previouslyFocused: HTMLElement | null = null;

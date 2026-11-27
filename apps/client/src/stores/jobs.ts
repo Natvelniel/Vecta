@@ -303,10 +303,17 @@ export const useJobsStore = defineStore("jobs", () => {
   }
 
   async function selectJob(userId: string, jobId: string) {
+    const switching = selectedDetail.value?.job_id !== jobId;
     selectedJobId.value = jobId;
+    if (switching) {
+      selectedDetail.value = null;
+    }
     loadingDetail.value = true;
     try {
-      selectedDetail.value = await ipc.getJobDetail(userId, jobId);
+      const detail = await ipc.getJobDetail(userId, jobId);
+      if (selectedJobId.value === jobId) {
+        selectedDetail.value = detail;
+      }
     } catch (e) {
       error.value = e instanceof IpcError ? e.message : "Gagal memuat detail lowongan.";
     } finally {

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useJobsStore } from "@/stores/jobs";
 import { useSettingsStore } from "@/stores/settings";
 import { useTheme } from "@/composables/useTheme";
+import { registerMainScroller } from "@/composables/useRouteScroll";
 import ProfileSwitcher from "@/components/domain/ProfileSwitcher.vue";
 import VIcon, { type IconName } from "@/components/ui/VIcon.vue";
 import VToastContainer from "@/components/ui/VToastContainer.vue";
@@ -41,7 +42,7 @@ const activeDockIndex = computed(() =>
 const lastDockIndex = ref(Math.max(0, activeDockIndex.value));
 const capsuleGlide = ref(true);
 const mainScrollRef = ref<HTMLElement | null>(null);
-const routeScrollMemory = new Map<string, number>();
+registerMainScroller(mainScrollRef);
 
 function scrollContainerToTop(el: HTMLElement | null) {
   if (!el) return;
@@ -57,6 +58,11 @@ function scrollContainerToTop(el: HTMLElement | null) {
 
 function handleDockTabClick(to: string, event: MouseEvent) {
   if (route.path !== to) return;
+  if (route.path === "/jobs" && route.query.detail) {
+    event.preventDefault();
+    void router.replace({ path: "/jobs", query: { ...route.query, detail: undefined } });
+    return;
+  }
   event.preventDefault();
   scrollContainerToTop(mainScrollRef.value);
   const innerList = mainScrollRef.value?.querySelector<HTMLElement>(".v-jobs-list") ?? null;
@@ -78,15 +84,8 @@ watch(
 
 watch(
   () => route.path,
-  async (nextPath, prevPath) => {
-    if (prevPath && mainScrollRef.value) {
-      routeScrollMemory.set(prevPath, mainScrollRef.value.scrollTop);
-    }
+  () => {
     void updateDesktopIndicator();
-    await nextTick();
-    if (mainScrollRef.value) {
-      mainScrollRef.value.scrollTop = routeScrollMemory.get(nextPath) ?? 0;
-    }
   },
 );
 
@@ -119,7 +118,7 @@ onMounted(() => {
     <!-- Mobile Top Micro-Bar (< 1024px): Symmetric 3-Zone Architectural Bar -->
     <header class="v-mobile-topbar">
       <RouterLink to="/dashboard" class="v-brand-link">
-        <VIcon name="mark" :size="13" />
+        <VIcon name="mark" :size="16" />
         <span class="v-brand-wordmark">Vecta</span>
       </RouterLink>
       <div class="v-mobile-center">
@@ -162,7 +161,7 @@ onMounted(() => {
     <aside class="v-sidebar" aria-label="Navigasi utama">
       <div>
         <RouterLink to="/dashboard" class="v-brand-bar">
-          <VIcon name="mark" :size="15" />
+          <VIcon name="mark" :size="18" />
           <span class="v-brand-wordmark">Vecta</span>
         </RouterLink>
 
@@ -331,8 +330,8 @@ onMounted(() => {
   border: 1px solid var(--glass-pill-border);
   box-shadow: inset 0 1px 0 var(--glass-specular);
   transition:
-    transform 260ms var(--ease-snappy),
-    height 180ms var(--ease-snappy);
+    transform 380ms var(--ease-glide),
+    height 260ms var(--ease-luxury);
   pointer-events: none;
   z-index: 0;
 }
@@ -439,6 +438,7 @@ onMounted(() => {
 }
 
 .v-main {
+  position: relative;
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -577,8 +577,8 @@ onMounted(() => {
     border: 1px solid var(--glass-pill-border);
     box-shadow: inset 0 1px 0 var(--glass-specular);
     transition:
-      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 160ms ease-out;
+      transform var(--dur-pill-slide) var(--ease-glide),
+      opacity 220ms ease-out;
     will-change: transform, opacity;
     pointer-events: none;
     z-index: 0;
@@ -587,7 +587,7 @@ onMounted(() => {
     opacity: 0;
   }
   .v-dock-capsule--instant {
-    transition: opacity 160ms ease-out;
+    transition: opacity 220ms ease-out;
   }
 
   .v-mobile-tab {
@@ -602,11 +602,11 @@ onMounted(() => {
     min-width: 0;
     text-decoration: none;
     color: var(--text-2);
-    transition: color 140ms ease-out, transform var(--dur-press) ease-out;
+    transition: color 240ms var(--ease-luxury), transform var(--dur-press) var(--ease-luxury);
     -webkit-tap-highlight-color: transparent;
   }
   .v-mobile-tab:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
   }
   .v-mobile-tab[aria-current="page"] {
     color: var(--text-1);
@@ -617,10 +617,10 @@ onMounted(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 320ms var(--ease-luxury);
   }
   .v-mobile-tab[aria-current="page"] .v-dock-icon {
-    transform: translateY(-1px) scale(1.06);
+    transform: translateY(-1.5px) scale(1.08);
   }
 
   .v-dock-label {

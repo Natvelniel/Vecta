@@ -7,6 +7,7 @@ import { formatRelativeDate, formatWorkMode } from "@/lib/format";
 import ScoreRing from "@/components/ui/ScoreRing.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VIcon from "@/components/ui/VIcon.vue";
+import VSelect from "@/components/ui/VSelect.vue";
 
 const props = defineProps<{
   jobs: NormalizedJobSummary[];
@@ -33,6 +34,8 @@ const STAGES: Array<{ id: ApplicationStatus; label: string }> = [
   { id: "offer", label: "Offer" },
   { id: "rejected", label: "Ditolak" },
 ];
+
+const STATUS_OPTIONS = STAGES.map((s) => ({ value: s.id, label: s.label }));
 
 const jobsByStage = computed(() => {
   const map: Record<string, NormalizedJobSummary[]> = {
@@ -121,6 +124,11 @@ function saveInlineNote(job: NormalizedJobSummary) {
       </div>
 
       <div class="v-pipe-lang" role="group" aria-label="Bahasa template follow-up">
+        <span
+          class="v-pipe-lang__thumb"
+          :style="{ transform: followUpLang === 'en' ? 'translateX(100%)' : 'translateX(0)' }"
+          aria-hidden="true"
+        />
         <button
           type="button"
           class="v-lang-btn"
@@ -135,7 +143,7 @@ function saveInlineNote(job: NormalizedJobSummary) {
           :aria-pressed="followUpLang === 'en'"
           @click="followUpLang = 'en'"
         >
-          EN
+          Follow-up EN
         </button>
       </div>
     </div>
@@ -172,24 +180,21 @@ function saveInlineNote(job: NormalizedJobSummary) {
 
         <div class="v-pipe-card__controls">
           <label :for="`pipe-st-${job.job_id}`" class="sr-only">Status lamaran</label>
-          <select
+          <VSelect
             :id="`pipe-st-${job.job_id}`"
-            :value="job.application_status"
-            class="v-pipe-select"
-            @change="
+            :model-value="job.application_status === 'new' && job.is_saved ? 'saved' : job.application_status"
+            :options="STATUS_OPTIONS"
+            compact
+            :full-width="false"
+            aria-label="Status lamaran"
+            @update:model-value="
               emit('update-status', {
                 jobId: job.job_id,
-                status: ($event.target as HTMLSelectElement).value as ApplicationStatus,
+                status: ($event as ApplicationStatus),
                 notes: null,
               })
             "
-          >
-            <option value="saved">Disimpan</option>
-            <option value="applied">Dilamar</option>
-            <option value="interview">Interview</option>
-            <option value="offer">Offer</option>
-            <option value="rejected">Ditolak</option>
-          </select>
+          />
 
           <VButton variant="secondary" size="compact" @click="copyFollowUp(job)">
             Salin Follow-up ({{ followUpLang.toUpperCase() }})
@@ -274,23 +279,44 @@ function saveInlineNote(job: NormalizedJobSummary) {
   background: rgba(255, 255, 255, 0.16);
 }
 .v-pipe-lang {
-  display: inline-flex;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
   border: 1px solid var(--border);
   border-radius: var(--radius-control);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
   overflow: hidden;
+  flex-shrink: 0;
+}
+.v-pipe-lang__thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: calc(var(--radius-control) - 2px);
   background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-control);
+  transition: transform 360ms var(--ease-glide);
+  pointer-events: none;
 }
 .v-lang-btn {
-  height: 32px;
+  position: relative;
+  z-index: 1;
+  height: 28px;
   padding: 0 10px;
   border: 0;
   background: transparent;
   color: var(--text-2);
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
+  transition: color 220ms ease;
 }
 .v-lang-btn[aria-pressed="true"] {
-  background: var(--brand-soft);
   color: var(--text-1);
 }
 .v-pipe-empty {

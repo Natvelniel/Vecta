@@ -557,6 +557,11 @@ export const ipc = {
     return unwrapResult(await commands.quickAddUserSkill(userId, skillId));
   },
 
+  async removeUserSkill(userId: string, skillId: number): Promise<null> {
+    if (isMockMode()) return (await getMockBackend()).removeUserSkill(userId, skillId);
+    return unwrapResult(await commands.removeUserSkill(userId, skillId));
+  },
+
   async getLocalAiStatus(): Promise<LocalAiModelStatus> {
     if (isMockMode()) return (await getMockBackend()).getLocalAiStatus();
     return unwrapResult(await commands.getLocalAiStatus());

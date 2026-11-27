@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onActivated, onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { AtsExportResult, MasterCvProfile } from "@/lib/bindings";
 import { useJobsStore } from "@/stores/jobs";
@@ -13,6 +13,7 @@ import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VCard from "@/components/ui/VCard.vue";
 import VIcon from "@/components/ui/VIcon.vue";
+import VSelect from "@/components/ui/VSelect.vue";
 
 const router = useRouter();
 const profileStore = useProfileStore();
@@ -77,6 +78,26 @@ onMounted(async () => {
     }
   }
 });
+
+onActivated(async () => {
+  const uid = profileStore.userId;
+  if (!uid) return;
+  await Promise.all([profileStore.loadActiveProfile(), jobsStore.loadJobs(uid)]);
+  if (!form.user_id) {
+    const cv = await profileStore.loadMasterCv(uid);
+    if (cv) hydrateForm(cv);
+  }
+  if (jobsStore.jobs.length > 0 && !targetJobId.value) {
+    targetJobId.value = jobsStore.selectedJobId ?? jobsStore.jobs[0].job_id;
+  }
+});
+
+const targetJobOptions = computed(() =>
+  jobsStore.jobs.slice(0, 20).map((j) => ({
+    value: j.job_id,
+    label: `${j.title} · ${j.company}`,
+  })),
+);
 
 watch(targetJobId, async (jid) => {
   if (jid && profileStore.userId) {
@@ -231,6 +252,11 @@ async function handleExportMasterPdf() {
     >
       <template #actions>
         <div class="v-lang-group" role="group" aria-label="Bahasa template CV ATS">
+          <span
+            class="v-lang-thumb"
+            :style="{ transform: exportLang === 'en' ? 'translateX(100%)' : 'translateX(0)' }"
+            aria-hidden="true"
+          />
           <button
             type="button"
             class="v-lang-btn"
@@ -289,11 +315,14 @@ async function handleExportMasterPdf() {
             </p>
           </div>
           <label for="cv-target-job" class="sr-only">Pilih target lowongan</label>
-          <select id="cv-target-job" v-model="targetJobId" class="v-target-select">
-            <option v-for="j in jobsStore.jobs.slice(0, 20)" :key="j.job_id" :value="j.job_id">
-              {{ j.title }} · {{ j.company }}
-            </option>
-          </select>
+          <VSelect
+            id="cv-target-job"
+            v-model="targetJobId"
+            :options="targetJobOptions"
+            compact
+            :full-width="false"
+            aria-label="Pilih target lowongan"
+          />
         </div>
 
         <div v-if="atsKeywordDiff" class="v-diff-grid">
@@ -333,6 +362,11 @@ async function handleExportMasterPdf() {
 
       <!-- Mobile Edit / Live A4 Preview Toggle -->
       <div class="v-cv-mobile-tabs" role="tablist" aria-label="Mode editor CV">
+        <span
+          class="v-cv-mtab-thumb"
+          :style="{ transform: mobileTab === 'preview' ? 'translateX(100%)' : 'translateX(0)' }"
+          aria-hidden="true"
+        />
         <button
           type="button"
           role="tab"
@@ -631,15 +665,32 @@ async function handleExportMasterPdf() {
   filter: brightness(1.08);
 }
 .v-cv-mobile-tabs {
+  position: relative;
   display: none;
-  gap: 6px;
+  grid-template-columns: 1fr 1fr;
   padding: 4px;
   border-radius: var(--radius-control);
   border: 1px solid var(--border);
-  background: var(--surface-2);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
+  overflow: hidden;
+}
+.v-cv-mtab-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: calc(var(--radius-control) - 3px);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-control);
+  transition: transform 360ms var(--ease-glide);
+  pointer-events: none;
 }
 .v-cv-mtab {
-  flex: 1;
+  position: relative;
+  z-index: 1;
   height: 34px;
   border-radius: var(--radius-sm);
   border: 0;
@@ -647,11 +698,10 @@ async function handleExportMasterPdf() {
   color: var(--text-2);
   font-size: 13px;
   font-weight: 600;
+  transition: color 220ms ease;
 }
 .v-cv-mtab--active {
-  background: var(--surface-1);
   color: var(--text-1);
-  box-shadow: var(--shadow-surface);
 }
 .v-sec-head {
   display: flex;
@@ -712,23 +762,42 @@ async function handleExportMasterPdf() {
   gap: var(--space-2);
 }
 .v-lang-group {
-  display: inline-flex;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
   border-radius: var(--radius-control);
   border: 1px solid var(--border-default);
-  background: var(--bg-primary);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
   overflow: hidden;
 }
+.v-lang-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: calc(var(--radius-control) - 2px);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-control);
+  transition: transform 360ms var(--ease-glide);
+  pointer-events: none;
+}
 .v-lang-btn {
-  height: 36px;
+  position: relative;
+  z-index: 1;
+  height: 30px;
   padding: 0 12px;
   border: 0;
   background: transparent;
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
+  transition: color 220ms ease;
 }
 .v-lang-btn[aria-pressed="true"] {
-  background: var(--brand-soft);
   color: var(--text-primary);
 }
 @media (max-width: 1023px) {
@@ -736,7 +805,7 @@ async function handleExportMasterPdf() {
     padding: var(--space-5) var(--space-4) var(--space-10);
   }
   .v-cv-mobile-tabs {
-    display: flex;
+    display: grid;
   }
   .v-cv-workspace,
   .v-diff-grid,

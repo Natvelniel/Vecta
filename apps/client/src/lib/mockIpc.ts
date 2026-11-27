@@ -888,7 +888,72 @@ export const mockCommands = {
       ],
     };
   },
-  async scrapeAndStoreJobs(_userId: string, _prefs: SearchPreferences_Deserialize): Promise<ScrapeRunReport_Serialize> {
+  async scrapeAndStoreJobs(_userId: string, prefs: SearchPreferences_Deserialize): Promise<ScrapeRunReport_Serialize> {
+    const customKw = prefs.custom_queries?.find((q) => q.trim().length > 0)?.trim();
+    if (customKw) {
+      const lower = customKw.toLowerCase();
+      const alreadyExists = mockJobs.some(
+        (j) =>
+          j.title.toLowerCase().includes(lower) ||
+          j.raw_description.toLowerCase().includes(lower),
+      );
+      let newlyIngested = 0;
+      if (!alreadyExists) {
+        const now = new Date().toISOString();
+        mockJobs.unshift({
+          job_id: `job-kw-${Date.now()}`,
+          source: "jobstreet",
+          external_id: `js-kw-${Date.now()}`,
+          url: "https://id.jobstreet.com",
+          title: `${customKw} Engineer`,
+          normalized_role: `${customKw} Engineer`,
+          company: "PT Karya Inovasi Digital",
+          location: prefs.location || "Jakarta",
+          location_cluster: "jabodetabek",
+          work_mode: "hybrid",
+          experience_level: "junior",
+          enrichment_status: "local_only",
+          posted_at: now,
+          salary_text: "Rp 12jt - 18jt",
+          salary_min_idr: 12_000_000,
+          salary_max_idr: 18_000_000,
+          opportunity_type: "full_time",
+          raw_description: `Dicari ${customKw} Engineer untuk membangun layanan backend berkinerja tinggi menggunakan ${customKw}, REST API, PostgreSQL, dan Git.`,
+          role_summary: `Posisi ${customKw} Engineer fokus pengembangan sistem inti.`,
+          vector_score: 0.84,
+          level_score: 1.0,
+          skill_refs: [
+            { skill_id: 2, requirement_type: "mandatory" },
+            { skill_id: 4, requirement_type: "mandatory" },
+            { skill_id: 5, requirement_type: "mandatory" },
+            { skill_id: 8, requirement_type: "nice_to_have" },
+          ],
+          ai_gap_analysis: null,
+          ai_apply_kit: null,
+          is_saved: false,
+          application_status: "new",
+          applied_at: null,
+          user_notes: null,
+          scraped_at: now,
+        });
+        newlyIngested = 1;
+      }
+      const pendingCustom = mockJobs.filter((j) => j.enrichment_status === "local_only" && j.application_status !== "dismissed").length;
+      return {
+        total_fetched: 6,
+        newly_ingested: newlyIngested,
+        skipped_duplicates: 6 - newlyIngested,
+        failed_extractions: 0,
+        pending_local_count: pendingCustom,
+        warnings: [],
+        portal_statuses: [
+          { source: "jobstreet", status: "ok", jobs_found: 3, latency_ms: 380 },
+          { source: "linkedin", status: "ok", jobs_found: 2, latency_ms: 490 },
+          { source: "kalibrr", status: "ok", jobs_found: 1, latency_ms: 250 },
+        ],
+      };
+    }
+
     const pending = mockJobs.filter((j) => j.enrichment_status === "local_only" && j.application_status !== "dismissed").length;
     return {
       total_fetched: 18,
@@ -1035,7 +1100,9 @@ export const mockCommands = {
         if (
           query &&
           !j.title.toLowerCase().includes(query) &&
-          !j.company.toLowerCase().includes(query)
+          !j.company.toLowerCase().includes(query) &&
+          !j.matched_skills.some((s) => s.canonical_name.toLowerCase().includes(query)) &&
+          !j.missing_skills.some((s) => s.canonical_name.toLowerCase().includes(query))
         ) {
           return false;
         }
@@ -1249,9 +1316,13 @@ export const mockCommands = {
         canonical_name: meta.canonical_name,
         category: meta.category,
         proficiency: "beginner",
-        evidence: "Ditambahkan cepat dari Vecta.",
+        evidence: "Ditambahkan cepat ke profil",
       });
     }
+    return null;
+  },
+  async removeUserSkill(_userId: string, skillId: number): Promise<null> {
+    activeProfile.skills = activeProfile.skills.filter((s) => s.skill_id !== skillId);
     return null;
   },
   async getLocalAiStatus(): Promise<LocalAiModelStatus> {

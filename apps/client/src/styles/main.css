@@ -175,12 +175,12 @@
   mix-blend-mode: normal;
 }
 
-/* Crisp GPU-only Backdrop, Bottom Sheet & Dialog Transitions (Zero Bounce) */
+/* Crisp GPU-only Backdrop, Bottom Sheet & Dialog Transitions (Weighted Luxury Motion) */
 .v-backdrop-fade-enter-active {
-  transition: opacity 180ms ease-out;
+  transition: opacity 260ms ease-out;
 }
 .v-backdrop-fade-leave-active {
-  transition: opacity 140ms ease-out;
+  transition: opacity 200ms ease-out;
 }
 .v-backdrop-fade-enter-from,
 .v-backdrop-fade-leave-to {
@@ -189,8 +189,9 @@
 
 .v-sheet-slide-enter-active {
   transition:
-    opacity var(--dur-sheet-in) var(--ease-snappy),
-    transform var(--dur-sheet-in) var(--ease-snappy);
+    opacity var(--dur-sheet-in) var(--ease-luxury),
+    transform var(--dur-sheet-in) var(--ease-luxury);
+  will-change: opacity, transform;
 }
 .v-sheet-slide-leave-active {
   transition:
@@ -199,70 +200,128 @@
 }
 .v-sheet-slide-enter-from {
   opacity: 0;
-  transform: translate3d(0, 16px, 0);
+  transform: translate3d(0, 24px, 0);
 }
 .v-sheet-slide-leave-to {
   opacity: 0;
-  transform: translate3d(0, 10px, 0);
+  transform: translate3d(0, 14px, 0);
 }
 
 .v-dialog-pop-enter-active {
   transition:
-    opacity var(--dur-dialog) var(--ease-snappy),
-    transform var(--dur-dialog) var(--ease-snappy);
+    opacity var(--dur-dialog) var(--ease-luxury),
+    transform var(--dur-dialog) var(--ease-luxury);
+  will-change: opacity, transform;
 }
 .v-dialog-pop-leave-active {
   transition:
-    opacity 140ms ease-out,
-    transform 140ms ease-out;
+    opacity var(--dur-dialog-out) ease-out,
+    transform var(--dur-dialog-out) ease-out;
 }
-.v-dialog-pop-enter-from,
+.v-dialog-pop-enter-from {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(0.97);
+}
 .v-dialog-pop-leave-to {
   opacity: 0;
-  transform: translate3d(0, 10px, 0);
+  transform: translate3d(0, 8px, 0) scale(0.985);
 }
 
-/* Spatial directional enter-only route transitions (zero blank frames, synced with dock capsule) */
+/* Spatial directional enter-only route transitions (ZERO glimpse: old view hidden & out of flow immediately) */
 .v-route-fade-enter-active,
 .v-route-forward-enter-active,
 .v-route-backward-enter-active {
   transition:
-    opacity 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--dur-route) var(--ease-luxury),
+    transform var(--dur-route) var(--ease-luxury);
   will-change: opacity, transform;
 }
 .v-route-fade-leave-active,
 .v-route-forward-leave-active,
 .v-route-backward-leave-active {
-  display: none;
+  position: absolute !important;
+  inset: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: none !important;
 }
 .v-route-fade-enter-from {
   opacity: 0;
-  transform: translate3d(0, 6px, 0);
+  transform: translate3d(0, 10px, 0);
 }
 .v-route-forward-enter-from {
   opacity: 0;
-  transform: translate3d(14px, 0, 0);
+  transform: translate3d(20px, 0, 0);
 }
 .v-route-backward-enter-from {
   opacity: 0;
-  transform: translate3d(-14px, 0, 0);
+  transform: translate3d(-20px, 0, 0);
 }
 
 /* Crisp Sun / Moon morph transition on theme button */
 .v-theme-icon-swap-enter-active,
 .v-theme-icon-swap-leave-active {
   transition:
-    opacity 140ms cubic-bezier(0.2, 0, 0, 1),
-    transform 180ms cubic-bezier(0.2, 0, 0, 1);
+    opacity 200ms var(--ease-luxury),
+    transform 280ms var(--ease-luxury);
 }
 .v-theme-icon-swap-enter-from {
   opacity: 0;
-  transform: scale(0.7) rotate(-25deg);
+  transform: scale(0.72) rotate(-28deg);
 }
 .v-theme-icon-swap-leave-to {
   opacity: 0;
-  transform: scale(0.7) rotate(25deg);
+  transform: scale(0.72) rotate(28deg);
+}
+
+/* Dynamic chip & gap list flow (skill add / undo) */
+.v-chip-flow-enter-active,
+.v-chip-flow-leave-active,
+.v-gap-flow-enter-active,
+.v-gap-flow-leave-active {
+  transition:
+    opacity var(--dur-list-item) var(--ease-luxury),
+    transform var(--dur-list-item) var(--ease-luxury);
+}
+.v-chip-flow-move,
+.v-gap-flow-move {
+  transition: transform var(--dur-list-item) var(--ease-glide);
+}
+.v-chip-flow-enter-from {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0) scale(0.95);
+}
+.v-chip-flow-leave-to {
+  opacity: 0;
+  transform: scale(0.94);
+}
+.v-gap-flow-enter-from {
+  opacity: 0;
+  transform: translate3d(-8px, 0, 0);
+}
+.v-gap-flow-leave-to {
+  opacity: 0;
+  transform: translate3d(12px, 0, 0);
+}
+
+/* Reveal for analytical sub-panels (What-If Simulator, Watchlist form) */
+.v-panel-reveal-enter-active {
+  transition:
+    opacity 340ms var(--ease-luxury),
+    transform 340ms var(--ease-luxury);
+}
+.v-panel-reveal-leave-active {
+  transition:
+    opacity 220ms ease-out,
+    transform 220ms ease-out;
+}
+.v-panel-reveal-enter-from {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0) scale(0.985);
+}
+.v-panel-reveal-leave-to {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0) scale(0.99);
 }
 
 @keyframes vecta-shimmer {

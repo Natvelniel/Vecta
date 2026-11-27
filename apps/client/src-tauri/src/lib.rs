@@ -71,12 +71,13 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         competency::simulate_skill_impact,
         competency::get_salary_benchmark,
         competency::get_company_snapshot,
-        // Roadmap (5)
+        // Roadmap (6)
         roadmap::generate_learning_roadmap,
         roadmap::list_roadmaps,
         roadmap::get_roadmap_detail,
         roadmap::update_roadmap_step_status,
         roadmap::quick_add_user_skill,
+        roadmap::remove_user_skill,
     ])
 }
 
@@ -284,9 +285,10 @@ mod tests {
             "get_roadmap_detail",
             "update_roadmap_step_status",
             "quick_add_user_skill",
+            "remove_user_skill",
         ];
 
-        assert_eq!(expected_commands.len(), 52);
+        assert_eq!(expected_commands.len(), 53);
         for cmd in expected_commands {
             assert!(
                 content.contains(cmd),

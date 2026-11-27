@@ -72,7 +72,7 @@ const toneColor = computed(() => {
 .ring-progress {
   fill: none;
   stroke-linecap: round;
-  transition: stroke-dashoffset 220ms ease-out, stroke 160ms ease-out;
+  transition: stroke-dashoffset var(--dur-meter) var(--ease-luxury), stroke 220ms ease-out;
 }
 .ring-val {
   position: absolute;

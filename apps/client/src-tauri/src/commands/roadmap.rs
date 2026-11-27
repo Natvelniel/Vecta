@@ -134,6 +134,15 @@ pub fn quick_add_user_skill_impl(
     state.recalculate_all_matches_for_user(&user_id)
 }
 
+pub fn remove_user_skill_impl(
+    state: &AppState,
+    user_id: String,
+    skill_id: i64,
+) -> Result<(), AppError> {
+    state.db.remove_user_skill_row(&user_id, skill_id)?;
+    state.recalculate_all_matches_for_user(&user_id)
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn generate_learning_roadmap(
@@ -183,6 +192,16 @@ pub fn quick_add_user_skill(
     skill_id: i64,
 ) -> Result<(), AppError> {
     quick_add_user_skill_impl(&state, user_id, skill_id)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn remove_user_skill(
+    state: State<'_, AppState>,
+    user_id: String,
+    skill_id: i64,
+) -> Result<(), AppError> {
+    remove_user_skill_impl(&state, user_id, skill_id)
 }
 
 #[cfg(test)]
@@ -313,7 +332,7 @@ mod tests {
             "quick_add_user_skill must recalculate locally with 0 Gemini calls"
         );
 
-        let score_after = get_job_detail_impl(&state, user_id.clone(), job_id)
+        let score_after = get_job_detail_impl(&state, user_id.clone(), job_id.clone())
             .expect("after")
             .final_score;
         assert!(
@@ -324,6 +343,13 @@ mod tests {
         let update2 = update_roadmap_step_status_impl(&state, step2_id, StepStatus::Done)
             .expect("mark step 2 done");
         assert_eq!(update2.suggest_add_skill, None);
+
+        remove_user_skill_impl(&state, user_id.clone(), suggested.skill_id)
+            .expect("undo quick add skill");
+        let score_restored = get_job_detail_impl(&state, user_id.clone(), job_id)
+            .expect("restored")
+            .final_score;
+        assert!((score_restored - score_before).abs() < 1e-6);
     }
 
     #[tokio::test]

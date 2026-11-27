@@ -143,18 +143,26 @@
   --radius-dialog: 20px;
   --radius-full: 9999px;
 
-  /* MOTION */
-  --dur-press: 150ms;
-  --dur-hover: 140ms;
-  --dur-dropdown: 180ms;
-  --dur-sheet-in: 240ms;
-  --dur-sheet-out: 140ms;
-  --dur-dialog: 200ms;
-  --dur-page: 160ms;
+  /* WEIGHTED LUXURY MOTION */
   --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.2, 0, 0, 1);
-  --ease-state: ease-out;
+  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-glide: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-state: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --dur-press: 160ms;
+  --dur-hover: 180ms;
+  --dur-dropdown: 280ms;
+  --dur-pill-slide: 400ms;
+  --dur-route: 340ms;
+  --dur-sheet-in: 360ms;
+  --dur-sheet-out: 240ms;
+  --dur-dialog: 320ms;
+  --dur-dialog-out: 220ms;
+  --dur-page: 340ms;
+  --dur-meter: 520ms;
+  --dur-list-item: 320ms;
 
   --shadow-overlay: 0 24px 56px -12px rgba(0, 0, 0, 0.76);
 }

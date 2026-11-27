@@ -5,6 +5,8 @@ import { useProfileStore } from "@/stores/profile";
 import { useSettingsStore } from "@/stores/settings";
 import { useToast } from "@/composables/useToast";
 import { useTheme } from "@/composables/useTheme";
+import { closeAllOverlaysForRouteChange } from "@/composables/useBackOverlay";
+import { restoreScrollForPath, saveScrollForPath } from "@/composables/useRouteScroll";
 import { registerApiKeyMissingHandler } from "@/lib/ipc";
 import AppShell from "@/components/layout/AppShell.vue";
 import VToastContainer from "@/components/ui/VToastContainer.vue";
@@ -28,6 +30,10 @@ const isFirstRunChrome = computed(
 );
 
 router.beforeEach((to, from) => {
+  closeAllOverlaysForRouteChange();
+  if (from.path && from.path !== to.path) {
+    saveScrollForPath(from.path);
+  }
   const fromIdx = DOCK_ORDER.indexOf(from.path);
   const toIdx = DOCK_ORDER.indexOf(to.path);
   if (fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
@@ -36,6 +42,10 @@ router.beforeEach((to, from) => {
     routeTransitionName.value = "v-route-fade";
   }
 });
+
+function handleRouteBeforeEnter() {
+  restoreScrollForPath(route.path);
+}
 
 onMounted(async () => {
   registerApiKeyMissingHandler(() => {
@@ -74,7 +84,7 @@ onMounted(async () => {
 
   <AppShell v-else>
     <RouterView v-slot="{ Component, route: viewRoute }">
-      <Transition :name="routeTransitionName">
+      <Transition :name="routeTransitionName" @before-enter="handleRouteBeforeEnter">
         <KeepAlive :max="6">
           <component :is="Component" :key="String(viewRoute.name ?? viewRoute.path)" />
         </KeepAlive>

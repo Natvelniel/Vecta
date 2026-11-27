@@ -129,7 +129,7 @@ const explanationBullets = computed(() => (props.matchExplanation ?? []).slice(0
 .v-meter-seg {
   height: 100%;
   border-radius: var(--radius-full);
-  transition: width 240ms var(--ease-out);
+  transition: width var(--dur-meter) var(--ease-luxury);
 }
 .v-meter-legend {
   display: flex;

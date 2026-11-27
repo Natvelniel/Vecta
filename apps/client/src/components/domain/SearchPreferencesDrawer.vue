@@ -5,7 +5,45 @@ import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VDialog from "@/components/ui/VDialog.vue";
 import VIcon from "@/components/ui/VIcon.vue";
+import VSelect from "@/components/ui/VSelect.vue";
 import VSwitch from "@/components/ui/VSwitch.vue";
+
+const LIMIT_OPTIONS = [
+  { value: 15, label: "15 lowongan" },
+  { value: 25, label: "25 lowongan" },
+  { value: 40, label: "40 lowongan" },
+  { value: 50, label: "50 lowongan" },
+];
+const PAGES_OPTIONS = [
+  { value: 1, label: "1 halaman" },
+  { value: 2, label: "2 halaman" },
+  { value: 3, label: "3 halaman" },
+];
+const DAYS_OPTIONS = [
+  { value: null, label: "Kapan saja" },
+  { value: 3, label: "3 hari terakhir" },
+  { value: 7, label: "7 hari terakhir" },
+  { value: 14, label: "14 hari terakhir" },
+  { value: 30, label: "30 hari terakhir" },
+];
+const MODE_OPTIONS = [
+  { value: "any", label: "Semua Mode" },
+  { value: "remote", label: "Remote" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "onsite", label: "Onsite" },
+];
+const AI_MAX_OPTIONS = [
+  { value: 10, label: "Top 10 lowongan" },
+  { value: 15, label: "Top 15 lowongan" },
+  { value: 25, label: "Top 25 lowongan" },
+  { value: 50, label: "Top 50 lowongan" },
+];
+const RPM_OPTIONS = [
+  { value: 5, label: "5 RPM (Ekstra aman)" },
+  { value: 10, label: "10 RPM (Aman Free Tier)" },
+  { value: 15, label: "15 RPM (Standar)" },
+  { value: 30, label: "30 RPM (Cepat / Paid)" },
+];
 
 const props = defineProps<{
   open: boolean;
@@ -229,42 +267,46 @@ function buildPayload(): SearchPreferences_Serialize {
       <div class="v-pref-grid">
         <div class="v-pref-group">
           <label for="pref-limit" class="v-pref-label">Lowongan / Query</label>
-          <select id="pref-limit" v-model.number="draft.limit_per_query" class="v-pref-select">
-            <option :value="15">15 lowongan</option>
-            <option :value="25">25 lowongan</option>
-            <option :value="40">40 lowongan</option>
-            <option :value="50">50 lowongan</option>
-          </select>
+          <VSelect
+            id="pref-limit"
+            v-model="draft.limit_per_query"
+            :options="LIMIT_OPTIONS"
+            compact
+            aria-label="Lowongan per query"
+          />
         </div>
 
         <div class="v-pref-group">
           <label for="pref-pages" class="v-pref-label">Jumlah Halaman</label>
-          <select id="pref-pages" v-model.number="draft.max_pages" class="v-pref-select">
-            <option :value="1">1 halaman</option>
-            <option :value="2">2 halaman</option>
-            <option :value="3">3 halaman</option>
-          </select>
+          <VSelect
+            id="pref-pages"
+            v-model="draft.max_pages"
+            :options="PAGES_OPTIONS"
+            compact
+            aria-label="Jumlah halaman"
+          />
         </div>
 
         <div class="v-pref-group">
           <label for="pref-days" class="v-pref-label">Rentang Posting</label>
-          <select id="pref-days" v-model="draft.posted_within_days" class="v-pref-select">
-            <option :value="null">Kapan saja</option>
-            <option :value="3">3 hari terakhir</option>
-            <option :value="7">7 hari terakhir</option>
-            <option :value="14">14 hari terakhir</option>
-            <option :value="30">30 hari terakhir</option>
-          </select>
+          <VSelect
+            id="pref-days"
+            v-model="draft.posted_within_days"
+            :options="DAYS_OPTIONS"
+            compact
+            aria-label="Rentang posting"
+          />
         </div>
 
         <div class="v-pref-group">
           <label for="pref-mode" class="v-pref-label">Mode Kerja</label>
-          <select id="pref-mode" v-model="draft.work_mode" class="v-pref-select">
-            <option value="any">Semua Mode</option>
-            <option value="remote">Remote</option>
-            <option value="hybrid">Hybrid</option>
-            <option value="onsite">Onsite</option>
-          </select>
+          <VSelect
+            id="pref-mode"
+            v-model="draft.work_mode"
+            :options="MODE_OPTIONS"
+            compact
+            aria-label="Mode kerja"
+          />
         </div>
       </div>
 
@@ -298,22 +340,24 @@ function buildPayload(): SearchPreferences_Serialize {
         <div v-if="draft.ai_enrich_enabled" class="v-pref-grid" style="margin-top: var(--space-3)">
           <div class="v-pref-group">
             <label for="pref-ai-max" class="v-pref-label">Batas AI / Sesi</label>
-            <select id="pref-ai-max" v-model.number="draft.ai_enrich_max_jobs" class="v-pref-select">
-              <option :value="10">Top 10 lowongan</option>
-              <option :value="15">Top 15 lowongan</option>
-              <option :value="25">Top 25 lowongan</option>
-              <option :value="50">Top 50 lowongan</option>
-            </select>
+            <VSelect
+              id="pref-ai-max"
+              v-model="draft.ai_enrich_max_jobs"
+              :options="AI_MAX_OPTIONS"
+              compact
+              aria-label="Batas AI per sesi"
+            />
           </div>
 
           <div class="v-pref-group">
             <label for="pref-rpm" class="v-pref-label">Batas Kecepatan (RPM)</label>
-            <select id="pref-rpm" v-model.number="draft.ai_rpm_limit" class="v-pref-select">
-              <option :value="5">5 RPM (Ekstra aman)</option>
-              <option :value="10">10 RPM (Aman Free Tier)</option>
-              <option :value="15">15 RPM (Standar)</option>
-              <option :value="30">30 RPM (Cepat / Paid)</option>
-            </select>
+            <VSelect
+              id="pref-rpm"
+              v-model="draft.ai_rpm_limit"
+              :options="RPM_OPTIONS"
+              compact
+              aria-label="Batas kecepatan RPM"
+            />
           </div>
         </div>
       </div>

@@ -1,12 +1,24 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark" style="height:100%;background-color:#0A0A0B;color:#F4F4F5;">
+<html lang="id" data-theme="dark" style="height:100%;background-color:#08080A;color:#F4F4F5;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>
+      (function () {
+        try {
+          var t = window.localStorage.getItem("vecta_theme_v1") === "light" ? "light" : "dark";
+          var r = document.documentElement;
+          r.dataset.theme = t;
+          r.style.colorScheme = t;
+          r.style.backgroundColor = t === "light" ? "#eef0f4" : "#08080a";
+          r.style.color = t === "light" ? "#111113" : "#f4f4f5";
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>Vecta: Career Intelligence</title>
   </head>
-  <body style="margin:0;padding:0;height:100%;background-color:#0A0A0B;color:#F4F4F5;">
+  <body style="margin:0;padding:0;height:100%;background-color:inherit;color:inherit;">
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

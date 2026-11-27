@@ -12,7 +12,7 @@ async function runAction(id: number, fn?: () => unknown) {
 </script>
 
 <template>
-  <div class="v-toast-host" aria-live="polite" aria-atomic="false">
+  <TransitionGroup name="v-toast-flow" tag="div" class="v-toast-host" aria-live="polite" aria-atomic="false">
     <div
       v-for="t in toasts"
       :key="t.id"
@@ -39,7 +39,7 @@ async function runAction(id: number, fn?: () => unknown) {
         <VIcon name="close" :size="13" />
       </button>
     </div>
-  </div>
+  </TransitionGroup>
 </template>
 
 <style scoped>
@@ -108,5 +108,22 @@ async function runAction(id: number, fn?: () => unknown) {
     bottom: 74px;
     max-width: none;
   }
+}
+.v-toast-flow-enter-active {
+  transition: opacity 320ms var(--ease-luxury), transform 320ms var(--ease-luxury);
+}
+.v-toast-flow-leave-active {
+  transition: opacity 220ms ease-out, transform 220ms ease-out;
+}
+.v-toast-flow-move {
+  transition: transform 320ms var(--ease-glide);
+}
+.v-toast-flow-enter-from {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(0.97);
+}
+.v-toast-flow-leave-to {
+  opacity: 0;
+  transform: translate3d(0, 8px, 0) scale(0.98);
 }
 </style>

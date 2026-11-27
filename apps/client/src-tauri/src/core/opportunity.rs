@@ -632,38 +632,159 @@ fn has_token(text: &str, token: &str) -> bool {
         .any(|w| w == token)
 }
 
+fn truncate_before_company_bio(raw_desc: &str) -> String {
+    let mut kept = Vec::new();
+    for line in raw_desc.lines() {
+        let lower = line
+            .trim()
+            .trim_end_matches(':')
+            .trim()
+            .to_lowercase();
+        if matches!(
+            lower.as_str(),
+            "tentang perusahaan"
+                | "about company"
+                | "about the company"
+                | "about us"
+                | "profil perusahaan"
+                | "mengenai perusahaan"
+                | "tentang kami"
+                | "company profile"
+                | "company overview"
+        ) {
+            break;
+        }
+        kept.push(line);
+    }
+    kept.join("\n")
+}
+
+fn has_currency_prefix(lower: &str) -> bool {
+    if lower.contains('$') {
+        return true;
+    }
+    let bytes = lower.as_bytes();
+    for (idx, _) in lower.match_indices("rp") {
+        let left_ok = idx == 0 || !bytes[idx - 1].is_ascii_alphanumeric();
+        let after = idx + 2;
+        let right_ok = after < bytes.len()
+            && (bytes[after].is_ascii_digit()
+                || bytes[after] == b' '
+                || bytes[after] == b'.'
+                || bytes[after] == b':');
+        if left_ok && right_ok {
+            return true;
+        }
+    }
+    for (idx, _) in lower.match_indices("idr") {
+        let left_ok = idx == 0 || !bytes[idx - 1].is_ascii_alphanumeric();
+        let after = idx + 3;
+        let right_ok = after == bytes.len()
+            || bytes[after].is_ascii_digit()
+            || !bytes[after].is_ascii_alphabetic();
+        if left_ok && right_ok {
+            return true;
+        }
+    }
+    has_token(lower, "usd") || has_token(lower, "sgd")
+}
+
+fn has_salary_context_keyword(lower: &str) -> bool {
+    if has_currency_prefix(lower) {
+        return true;
+    }
+    [
+        "gaji",
+        "salary",
+        "upah",
+        "thp",
+        "kompensasi",
+        "penghasilan",
+        "remunerasi",
+        "honor",
+        "tunjangan",
+        "bayaran",
+    ]
+    .iter()
+    .any(|kw| has_token(lower, kw))
+        || lower.contains("take home pay")
+        || lower.contains("uang saku")
+}
+
+fn is_followed_by_non_money_noun(after_unit: &str) -> bool {
+    let next_word = after_unit
+        .split(|c: char| !c.is_ascii_alphabetic())
+        .find(|w| !w.is_empty())
+        .unwrap_or("");
+    matches!(
+        next_word,
+        "pengguna"
+            | "user"
+            | "users"
+            | "siswa"
+            | "pelajar"
+            | "mahasiswa"
+            | "pelanggan"
+            | "customer"
+            | "customers"
+            | "unduhan"
+            | "download"
+            | "downloads"
+            | "transaksi"
+            | "follower"
+            | "followers"
+            | "penonton"
+            | "penduduk"
+            | "orang"
+            | "guru"
+            | "karyawan"
+            | "pegawai"
+            | "toko"
+            | "outlet"
+            | "cabang"
+            | "bidang"
+            | "anggota"
+            | "member"
+            | "pekerja"
+            | "kali"
+            | "tahun"
+    )
+}
+
 pub fn extract_salary_idr(salary_text: Option<&str>, raw_desc: &str) -> (Option<i64>, Option<i64>) {
     if let Some(st) = salary_text.map(str::trim).filter(|s| !s.is_empty()) {
-        let parsed = parse_salary_fragment(st);
+        let lower = st.to_lowercase();
+        let parsed = parse_salary_fragment(&lower, true);
         if parsed.0.is_some() {
             return parsed;
         }
     }
 
-    for line in raw_desc.lines().take(60) {
+    let cleaned_desc = truncate_before_company_bio(raw_desc);
+    for line in cleaned_desc.lines().take(60) {
         let lower = line.to_lowercase();
-        if lower.contains("rp")
-            || lower.contains("idr")
-            || lower.contains("gaji")
-            || lower.contains("salary")
-            || lower.contains("juta")
-            || lower.contains("jt")
-            || lower.contains("usd")
-        {
-            let parsed = parse_salary_fragment(line);
-            if parsed.0.is_some() {
-                return parsed;
-            }
+        if !has_salary_context_keyword(&lower) {
+            continue;
+        }
+        let parsed = parse_salary_fragment(&lower, false);
+        if parsed.0.is_some() {
+            return parsed;
         }
     }
 
     (None, None)
 }
 
-fn parse_salary_fragment(fragment: &str) -> (Option<i64>, Option<i64>) {
-    let lower = fragment.to_lowercase();
-    let is_usd = lower.contains("usd") || lower.contains('$');
-    let is_yearly = lower.contains("/year") || lower.contains("per year") || lower.contains("/tahun");
+fn parse_salary_fragment(lower: &str, trusted_salary_field: bool) -> (Option<i64>, Option<i64>) {
+    let is_usd = has_token(lower, "usd") || lower.contains('$');
+    let is_yearly = lower.contains("/year")
+        || lower.contains("per year")
+        || lower.contains("/tahun")
+        || lower.contains("per tahun");
+    let has_money_signal = trusted_salary_field || has_salary_context_keyword(lower);
+    if !has_money_signal {
+        return (None, None);
+    }
 
     let bytes = lower.as_bytes();
     let mut i = 0usize;
@@ -678,11 +799,16 @@ fn parse_salary_fragment(fragment: &str) -> (Option<i64>, Option<i64>) {
                 i += 1;
             }
             let num_str = &lower[start..i];
-            let mut rest = lower[i..].trim_start();
-            // Look ahead up to 8 chars for unit marker
-            let unit_prefix: String = rest.chars().take(10).collect();
+            let rest = lower[i..].trim_start();
+            let unit_prefix: String = rest.chars().take(12).collect();
 
-            if let Some(mut val) = parse_indonesian_or_std_number(num_str, &unit_prefix, is_usd) {
+            if let Some((mut val, consumed_unit_len)) =
+                parse_indonesian_or_std_number(num_str, &unit_prefix, is_usd)
+            {
+                let after_unit = rest.get(consumed_unit_len..).unwrap_or("");
+                if consumed_unit_len > 0 && is_followed_by_non_money_noun(after_unit) {
+                    continue;
+                }
                 if is_yearly {
                     val /= 12;
                 }
@@ -693,19 +819,15 @@ fn parse_salary_fragment(fragment: &str) -> (Option<i64>, Option<i64>) {
                 if (1_500_000..=250_000_000).contains(&val) {
                     vals.push(val);
                 }
-            } else {
-                // Handle "8 - 12 juta" where the unit appears on the second number
-                rest = "";
-                let _ = rest;
             }
         } else {
             i += 1;
         }
     }
 
-    // Handle shorthand ranges like "8 - 12 juta" or "6-9 jt"
+    // Handle adjacent shorthand ranges like "8 - 12 juta" or "6-9 jt"
     if vals.len() == 1 {
-        if let Some((a, b)) = try_parse_range_sharing_million(&lower) {
+        if let Some((a, b)) = try_parse_range_sharing_million(lower) {
             return (Some(a), Some(b));
         }
     }
@@ -724,71 +846,136 @@ fn parse_salary_fragment(fragment: &str) -> (Option<i64>, Option<i64>) {
     (Some(min_v), Some(max_v))
 }
 
-fn try_parse_range_sharing_million(lower: &str) -> Option<(i64, i64)> {
-    let has_jt = lower.contains("juta") || lower.contains("jt") || lower.contains("mio");
-    if !has_jt {
+fn parse_float_token(s: &str) -> Option<f64> {
+    let clean = s.trim_matches(|c: char| c == '.' || c == ',');
+    if clean.is_empty() {
         return None;
     }
-    let mut nums = Vec::new();
-    let mut cur = String::new();
-    for ch in lower.chars() {
-        if ch.is_ascii_digit() || ch == '.' || ch == ',' {
-            cur.push(ch);
-        } else if !cur.is_empty() {
-            let norm = cur.replace(',', ".");
-            if let Ok(v) = norm.parse::<f64>() {
-                if (1.5..=250.0).contains(&v) {
-                    nums.push((v * 1_000_000.0).round() as i64);
-                }
-            }
-            cur.clear();
+    clean.replace(',', ".").parse::<f64>().ok()
+}
+
+fn try_parse_range_sharing_million(lower: &str) -> Option<(i64, i64)> {
+    // Only accept directly connected range: <num1> (-|–|hingga|sampai|to|s/d|sd) <num2> (juta|jt|mio)
+    let bytes = lower.as_bytes();
+    let mut i = 0usize;
+    while i < bytes.len() {
+        if !bytes[i].is_ascii_digit() {
+            i += 1;
+            continue;
         }
-    }
-    if !cur.is_empty() {
-        let norm = cur.replace(',', ".");
-        if let Ok(v) = norm.parse::<f64>() {
-            if (1.5..=250.0).contains(&v) {
-                nums.push((v * 1_000_000.0).round() as i64);
-            }
+        let n1_start = i;
+        while i < bytes.len()
+            && (bytes[i].is_ascii_digit() || bytes[i] == b'.' || bytes[i] == b',')
+        {
+            i += 1;
         }
-    }
-    if nums.len() >= 2 {
-        nums.sort_unstable();
-        return Some((nums[0], *nums.last().unwrap_or(&nums[0])));
+        let Some(v1) = parse_float_token(&lower[n1_start..i]) else {
+            continue;
+        };
+        if !(1.5..=250.0).contains(&v1) {
+            continue;
+        }
+
+        let after_n1 = lower[i..].trim_start();
+        let rest_after_conn = after_n1
+            .strip_prefix('-')
+            .or_else(|| after_n1.strip_prefix('–'))
+            .or_else(|| after_n1.strip_prefix('~'))
+            .or_else(|| after_n1.strip_prefix("s/d"))
+            .or_else(|| after_n1.strip_prefix("sd "))
+            .or_else(|| after_n1.strip_prefix("hingga "))
+            .or_else(|| after_n1.strip_prefix("sampai "))
+            .or_else(|| after_n1.strip_prefix("to "));
+
+        let Some(after_conn_raw) = rest_after_conn else {
+            continue;
+        };
+        let after_conn = after_conn_raw.trim_start();
+        let n2_len = after_conn
+            .bytes()
+            .take_while(|b| b.is_ascii_digit() || *b == b'.' || *b == b',')
+            .count();
+        if n2_len == 0 {
+            continue;
+        }
+        let Some(v2) = parse_float_token(&after_conn[..n2_len]) else {
+            continue;
+        };
+        if !(1.5..=250.0).contains(&v2) || v2 < v1 {
+            continue;
+        }
+
+        let after_n2 = after_conn[n2_len..].trim_start();
+        let unit_len = if after_n2.starts_with("juta") {
+            4
+        } else if after_n2.starts_with("mio") {
+            3
+        } else if after_n2.starts_with("jt") {
+            2
+        } else {
+            0
+        };
+        if unit_len == 0 {
+            continue;
+        }
+        let after_unit = &after_n2[unit_len..];
+        if is_followed_by_non_money_noun(after_unit) {
+            continue;
+        }
+        let a = (v1 * 1_000_000.0).round() as i64;
+        let b = (v2 * 1_000_000.0).round() as i64;
+        return Some((a.min(b), a.max(b)));
     }
     None
 }
 
-fn parse_indonesian_or_std_number(num_str: &str, unit_after: &str, is_usd: bool) -> Option<i64> {
+fn parse_indonesian_or_std_number(
+    num_str: &str,
+    unit_after: &str,
+    is_usd: bool,
+) -> Option<(i64, usize)> {
     let clean = num_str.trim_matches(|c| c == '.' || c == ',');
     if clean.is_empty() {
         return None;
     }
 
-    let is_jt = unit_after.starts_with("jt")
-        || unit_after.starts_with("juta")
-        || unit_after.starts_with("mio")
-        || unit_after.starts_with("m ");
-    let is_rb = unit_after.starts_with("rb") || unit_after.starts_with("ribu");
-
-    if is_jt {
+    let unit_len = if unit_after.starts_with("juta") {
+        4
+    } else if unit_after.starts_with("mio") {
+        3
+    } else if unit_after.starts_with("jt") {
+        2
+    } else if unit_after.starts_with("m ") {
+        1
+    } else {
+        0
+    };
+    if unit_len > 0 {
         let norm = clean.replace(',', ".");
         let v: f64 = norm.parse().ok()?;
-        return Some((v * 1_000_000.0).round() as i64);
+        return Some(((v * 1_000_000.0).round() as i64, unit_len));
     }
-    if is_rb {
+
+    let rb_len = if unit_after.starts_with("ribu") {
+        4
+    } else if unit_after.starts_with("rb") {
+        2
+    } else {
+        0
+    };
+    if rb_len > 0 {
         let norm = clean.replace(',', ".");
         let v: f64 = norm.parse().ok()?;
-        return Some((v * 1_000.0).round() as i64);
+        return Some(((v * 1_000.0).round() as i64, rb_len));
     }
 
     let digits: String = clean.chars().filter(|c| c.is_ascii_digit()).collect();
     if is_usd {
-        return digits.parse::<i64>().ok();
+        return digits.parse::<i64>().ok().map(|v| (v, 0));
     }
     // Plain Indonesian formatted numbers like 8.000.000 or 12,000,000
     if digits.len() >= 7 {
-        return digits.parse::<i64>().ok();
+        return digits.parse::<i64>().ok().map(|v| (v, 0));
     }
     None
 }
@@ -868,6 +1055,16 @@ mod tests {
         );
         assert_eq!(
             extract_salary_idr(None, "Minimal 3 tahun pengalaman sejak 2022"),
+            (None, None)
+        );
+        // Regression guard against false positives in Kalibrr/Ruangguru company bios and Indonesian words ("berperan", "berkelanjutan")
+        let ruangguru_desc = "\
+Deskripsi Pekerjaan\nMengajar siswa UTBK dan berperan aktif sebagai mentor kelas berkelanjutan.\n\
+Tentang Perusahaan\n\
+Ruangguru merupakan perusahaan teknologi terbesar dan terlengkap di Indonesia yang berfokus pada layanan berbasis pendidikan dan telah memiliki lebih dari 13 juta pengguna serta telah mengelola lebih dari 500.000 guru yang menawarkan jasa di lebih dari 100 bidang pelajaran.";
+        assert_eq!(extract_salary_idr(None, ruangguru_desc), (None, None));
+        assert_eq!(
+            extract_salary_idr(None, "Gaji kompetitif untuk 13 juta pengguna dan berperan di 100 cabang"),
             (None, None)
         );
     }

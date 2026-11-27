@@ -6,6 +6,7 @@ import { useJobsStore } from "@/stores/jobs";
 import { useCompetencyStore } from "@/stores/competency";
 import { useRoadmapStore } from "@/stores/roadmap";
 import { useToast } from "@/composables/useToast";
+import { useBackOverlay } from "@/composables/useBackOverlay";
 import { formatExperienceLevel } from "@/lib/format";
 import VIcon from "@/components/ui/VIcon.vue";
 
@@ -21,6 +22,9 @@ const roadmapStore = useRoadmapStore();
 const toast = useToast();
 
 const open = ref(false);
+useBackOverlay(open, () => {
+  open.value = false;
+}, "profile-menu");
 
 function handleEscapeKey(e: KeyboardEvent) {
   if (e.key === "Escape" && open.value) {

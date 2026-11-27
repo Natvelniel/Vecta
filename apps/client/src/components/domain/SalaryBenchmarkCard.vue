@@ -227,5 +227,6 @@ const medianPct = computed(() => {
   border-radius: 50%;
   background: var(--status-success);
   border: 2px solid var(--surface-1);
+  transition: left 460ms var(--ease-glide);
 }
 </style>

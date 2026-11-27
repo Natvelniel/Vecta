@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onActivated, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import type { StepStatus } from "@/lib/bindings";
 import { useCompetencyStore } from "@/stores/competency";
@@ -14,6 +14,7 @@ import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VCard from "@/components/ui/VCard.vue";
 import VIcon from "@/components/ui/VIcon.vue";
+import VSelect from "@/components/ui/VSelect.vue";
 
 const router = useRouter();
 const profileStore = useProfileStore();
@@ -30,6 +31,19 @@ onMounted(async () => {
     await roadmapStore.loadRoadmaps(profileStore.userId);
   }
 });
+
+onActivated(async () => {
+  if (profileStore.userId) {
+    await roadmapStore.loadRoadmaps(profileStore.userId);
+  }
+});
+
+const roadmapOptions = computed(() =>
+  roadmapStore.roadmaps.map((rm) => ({
+    value: rm.id,
+    label: `${rm.title} (${Math.round(rm.progress_percentage)}%)`,
+  })),
+);
 
 const doneCount = computed(
   () => roadmapStore.activeDetail?.steps.filter((s) => s.status === "done").length ?? 0,
@@ -88,8 +102,7 @@ async function copyKeyword(keyword: string) {
   }
 }
 
-async function handleSelectRoadmap(e: Event) {
-  const id = (e.target as HTMLSelectElement).value;
+async function handleSelectRoadmap(id: string) {
   if (id) await roadmapStore.selectRoadmap(id);
 }
 const isLocalRoadmap = computed(() => {
@@ -111,17 +124,16 @@ const isLocalRoadmap = computed(() => {
         <label v-if="roadmapStore.roadmaps.length > 1" for="rm-picker" class="sr-only">
           Pilih roadmap
         </label>
-        <select
+        <VSelect
           v-if="roadmapStore.roadmaps.length > 1"
           id="rm-picker"
-          :value="roadmapStore.activeRoadmapId ?? ''"
-          class="v-rm-select"
-          @change="handleSelectRoadmap"
-        >
-          <option v-for="rm in roadmapStore.roadmaps" :key="rm.id" :value="rm.id">
-            {{ rm.title }} ({{ Math.round(rm.progress_percentage) }}%)
-          </option>
-        </select>
+          :model-value="roadmapStore.activeRoadmapId ?? ''"
+          :options="roadmapOptions"
+          compact
+          :full-width="false"
+          aria-label="Pilih roadmap"
+          @update:model-value="handleSelectRoadmap(String($event ?? ''))"
+        />
 
         <span v-if="roadmapStore.activeDetail" class="t-meta t-num">
           <strong style="color: var(--brand-hover); font-size: 15px">{{ progressPct }}%</strong>
@@ -185,16 +197,16 @@ const isLocalRoadmap = computed(() => {
             </button>
 
             <div class="v-step-head">
-              <div>
+              <div class="v-step-head__main">
                 <div class="v-step-tags">
                   <span class="t-meta">{{ step.phase_name }}</span>
-                  <VBadge v-if="step.skill_name">{{ step.skill_name }}</VBadge>
+                  <VBadge v-if="step.skill_name" wrap>{{ step.skill_name }}</VBadge>
                   <VBadge v-if="step.status === 'in_progress'" tone="info">
                     Sedang dipelajari
                   </VBadge>
                 </div>
                 <h2
-                  class="t-card"
+                  class="t-card v-step-title"
                   :style="
                     step.status === 'done'
                       ? 'text-decoration: line-through; color: var(--text-secondary);'
@@ -263,6 +275,10 @@ const isLocalRoadmap = computed(() => {
   color: var(--text-primary);
   font-size: 13px;
 }
+.v-rm-root {
+  overflow-x: clip;
+  min-width: 0;
+}
 .v-bar-track {
   height: 5px;
   width: 100%;
@@ -274,12 +290,14 @@ const isLocalRoadmap = computed(() => {
   height: 100%;
   background: var(--brand-primary);
   border-radius: var(--radius-full);
-  transition: width 240ms var(--ease-out);
+  transition: width var(--dur-meter, 520ms) var(--ease-luxury, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .v-timeline {
   position: relative;
   padding-left: 44px;
   margin-top: var(--space-6);
+  min-width: 0;
+  max-width: 100%;
 }
 .v-timeline-rail {
   position: absolute;
@@ -293,6 +311,8 @@ const isLocalRoadmap = computed(() => {
   position: relative;
   padding: var(--space-5) 0 var(--space-6);
   border-bottom: 1px solid var(--border-divider);
+  min-width: 0;
+  max-width: 100%;
 }
 .v-step-check {
   position: absolute;
@@ -316,11 +336,18 @@ const isLocalRoadmap = computed(() => {
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  transition: background var(--dur-hover) var(--ease-state), border-color var(--dur-hover) var(--ease-state);
+  transition:
+    background var(--dur-hover) var(--ease-state),
+    border-color var(--dur-hover) var(--ease-state),
+    transform 240ms var(--ease-luxury);
+}
+.v-step-check:active .v-step-box {
+  transform: scale(0.92);
 }
 .v-step-check[aria-pressed="true"] .v-step-box {
   background: var(--brand-primary);
   border-color: var(--brand-primary);
+  transform: scale(1.04);
 }
 .v-step-meta {
   display: inline-flex;
@@ -359,27 +386,49 @@ const isLocalRoadmap = computed(() => {
   justify-content: space-between;
   gap: var(--space-3);
   flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.v-step-head__main {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 100%;
+}
+.v-step-title {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .v-step-tags {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-1);
+  min-width: 0;
+  max-width: 100%;
+}
+.v-timeline-step p.t-body {
+  overflow-wrap: anywhere;
 }
 .v-kw-pills {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-3);
+  min-width: 0;
+  max-width: 100%;
 }
 .v-kw-pill {
-  padding: 4px 10px;
+  padding: 5px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-default);
   background: var(--bg-elevated);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
   transition: background var(--dur-hover) var(--ease-state), color var(--dur-hover) var(--ease-state);
 }
 @media (hover: hover) {
@@ -391,6 +440,17 @@ const isLocalRoadmap = computed(() => {
 @media (max-width: 1023px) {
   .v-narrow-container {
     padding: var(--space-5) var(--space-4) var(--space-10);
+  }
+  .v-timeline {
+    padding-left: 34px;
+  }
+  .v-timeline-rail {
+    left: 15px;
+  }
+  .v-step-check {
+    left: -34px;
+    width: 32px;
+    height: 32px;
   }
 }
 </style>

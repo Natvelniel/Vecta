@@ -12,7 +12,8 @@ use crate::core::local_matcher::{taxonomy_seed_skills, LocalSkillEntry};
 use crate::core::matching::compute_hybrid_match;
 use crate::core::native_scraper::quality::{JobRedFlag, PortalLinkRef};
 use crate::core::opportunity::{
-    expand_location_cluster_filter, extract_opportunity_metadata, normalize_location_cluster,
+    expand_location_cluster_filter, extract_opportunity_metadata, extract_salary_idr,
+    normalize_location_cluster,
 };
 use crate::error::AppError;
 use crate::models::competency::{
@@ -537,6 +538,52 @@ impl Database {
 
             mig_result?;
             fk_restore?;
+        }
+
+        let has_v9: bool = self.with_conn(|conn| {
+            conn.query_row(
+                "SELECT 1 FROM schema_migrations WHERE version = 9",
+                [],
+                |_| Ok(true),
+            )
+            .optional()
+            .map(|o| o.unwrap_or(false))
+            .map_err(|e| db_err("Gagal memeriksa versi migrasi 9", e))
+        })?;
+
+        if !has_v9 {
+            self.with_tx(|tx| {
+                let existing: Vec<(String, Option<String>, String)> = {
+                    let mut stmt = tx
+                        .prepare("SELECT id, salary_text, raw_description FROM jobs")
+                        .map_err(|e| db_err("Gagal membaca jobs untuk sanitasi gaji v9", e))?;
+                    let rows = stmt
+                        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
+                        .map_err(|e| db_err("Gagal iterasi sanitasi gaji v9", e))?;
+                    let mut buf = Vec::new();
+                    for row in rows {
+                        buf.push(row.map_err(|e| db_err("Gagal parse baris sanitasi gaji v9", e))?);
+                    }
+                    buf
+                };
+
+                for (id, salary_text, raw_desc) in existing {
+                    let (min_idr, max_idr) =
+                        extract_salary_idr(salary_text.as_deref(), &raw_desc);
+                    tx.execute(
+                        "UPDATE jobs SET salary_min_idr = ?1, salary_max_idr = ?2 WHERE id = ?3",
+                        params![min_idr, max_idr, id],
+                    )
+                    .map_err(|e| db_err("Gagal memperbarui gaji ter-sanitasi v9", e))?;
+                }
+
+                tx.execute(
+                    "INSERT OR IGNORE INTO schema_migrations (version, name) VALUES (?1, ?2)",
+                    params![9i64, "009_cleanup_false_salary"],
+                )
+                .map_err(|e| db_err("Gagal mencatat versi migrasi 9", e))?;
+                Ok(())
+            })?;
         }
         Ok(())
     }
@@ -2893,11 +2940,22 @@ impl Database {
         self.with_conn(|conn| {
             conn.execute(
                 "INSERT INTO user_skills (user_id, skill_id, proficiency, evidence)
-                 VALUES (?1, ?2, 'beginner', 'Selesai dipelajari melalui Vecta Roadmap')
+                 VALUES (?1, ?2, 'beginner', 'Ditambahkan cepat ke profil')
                  ON CONFLICT(user_id, skill_id) DO NOTHING",
                 params![user_id, skill_id],
             )
             .map_err(|e| db_err("Gagal menambahkan skill pengguna", e))?;
+            Ok(())
+        })
+    }
+
+    pub fn remove_user_skill_row(&self, user_id: &str, skill_id: i64) -> Result<(), AppError> {
+        self.with_conn(|conn| {
+            conn.execute(
+                "DELETE FROM user_skills WHERE user_id = ?1 AND skill_id = ?2",
+                params![user_id, skill_id],
+            )
+            .map_err(|e| db_err("Gagal menghapus skill pengguna", e))?;
             Ok(())
         })
     }
@@ -3885,7 +3943,47 @@ mod tests {
             .expect("query pragmas");
 
         assert_eq!(fk, 1);
-        assert_eq!(mig_count, 8);
+        assert_eq!(mig_count, 9);
+    }
+
+    #[test]
+    fn migration_v9_cleans_false_positive_salaries_and_preserves_real_salaries() {
+        let db = Database::open_in_memory().expect("db");
+        let mut fake = sample_job("job-rg-1", "kb-rg-1", "Pengajar UTBK");
+        fake.raw_description = "Mengajar berkelanjutan.\nTentang Perusahaan:\nRuangguru memiliki 13 juta pengguna di 100 bidang pelajaran.".into();
+        db.insert_job_with_skills(&fake, &[]).expect("ins fake");
+        let mut real = sample_job("job-real-1", "js-r1", "Backend Engineer");
+        real.salary_text = Some("Rp 9.000.000 - Rp 13.000.000".into());
+        db.insert_job_with_skills(&real, &[]).expect("ins real");
+
+        // Simulate legacy polluted salary_min_idr=13_000_000, salary_max_idr=100_000_000 before v9
+        db.with_conn(|conn| {
+            conn.execute(
+                "UPDATE jobs SET salary_min_idr = 13000000, salary_max_idr = 100000000 WHERE id = 'job-rg-1'",
+                [],
+            )
+            .map_err(|e| AppError::db_error(e.to_string()))?;
+            conn.execute("DELETE FROM schema_migrations WHERE version = 9", [])
+                .map_err(|e| AppError::db_error(e.to_string()))?;
+            Ok(())
+        })
+        .expect("poison legacy row");
+
+        db.run_migrations().expect("run v9");
+
+        let (rg_min, rg_max, real_min, real_max): (Option<i64>, Option<i64>, Option<i64>, Option<i64>) = db
+            .with_conn(|conn| {
+                let a: (Option<i64>, Option<i64>) = conn
+                    .query_row("SELECT salary_min_idr, salary_max_idr FROM jobs WHERE id = 'job-rg-1'", [], |r| Ok((r.get(0)?, r.get(1)?)))
+                    .map_err(|e| AppError::db_error(e.to_string()))?;
+                let b: (Option<i64>, Option<i64>) = conn
+                    .query_row("SELECT salary_min_idr, salary_max_idr FROM jobs WHERE id = 'job-real-1'", [], |r| Ok((r.get(0)?, r.get(1)?)))
+                    .map_err(|e| AppError::db_error(e.to_string()))?;
+                Ok((a.0, a.1, b.0, b.1))
+            })
+            .expect("query cleaned");
+        assert_eq!((rg_min, rg_max), (None, None));
+        assert_eq!((real_min, real_max), (Some(9_000_000), Some(13_000_000)));
     }
 
     #[test]

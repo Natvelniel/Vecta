@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onActivated, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useJobsStore } from "@/stores/jobs";
 import { useProfileStore } from "@/stores/profile";
@@ -16,15 +16,22 @@ const profileStore = useProfileStore();
 const jobsStore = useJobsStore();
 const roadmapStore = useRoadmapStore();
 
-onMounted(async () => {
+async function syncDashboardData() {
   if (!profileStore.activeProfile) {
     await profileStore.loadActiveProfile();
   }
   const uid = profileStore.userId;
   if (uid) {
-    await Promise.all([jobsStore.loadJobs(uid), roadmapStore.loadRoadmaps(uid)]);
+    await Promise.all([
+      profileStore.loadActiveProfile(),
+      jobsStore.loadJobs(uid),
+      roadmapStore.loadRoadmaps(uid),
+    ]);
   }
-});
+}
+
+onMounted(syncDashboardData);
+onActivated(syncDashboardData);
 
 const highFitCount = computed(
   () => jobsStore.jobs.filter((j) => formatScore(j.final_score) >= 75).length,
@@ -92,14 +99,24 @@ const headerSubtitle = computed(() => {
   return `${role} (${formatExperienceLevel(p.experience_level)}) · ${profileStore.activeKeywordsCount} kata kunci aktif`;
 });
 
-function openJob(jobId: string) {
+async function openJob(jobId: string) {
   jobsStore.selectedJobId = jobId;
-  router.push("/jobs");
+  if (typeof window !== "undefined" && window.innerWidth < 1024) {
+    await router.push("/jobs");
+    await router.push({ path: "/jobs", query: { detail: jobId } });
+    return;
+  }
+  await router.push({ path: "/jobs", query: { detail: jobId } });
 }
 
-function openPipelineJob(jobId: string) {
+async function openPipelineJob(jobId: string) {
   jobsStore.selectedJobId = jobId;
-  router.push({ path: "/jobs", query: { tab: "pipeline", jobId } });
+  if (typeof window !== "undefined" && window.innerWidth < 1024) {
+    await router.push({ path: "/jobs", query: { tab: "pipeline" } });
+    await router.push({ path: "/jobs", query: { tab: "pipeline", detail: jobId } });
+    return;
+  }
+  await router.push({ path: "/jobs", query: { tab: "pipeline", detail: jobId } });
 }
 
 function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string | null {
@@ -140,7 +157,7 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
         <!-- Quiet Architectural Metrics Strip -->
         <div class="v-metrics-strip">
           <div class="v-metric-cell">
-            <div class="t-meta v-metric-label">Cocok (&ge; 75%)</div>
+            <div class="t-meta v-metric-label">Cocok &ge;75%</div>
             <div class="t-display t-num v-metric-val">
               {{ highFitCount }}
             </div>
@@ -150,7 +167,7 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
           </div>
 
           <div class="v-metric-cell">
-            <div class="t-meta v-metric-label">Lamaran Aktif</div>
+            <div class="t-meta v-metric-label">Lamaran</div>
             <div class="t-display t-num v-metric-val" style="color: var(--status-success)">
               {{ appliedCount }}
             </div>
@@ -160,7 +177,7 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
           </div>
 
           <div class="v-metric-cell">
-            <div class="t-meta v-metric-label">Progres Roadmap</div>
+            <div class="t-meta v-metric-label">Roadmap</div>
             <div class="t-display t-num v-metric-val" style="color: var(--brand-hover)">
               {{ activeRoadmapProgress }}%
             </div>
@@ -399,8 +416,8 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
 .v-col-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  margin: 0 calc(var(--space-4) * -1);
+  gap: var(--space-2);
+  margin: 0;
 }
 .v-list-row {
   width: 100%;
@@ -408,13 +425,21 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
   text-align: left;
   padding: var(--space-4);
   border-radius: var(--radius-card);
-  border: 1px solid transparent;
-  background: transparent;
-  transition: background var(--dur-hover) var(--ease-state);
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-surface);
+  transition:
+    background var(--dur-hover) var(--ease-state),
+    border-color var(--dur-hover) var(--ease-state),
+    transform var(--dur-press) ease-out;
+}
+.v-list-row:active {
+  transform: scale(0.99);
 }
 @media (hover: hover) {
   .v-list-row:hover {
     background: var(--bg-elevated);
+    border-color: var(--brand-border);
   }
 }
 .v-list-row__inner {
@@ -584,6 +609,17 @@ function formatSalaryMini(minIdr: number | null, maxIdr: number | null): string 
   .v-metric-cell {
     text-align: left;
     padding: 0 4px;
+  }
+  .v-metric-cell + .v-metric-cell {
+    border-left: 1px solid var(--border-divider);
+    padding-left: 10px;
+  }
+  .v-metric-label {
+    font-size: 11px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .v-metric-val {
     font-size: 22px;

@@ -171,6 +171,27 @@ jobs:
           CI: "true"
         run: |
           npx tauri android init --ci --skip-targets-install
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          TAG="${TAG#refs/tags/}"
+          TAG="${TAG#v}"
+          TAG="$TAG" python3 - <<'PY'
+          import os, pathlib, re
+          tag = os.environ["TAG"]
+          m = re.match(r"^(\d+)\.(\d+)\.(\d+)", tag)
+          props_path = pathlib.Path("src-tauri/gen/android/app/tauri.properties")
+          if m and props_path.exists():
+              major, minor, patch = int(m.group(1)), int(m.group(2)), int(m.group(3))
+              version_code = major * 1_000_000 + minor * 1_000 + patch
+              version_name = f"{major}.{minor}.{patch}"
+              lines = [
+                  ln for ln in props_path.read_text(encoding="utf-8").splitlines()
+                  if not ln.startswith("tauri.android.versionCode=") and not ln.startswith("tauri.android.versionName=")
+              ]
+              lines.append(f"tauri.android.versionCode={version_code}")
+              lines.append(f"tauri.android.versionName={version_name}")
+              props_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+              print(f"Configured Android versionName={version_name}, versionCode={version_code}")
+          PY
           python3 - <<'PY'
           from pathlib import Path
           gradle = Path("src-tauri/gen/android/app/build.gradle.kts")
@@ -243,16 +264,18 @@ jobs:
           "$BUILD_TOOLS/zipalign" -p -f 4 "$RAW_APK" "$ALIGNED_APK"
 
           if [ -n "${ANDROID_KEYSTORE_BASE64}" ]; then
-            echo "Signing APK with repository release keystore secret..."
-            echo "${ANDROID_KEYSTORE_BASE64}" | base64 -d > "$KS_PATH"
+            echo "Signing mode: PERMANENT RELEASE KEYSTORE (preserves in-place Android updates)"
+            printf '%s' "${ANDROID_KEYSTORE_BASE64}" | tr -d ' \r\n\t' | base64 -d > "$KS_PATH"
             KS_ALIAS="${ANDROID_KEY_ALIAS:-vecta}"
             KS_PASS="${ANDROID_KEYSTORE_PASSWORD}"
             KEY_PASS="${ANDROID_KEY_PASSWORD:-$ANDROID_KEYSTORE_PASSWORD}"
+            SIGN_MODE="Permanent Release Keystore"
           else
-            echo "No ANDROID_KEYSTORE_BASE64 secret configured; generating PKCS12 signing key for click-to-install APK..."
+            echo "::warning::ANDROID_KEYSTORE_BASE64 secret is not configured. Signing with an ephemeral keystore, which breaks in-place Android APK updates."
             KS_ALIAS="vecta"
             KS_PASS="vecta-release-key"
             KEY_PASS="vecta-release-key"
+            SIGN_MODE="EPHEMERAL FALLBACK (configure ANDROID_KEYSTORE_BASE64 secret!)"
             keytool -genkeypair -noprompt \
               -keystore "$KS_PATH" \
               -storetype PKCS12 \
@@ -273,7 +296,15 @@ jobs:
             --out "$SIGNED_APK" \
             "$ALIGNED_APK"
 
-          "$BUILD_TOOLS/apksigner" verify --verbose "$SIGNED_APK"
+          VERIFY_OUT=$("$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$SIGNED_APK")
+          echo "$VERIFY_OUT"
+          {
+            echo "### Android APK Signing Report"
+            echo "- Mode: **${SIGN_MODE}**"
+            echo '```text'
+            echo "$VERIFY_OUT" | grep -E "Signer #1|Verified using" || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
           ls -lh "$SIGNED_APK"
 
       - name: Upload Android artifact

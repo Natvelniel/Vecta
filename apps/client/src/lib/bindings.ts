@@ -57,6 +57,7 @@ export const commands = {
 	getRoadmapDetail: (roadmapId: string, options?: InvokeOptions) => typedError<RoadmapDetail_Serialize, AppError>(__TAURI_INVOKE("get_roadmap_detail", { roadmapId }, options)),
 	updateRoadmapStepStatus: (stepId: string, status: StepStatus, options?: InvokeOptions) => typedError<StepUpdateResult_Serialize, AppError>(__TAURI_INVOKE("update_roadmap_step_status", { stepId, status }, options)),
 	quickAddUserSkill: (userId: string, skillId: number, options?: InvokeOptions) => typedError<null, AppError>(__TAURI_INVOKE("quick_add_user_skill", { userId, skillId }, options)),
+	removeUserSkill: (userId: string, skillId: number, options?: InvokeOptions) => typedError<null, AppError>(__TAURI_INVOKE("remove_user_skill", { userId, skillId }, options)),
 };
 
 /* Types */

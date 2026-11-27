@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type {
   ApplicationStatus,
@@ -9,6 +9,7 @@ import type {
   WorkMode,
 } from "@/lib/bindings";
 import type { JobSortBy } from "@/stores/jobs";
+import { useBackOverlay } from "@/composables/useBackOverlay";
 import { useCompetencyStore } from "@/stores/competency";
 import { useJobsStore } from "@/stores/jobs";
 import { useProfileStore } from "@/stores/profile";
@@ -30,6 +31,7 @@ import PageHeader from "@/components/layout/PageHeader.vue";
 import VBadge from "@/components/ui/VBadge.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VIcon from "@/components/ui/VIcon.vue";
+import VSelect from "@/components/ui/VSelect.vue";
 import VSkeleton from "@/components/ui/VSkeleton.vue";
 import LocationClusterSelect from "@/components/ui/LocationClusterSelect.vue";
 import JobListingRow from "@/components/domain/JobListingRow.vue";
@@ -72,10 +74,67 @@ const manualModalOpen = ref(false);
 const preferencesOpen = ref(false);
 const savingPrefs = ref(false);
 const manualModalRef = ref<InstanceType<typeof ManualJobModal> | null>(null);
-const mobileDetailOpen = ref(false);
+const mobileDetailOpen = ref(Boolean(route.query.detail));
 const filtersExpanded = ref(false);
 const mobileMenuOpen = ref(false);
 const mobileMenuRef = ref<HTMLElement | null>(null);
+const tabsContainerRef = ref<HTMLElement | null>(null);
+const exploreTabRef = ref<HTMLButtonElement | null>(null);
+const pipelineTabRef = ref<HTMLButtonElement | null>(null);
+const tabSliderStyle = ref<Record<string, string>>({
+  width: "0px",
+  transform: "translateX(0px)",
+  opacity: "0",
+});
+const sessionAddedSkillIds = ref<number[]>([]);
+
+useBackOverlay(
+  filtersExpanded,
+  () => {
+    filtersExpanded.value = false;
+  },
+  "jobs-filters",
+);
+useBackOverlay(
+  mobileMenuOpen,
+  () => {
+    mobileMenuOpen.value = false;
+  },
+  "jobs-menu",
+);
+
+const DETAIL_STATUS_OPTIONS = [
+  { value: "new", label: "Baru" },
+  { value: "saved", label: "Disimpan" },
+  { value: "applied", label: "Dilamar" },
+  { value: "interview", label: "Interview" },
+  { value: "offer", label: "Offer" },
+  { value: "rejected", label: "Ditolak" },
+  { value: "dismissed", label: "Disembunyikan" },
+];
+
+const quickAddedSkillIds = computed(() => {
+  const ids = new Set<number>(sessionAddedSkillIds.value);
+  for (const sk of profileStore.activeProfile?.skills ?? []) {
+    if (/ditambahkan|vecta roadmap/i.test(sk.evidence ?? "")) {
+      ids.add(sk.skill_id);
+    }
+  }
+  return ids;
+});
+
+function updateJobsTabSlider() {
+  const container = tabsContainerRef.value;
+  const activeBtn = activeTab.value === "pipeline" ? pipelineTabRef.value : exploreTabRef.value;
+  if (!container || !activeBtn) return;
+  tabSliderStyle.value = {
+    width: `${activeBtn.offsetWidth}px`,
+    transform: `translateX(${activeBtn.offsetLeft - 3}px)`,
+    opacity: "1",
+  };
+}
+
+let tabResizeObserver: ResizeObserver | null = null;
 const watchlistPopoverOpen = ref(false);
 const watchlistName = ref("");
 const aiBarDismissed = ref(false);
@@ -350,11 +409,42 @@ async function handlePipelineUpdate(payload: {
   await jobsStore.updateApplication(profileStore.userId, payload.jobId, payload.status, payload.notes);
 }
 
+function setActiveTab(tab: "explore" | "pipeline") {
+  activeTab.value = tab;
+  void router.replace({
+    path: "/jobs",
+    query: {
+      ...route.query,
+      tab: tab === "pipeline" ? "pipeline" : undefined,
+      detail: tab === "pipeline" ? undefined : route.query.detail,
+    },
+  });
+}
+
+function closeMobileDetail() {
+  const prevRoute =
+    typeof window !== "undefined" ? (window.history.state?.back as string | undefined) : undefined;
+  if (prevRoute && prevRoute.startsWith("/jobs")) {
+    router.back();
+    return;
+  }
+  mobileDetailOpen.value = false;
+  void router.replace({
+    path: "/jobs",
+    query: {
+      ...route.query,
+      detail: undefined,
+    },
+  });
+}
+
 async function handleOpenPipelineDetail(jobId: string) {
   if (!profileStore.userId) return;
+  await router.push({
+    path: "/jobs",
+    query: { ...route.query, tab: "explore", detail: jobId },
+  });
   await jobsStore.selectJob(profileStore.userId, jobId);
-  activeTab.value = "explore";
-  mobileDetailOpen.value = true;
 }
 
 function handleMobileMenuOutsideClick(e: MouseEvent) {
@@ -375,9 +465,13 @@ onBeforeUnmount(() => {
   if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
   if (unlistenProgress) unlistenProgress();
   if (unlistenRerank) unlistenRerank();
+  tabResizeObserver?.disconnect();
   window.removeEventListener("click", handleMobileMenuOutsideClick);
   window.removeEventListener("keydown", handleMobileMenuKeydown);
 });
+
+const trimmedSearchQuery = computed(() => jobsStore.searchQuery.trim());
+const canScrapeKeyword = computed(() => trimmedSearchQuery.value.length >= 2);
 
 function handleSearchInput(value: string) {
   jobsStore.searchQuery = value;
@@ -385,6 +479,18 @@ function handleSearchInput(value: string) {
   searchDebounceTimer = setTimeout(() => {
     void refreshFilters();
   }, 220);
+}
+
+function handleSearchKeydown(e: KeyboardEvent) {
+  if (
+    e.key === "Enter" &&
+    canScrapeKeyword.value &&
+    !jobsStore.scraping &&
+    jobsStore.jobs.length === 0
+  ) {
+    e.preventDefault();
+    void handleScrapeByKeyword();
+  }
 }
 
 function handleLocationClustersChange(nextClusters: string[]) {
@@ -397,6 +503,35 @@ async function handleLoadMore() {
   if (!profileStore.userId) return;
   await jobsStore.loadMoreJobs(profileStore.userId);
 }
+
+watch(
+  () => route.query.tab,
+  async (tab) => {
+    activeTab.value = tab === "pipeline" ? "pipeline" : "explore";
+    await nextTick();
+    updateJobsTabSlider();
+  },
+);
+
+watch(
+  () => [activeTab.value, pipelineCount.value, jobsStore.jobs.length],
+  async () => {
+    await nextTick();
+    updateJobsTabSlider();
+  },
+);
+
+watch(
+  () => route.query.detail,
+  async (detailId) => {
+    const id = typeof detailId === "string" && detailId.length > 0 ? detailId : null;
+    mobileDetailOpen.value = Boolean(id);
+    if (id && profileStore.userId && jobsStore.selectedJobId !== id) {
+      await jobsStore.selectJob(profileStore.userId, id);
+    }
+  },
+  { immediate: true },
+);
 
 onMounted(async () => {
   window.addEventListener("click", handleMobileMenuOutsideClick);
@@ -420,7 +555,36 @@ onMounted(async () => {
       jobsStore.loadWatchlists(uid),
       competencyStore.loadRolesAndMap(uid),
     ]);
+    const routeDetail = typeof route.query.detail === "string" ? route.query.detail : null;
+    if (routeDetail) {
+      mobileDetailOpen.value = true;
+      await jobsStore.selectJob(uid, routeDetail);
+    }
   }
+  await nextTick();
+  updateJobsTabSlider();
+  if (typeof ResizeObserver !== "undefined" && tabsContainerRef.value) {
+    tabResizeObserver = new ResizeObserver(() => updateJobsTabSlider());
+    tabResizeObserver.observe(tabsContainerRef.value);
+  }
+});
+
+onActivated(async () => {
+  const uid = profileStore.userId;
+  if (uid) {
+    await Promise.all([
+      profileStore.loadActiveProfile(),
+      jobsStore.loadJobs(uid),
+      competencyStore.loadRolesAndMap(uid),
+    ]);
+    const routeDetail = typeof route.query.detail === "string" ? route.query.detail : null;
+    if (routeDetail && jobsStore.selectedDetail?.job_id !== routeDetail) {
+      mobileDetailOpen.value = true;
+      await jobsStore.selectJob(uid, routeDetail);
+    }
+  }
+  await nextTick();
+  updateJobsTabSlider();
 });
 
 const activeFilterCount = computed(() => {
@@ -536,6 +700,11 @@ const roleOptions = computed(() => {
   return Array.from(new Set([...fromRoles, ...fromJobs])).sort();
 });
 
+const roleSelectOptions = computed(() => [
+  { value: "", label: "Semua Peran" },
+  ...roleOptions.value.map((r) => ({ value: r, label: r })),
+]);
+
 async function refreshFilters() {
   if (!profileStore.userId) return;
   await jobsStore.loadJobs(profileStore.userId);
@@ -548,8 +717,13 @@ async function resetFilters() {
 
 async function handleSelectJob(jobId: string) {
   if (!profileStore.userId) return;
+  if (typeof window !== "undefined" && window.innerWidth < 1024 && route.query.detail !== jobId) {
+    await router.push({
+      path: "/jobs",
+      query: { ...route.query, detail: jobId },
+    });
+  }
   await jobsStore.selectJob(profileStore.userId, jobId);
-  mobileDetailOpen.value = true;
 }
 
 async function handleToggleSavedFilter() {
@@ -589,28 +763,11 @@ async function handleSavePreferences(prefs: SearchPreferences_Serialize, runImme
   }
 }
 
-async function handleRefreshScrape() {
-  if (!profileStore.userId) {
-    toast.show("Buat Profil Cerita terlebih dahulu sebelum mengambil lowongan.", {
-      tone: "warning",
-      actionLabel: "Buat Profil",
-      onAction: () => router.push("/onboarding"),
-    });
-    return;
-  }
-  const report = await jobsStore.runScrape(profileStore.userId);
-  if (report) {
-    if (report.warnings.length > 0) {
-      console.debug("[vecta::scraper] partial warnings suppressed from UI:", report.warnings);
-    }
-    const aiNote = jobsStore.searchPreferences.ai_enrich_enabled
-      ? " + AI Matching selesai."
-      : " (0 token Gemini).";
-    toast.show(
-      `Selesai: ${report.newly_ingested} lowongan baru tersimpan, ${report.skipped_duplicates} duplikat dilewati${aiNote}`,
-      { tone: "success" },
-    );
-  } else {
+function presentScrapeOutcome(
+  report: Awaited<ReturnType<typeof jobsStore.runScrape>>,
+  keyword?: string,
+) {
+  if (!report) {
     if (jobsStore.error) {
       console.debug("[vecta::scraper] network error suppressed from UI:", jobsStore.error);
     }
@@ -621,7 +778,82 @@ async function handleRefreshScrape() {
         manualModalOpen.value = true;
       },
     });
+    return;
   }
+  if (report.warnings.length > 0) {
+    console.debug("[vecta::scraper] partial warnings suppressed from UI:", report.warnings);
+  }
+  const aiNote = jobsStore.searchPreferences.ai_enrich_enabled
+    ? " + AI Matching selesai."
+    : " (0 token Gemini).";
+
+  if (!keyword) {
+    toast.show(
+      `Selesai: ${report.newly_ingested} lowongan baru tersimpan, ${report.skipped_duplicates} duplikat dilewati${aiNote}`,
+      { tone: "success" },
+    );
+    return;
+  }
+
+  const normalizedKw = keyword.toLowerCase();
+  const alreadySaved = profileStore.keywordsDraft.some(
+    (k) =>
+      k.role_label.trim().toLowerCase() === normalizedKw ||
+      k.scrape_queries.some((q) => q.trim().toLowerCase() === normalizedKw),
+  );
+  toast.show(
+    `Selesai tarik "${keyword}": ${report.newly_ingested} lowongan baru, ${report.skipped_duplicates} duplikat${aiNote}`,
+    {
+      tone: "success",
+      ...(alreadySaved
+        ? {}
+        : {
+            actionLabel: "Simpan Kata Kunci",
+            onAction: async () => {
+              const saved = await profileStore.addCustomKeyword(keyword);
+              if (saved) {
+                toast.show(`Kata kunci "${keyword}" disimpan ke profil.`, { tone: "success" });
+              }
+            },
+          }),
+    },
+  );
+}
+
+async function handleRefreshScrape() {
+  if (!profileStore.userId) {
+    toast.show("Buat Profil Cerita terlebih dahulu sebelum mengambil lowongan.", {
+      tone: "warning",
+      actionLabel: "Buat Profil",
+      onAction: () => router.push("/onboarding"),
+    });
+    return;
+  }
+  const report = await jobsStore.runScrape(profileStore.userId);
+  presentScrapeOutcome(report);
+}
+
+async function handleScrapeByKeyword(rawKeyword?: string) {
+  const kw = (rawKeyword ?? trimmedSearchQuery.value).trim();
+  if (kw.length < 2) return;
+  if (!profileStore.userId) {
+    toast.show("Buat Profil Cerita terlebih dahulu sebelum mengambil lowongan.", {
+      tone: "warning",
+      actionLabel: "Buat Profil",
+      onAction: () => router.push("/onboarding"),
+    });
+    return;
+  }
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = null;
+  }
+  jobsStore.searchQuery = kw;
+  const report = await jobsStore.runScrape(profileStore.userId, {
+    ...jobsStore.searchPreferences,
+    custom_queries: [kw],
+  });
+  presentScrapeOutcome(report, kw);
 }
 
 async function handleRunAiQueue() {
@@ -762,7 +994,9 @@ async function handleManualSubmit(payload: {
   if (detail) {
     manualModalRef.value?.resetFields();
     manualModalOpen.value = false;
-    mobileDetailOpen.value = true;
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      await router.push({ path: "/jobs", query: { ...route.query, detail: detail.job_id } });
+    }
     toast.show(`Lowongan ${detail.title} berhasil dianalisis dan di-ranking.`, {
       tone: "success",
     });
@@ -772,6 +1006,9 @@ async function handleManualSubmit(payload: {
 async function handleQuickAddSkill(skillId: number, skillName: string) {
   if (!profileStore.userId) return;
   try {
+    if (!sessionAddedSkillIds.value.includes(skillId)) {
+      sessionAddedSkillIds.value = [...sessionAddedSkillIds.value, skillId];
+    }
     await ipc.quickAddUserSkill(profileStore.userId, skillId);
     await Promise.all([
       profileStore.loadActiveProfile(),
@@ -783,7 +1020,26 @@ async function handleQuickAddSkill(skillId: number, skillName: string) {
       { tone: "success" },
     );
   } catch (e) {
+    sessionAddedSkillIds.value = sessionAddedSkillIds.value.filter((id) => id !== skillId);
     toast.show(friendlyActionMessage(e instanceof IpcError ? e.message : null, "Gagal menambahkan skill."), { tone: "info" });
+  }
+}
+
+async function handleRemoveQuickSkill(skillId: number, skillName: string) {
+  if (!profileStore.userId) return;
+  try {
+    sessionAddedSkillIds.value = sessionAddedSkillIds.value.filter((id) => id !== skillId);
+    await ipc.removeUserSkill(profileStore.userId, skillId);
+    await Promise.all([
+      profileStore.loadActiveProfile(),
+      jobsStore.loadJobs(profileStore.userId),
+      competencyStore.loadRolesAndMap(profileStore.userId),
+    ]);
+    toast.show(`${skillName} dihapus dari profil. Skor kecocokan diperbarui lokal.`, {
+      tone: "info",
+    });
+  } catch (e) {
+    toast.show(friendlyActionMessage(e instanceof IpcError ? e.message : null, "Gagal menghapus skill."), { tone: "info" });
   }
 }
 
@@ -930,25 +1186,33 @@ async function handleCreateRoadmapFromJob() {
 
     <!-- Segmented Switch: Eksplorasi vs Lamaran Saya (+ Compact Mobile Primary Actions) -->
     <div class="v-jobs-mode-bar">
-      <div class="v-jobs-tabs" role="tablist" aria-label="Mode tampilan lowongan">
+      <div
+        ref="tabsContainerRef"
+        class="v-jobs-tabs"
+        role="tablist"
+        aria-label="Mode tampilan lowongan"
+      >
+        <span class="v-jobs-tab-slider" :style="tabSliderStyle" aria-hidden="true" />
         <button
+          ref="exploreTabRef"
           type="button"
           role="tab"
           class="v-jobs-tab"
           :class="{ 'v-jobs-tab--active': activeTab === 'explore' }"
           :aria-selected="activeTab === 'explore'"
-          @click="activeTab = 'explore'"
+          @click="setActiveTab('explore')"
         >
           <span class="v-jobs-tab-label">Eksplorasi</span>
           <span class="v-jobs-tab-count v-jobs-tab-count--mobile t-num">{{ jobsStore.jobs.length }}</span>
         </button>
         <button
+          ref="pipelineTabRef"
           type="button"
           role="tab"
           class="v-jobs-tab"
           :class="{ 'v-jobs-tab--active': activeTab === 'pipeline' }"
           :aria-selected="activeTab === 'pipeline'"
-          @click="activeTab = 'pipeline'"
+          @click="setActiveTab('pipeline')"
         >
           <span class="v-jobs-tab-label">Lamaran</span>
           <span class="v-jobs-tab-count t-num">{{ pipelineCount }}</span>
@@ -1034,8 +1298,9 @@ async function handleCreateRoadmapFromJob() {
                 type="search"
                 :value="jobsStore.searchQuery"
                 class="v-search-input"
-                placeholder="Cari judul, perusahaan, skill..."
+                placeholder="Cari lokal atau ketik keyword portal..."
                 @input="handleSearchInput(($event.target as HTMLInputElement).value)"
+                @keydown="handleSearchKeydown"
               />
               <button
                 v-if="jobsStore.searchQuery.trim()"
@@ -1062,6 +1327,36 @@ async function handleCreateRoadmapFromJob() {
               </span>
             </button>
           </div>
+
+          <Transition name="v-panel-reveal">
+            <div v-if="canScrapeKeyword" class="v-kw-scrape-strip">
+              <span class="v-kw-scrape-strip__meta t-meta">
+                {{
+                  jobsStore.loadingList
+                    ? "Menyaring lokal..."
+                    : jobsStore.jobs.length > 0
+                      ? `${jobsStore.jobs.length} hasil lokal`
+                      : "Tidak ada di lokal"
+                }}
+              </span>
+              <VButton
+                variant="secondary"
+                size="compact"
+                class="v-kw-scrape-btn"
+                :loading="jobsStore.scraping"
+                @click="handleScrapeByKeyword()"
+              >
+                <VIcon v-if="!jobsStore.scraping" name="refresh" :size="13" />
+                <span class="v-kw-scrape-btn__text">
+                  {{
+                    jobsStore.scraping
+                      ? `Menarik "${trimmedSearchQuery}"...`
+                      : `Tarik "${trimmedSearchQuery}" dari Portal`
+                  }}
+                </span>
+              </VButton>
+            </div>
+          </Transition>
 
           <!-- Opportunity Watchlists Strip (hidden on mobile when empty to declutter top feed) -->
           <div
@@ -1278,20 +1573,17 @@ async function handleCreateRoadmapFromJob() {
 
             <div class="v-filter-row">
               <label for="jobs-role-select" class="sr-only">Filter peran</label>
-              <select
+              <VSelect
                 id="jobs-role-select"
-                :value="jobsStore.roleFilter ?? ''"
-                class="v-select-compact"
-                @change="
-                  jobsStore.roleFilter = ($event.target as HTMLSelectElement).value || null;
+                :model-value="jobsStore.roleFilter ?? ''"
+                :options="roleSelectOptions"
+                compact
+                aria-label="Filter peran"
+                @update:model-value="
+                  jobsStore.roleFilter = $event ? String($event) : null;
                   refreshFilters();
                 "
-              >
-                <option value="">Semua Peran</option>
-                <option v-for="role in roleOptions" :key="role" :value="role">
-                  {{ role }}
-                </option>
-              </select>
+              />
               <ScrapeKeywordsPopover />
             </div>
 
@@ -1373,14 +1665,30 @@ async function handleCreateRoadmapFromJob() {
             </p>
             <p class="t-meta" style="margin-top: var(--space-2)">
               {{
-                hasActiveFilters
-                  ? "Ubah kata kunci pencarian atau reset filter untuk melihat seluruh daftar."
-                  : "Klik Cari Lowongan Sekarang untuk mengambil data resmi dari JobStreet, LinkedIn, Kalibrr & Dealls (0 token Gemini)."
+                canScrapeKeyword
+                  ? "Belum ditemukan di daftar lokal. Tarik langsung dari portal untuk kata kunci ini atau reset filter."
+                  : hasActiveFilters
+                    ? "Ubah kata kunci pencarian atau reset filter untuk melihat seluruh daftar."
+                    : "Klik Cari Lowongan Sekarang untuk mengambil data resmi dari JobStreet, LinkedIn, Kalibrr & Dealls (0 token Gemini)."
               }}
             </p>
             <div style="margin-top: var(--space-4); display: flex; gap: 8px; justify-content: center; flex-wrap: wrap">
+              <template v-if="canScrapeKeyword">
+                <VButton
+                  variant="primary"
+                  size="compact"
+                  :loading="jobsStore.scraping"
+                  @click="handleScrapeByKeyword()"
+                >
+                  <VIcon v-if="!jobsStore.scraping" name="refresh" :size="13" />
+                  <span>Tarik "{{ trimmedSearchQuery }}" dari Portal</span>
+                </VButton>
+                <VButton variant="secondary" size="compact" @click="resetFilters">
+                  Reset Filter
+                </VButton>
+              </template>
               <VButton
-                v-if="hasActiveFilters"
+                v-else-if="hasActiveFilters"
                 variant="secondary"
                 size="compact"
                 @click="resetFilters"
@@ -1431,7 +1739,26 @@ async function handleCreateRoadmapFromJob() {
 
       <!-- Right Detail Pane -->
       <section class="v-jobs-detail" aria-label="Detail lowongan terpilih">
-        <div v-if="jobsStore.loadingDetail && !jobsStore.selectedDetail" class="v-detail-skeleton" aria-busy="true" aria-label="Memuat detail lowongan">
+        <div
+          v-if="
+            jobsStore.loadingDetail ||
+            (jobsStore.selectedJobId && jobsStore.selectedDetail?.job_id !== jobsStore.selectedJobId)
+          "
+          class="v-detail-skeleton"
+          aria-busy="true"
+          aria-label="Memuat detail lowongan"
+        >
+          <div v-if="mobileDetailOpen" class="v-mobile-back">
+            <VButton
+              variant="tertiary"
+              size="compact"
+              style="padding-left: 0"
+              @click="closeMobileDetail"
+            >
+              <VIcon name="back" :size="15" />
+              <span>Kembali ke Daftar</span>
+            </VButton>
+          </div>
           <VSkeleton width="58%" height="28px" />
           <VSkeleton width="36%" height="14px" />
           <VSkeleton width="100%" height="96px" radius="var(--radius-card)" />
@@ -1451,7 +1778,7 @@ async function handleCreateRoadmapFromJob() {
               variant="tertiary"
               size="compact"
               style="padding-left: 0"
-              @click="mobileDetailOpen = false"
+              @click="closeMobileDetail"
             >
               <VIcon name="back" :size="15" />
               <span>Kembali ke Daftar</span>
@@ -1609,23 +1936,16 @@ async function handleCreateRoadmapFromJob() {
           <div class="v-pipeline-bar" aria-label="Pelacak status lamaran">
             <div class="v-pipeline-status">
               <label for="detail-app-status" class="t-meta">Status Lamaran</label>
-              <select
+              <VSelect
                 id="detail-app-status"
-                :value="jobsStore.selectedDetail.application_status"
+                :model-value="jobsStore.selectedDetail.application_status"
+                :options="DETAIL_STATUS_OPTIONS"
                 :disabled="jobsStore.updatingApplication"
-                class="v-pipeline-select"
-                @change="
-                  handleStatusChange(($event.target as HTMLSelectElement).value as ApplicationStatus)
-                "
-              >
-                <option value="new">Baru</option>
-                <option value="saved">Disimpan</option>
-                <option value="applied">Dilamar</option>
-                <option value="interview">Interview</option>
-                <option value="offer">Offer</option>
-                <option value="rejected">Ditolak</option>
-                <option value="dismissed">Disembunyikan</option>
-              </select>
+                compact
+                :full-width="false"
+                aria-label="Status Lamaran"
+                @update:model-value="handleStatusChange($event as ApplicationStatus)"
+              />
               <VButton
                 v-if="jobsStore.selectedDetail.application_status !== 'dismissed'"
                 variant="tertiary"
@@ -1682,18 +2002,36 @@ async function handleCreateRoadmapFromJob() {
             <p v-if="jobsStore.selectedDetail.matched_skills.length === 0" class="t-body">
               Belum ada skill yang cocok terdeteksi pada lowongan ini.
             </p>
-            <div v-else class="v-skill-wrap">
+            <TransitionGroup v-else name="v-chip-flow" tag="div" class="v-skill-wrap">
               <span
                 v-for="s in jobsStore.selectedDetail.matched_skills"
                 :key="s.skill_id"
                 class="v-skill-chip"
+                :class="{ 'v-skill-chip--added': quickAddedSkillIds.has(s.skill_id) }"
               >
                 <span style="color: var(--status-success); display: inline-flex">
                   <VIcon name="check" :size="13" />
                 </span>
                 <span>{{ s.canonical_name }}</span>
+                <span
+                  v-if="quickAddedSkillIds.has(s.skill_id)"
+                  class="v-skill-origin"
+                  title="Baru ditambahkan ke profilmu"
+                >
+                  Ditambah
+                </span>
+                <button
+                  v-if="quickAddedSkillIds.has(s.skill_id)"
+                  type="button"
+                  class="v-skill-undo"
+                  :aria-label="`Hapus ${s.canonical_name} dari profil`"
+                  title="Batalkan penambahan skill"
+                  @click="handleRemoveQuickSkill(s.skill_id, s.canonical_name)"
+                >
+                  <VIcon name="close" :size="11" />
+                </button>
               </span>
-            </div>
+            </TransitionGroup>
           </div>
 
           <!-- Missing Skills -->
@@ -1718,29 +2056,36 @@ async function handleCreateRoadmapFromJob() {
               Seluruh skill terdeteksi pada lowongan ini sudah ada di profilmu.
             </p>
 
-            <div v-else class="v-skill-wrap">
-              <span
+            <TransitionGroup v-else name="v-gap-flow" tag="div" class="v-gap-list">
+              <div
                 v-for="m in jobsStore.selectedDetail.missing_skills"
                 :key="m.skill_id"
-                class="v-gap-chip"
+                class="v-gap-row"
               >
-                <span class="v-gap-chip__label">
-                  <span>{{ m.canonical_name }}</span>
-                  <span class="t-meta" style="color: var(--status-warning)">
-                    {{ m.requirement_type === "mandatory" ? "Wajib" : "Plus" }}
+                <div class="v-gap-row__info">
+                  <span class="v-gap-row__name">{{ m.canonical_name }}</span>
+                  <span
+                    class="v-gap-row__tag"
+                    :class="
+                      m.requirement_type === 'mandatory'
+                        ? 'v-gap-row__tag--mandatory'
+                        : 'v-gap-row__tag--plus'
+                    "
+                  >
+                    {{ m.requirement_type === "mandatory" ? "Wajib" : "Nilai Plus" }}
                   </span>
-                </span>
+                </div>
                 <button
                   type="button"
-                  class="v-gap-chip__add"
+                  class="v-gap-row__add"
                   :aria-label="`Tambahkan ${m.canonical_name} ke profil`"
                   @click="handleQuickAddSkill(m.skill_id, m.canonical_name)"
                 >
                   <VIcon name="plus" :size="13" />
                   <span>Tambah</span>
                 </button>
-              </span>
-            </div>
+              </div>
+            </TransitionGroup>
           </div>
 
           <!-- Section 9.3: AI Gap Analysis Card -->
@@ -1869,6 +2214,7 @@ async function handleCreateRoadmapFromJob() {
   gap: var(--space-2);
 }
 .v-jobs-tabs {
+  position: relative;
   display: inline-flex;
   gap: 3px;
   padding: 3px;
@@ -1878,7 +2224,24 @@ async function handleCreateRoadmapFromJob() {
   box-shadow: var(--shadow-recessed);
   min-width: 0;
 }
+.v-jobs-tab-slider {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  height: calc(100% - 6px);
+  border-radius: 7px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-control);
+  transition:
+    transform 360ms var(--ease-glide),
+    width 360ms var(--ease-glide),
+    opacity 180ms ease;
+  pointer-events: none;
+}
 .v-jobs-tab {
+  position: relative;
+  z-index: 1;
   height: 30px;
   padding: 0 12px;
   border-radius: 7px;
@@ -1891,15 +2254,13 @@ async function handleCreateRoadmapFromJob() {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-  transition: color 140ms ease-out, background-color 140ms ease-out, transform var(--dur-press) ease-out;
+  transition: color 220ms ease-out, transform var(--dur-press) ease-out;
 }
 .v-jobs-tab:not(:disabled):active {
   transform: scale(0.96);
 }
 .v-jobs-tab--active {
-  background: var(--surface-1);
   color: var(--text-1);
-  box-shadow: var(--shadow-control);
 }
 .v-jobs-tab-count {
   font-size: 11px;
@@ -2230,6 +2591,35 @@ async function handleCreateRoadmapFromJob() {
   color: var(--text-primary);
   font-size: 13px;
   outline: none;
+}
+.v-search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.v-kw-scrape-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 6px 10px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  background: var(--surface-recessed);
+  box-shadow: var(--shadow-recessed);
+  min-width: 0;
+}
+.v-kw-scrape-strip__meta {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.v-kw-scrape-btn {
+  max-width: 100%;
+  min-width: 0;
+}
+.v-kw-scrape-btn__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .v-search-clear {
   width: 26px;
@@ -2678,48 +3068,132 @@ async function handleCreateRoadmapFromJob() {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 32px;
-  padding: 0 var(--space-3);
+  min-height: 34px;
+  padding: 4px 10px;
   background: var(--bg-hover);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
+  max-width: 100%;
 }
-.v-gap-chip {
-  display: inline-flex;
-  align-items: stretch;
-  background: var(--warning-soft);
-  border: 1px solid var(--warning-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+.v-skill-chip--added {
+  border-color: var(--filter-active-border);
+  background: var(--filter-active-tint);
 }
-.v-gap-chip__label {
+.v-skill-origin {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background: var(--surface-1);
+  border: 1px solid var(--filter-active-border);
+  color: var(--status-success);
+  white-space: nowrap;
+}
+.v-skill-undo {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  height: 34px;
-  padding: 0 var(--space-3);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-.v-gap-chip__add {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0 var(--space-3);
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: -4px;
   border: 0;
-  border-left: 1px solid var(--warning-border);
+  border-radius: var(--radius-full);
   background: transparent;
-  color: var(--status-warning);
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--text-2);
+  transition: background-color 140ms ease, color 140ms ease, transform var(--dur-press) ease-out;
+}
+.v-skill-undo:active {
+  transform: scale(0.92);
 }
 @media (hover: hover) {
-  .v-gap-chip__add:hover {
-    background: var(--warning-soft);
+  .v-skill-undo:hover {
+    background: var(--error-soft);
+    color: var(--status-error);
+  }
+}
+.v-gap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v-gap-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px 8px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-surface);
+  min-width: 0;
+}
+.v-gap-row__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.v-gap-row__name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-1);
+  overflow-wrap: anywhere;
+}
+.v-gap-row__tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+.v-gap-row__tag--mandatory {
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+  color: var(--status-warning);
+}
+.v-gap-row__tag--plus {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.v-gap-row__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-shrink: 0;
+  height: 30px;
+  min-width: 84px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: var(--shadow-control);
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform var(--dur-press) ease-out;
+}
+.v-gap-row__add:active {
+  transform: scale(0.96);
+}
+@media (hover: hover) {
+  .v-gap-row__add:hover {
+    background: var(--bg-hover);
+    border-color: var(--brand-border);
   }
 }
 
@@ -2746,8 +3220,8 @@ async function handleCreateRoadmapFromJob() {
     display: none;
   }
   .v-jobs-mode-bar {
-    padding: 8px 12px 6px;
-    gap: 8px;
+    padding: 8px 10px 6px;
+    gap: 6px;
     flex-wrap: nowrap;
     border-bottom: 1px solid var(--border-divider);
   }
@@ -2755,16 +3229,16 @@ async function handleCreateRoadmapFromJob() {
     flex: 1 1 0;
     min-width: 0;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.88fr);
     overflow: hidden;
   }
   .v-jobs-tab {
     height: 32px;
     min-width: 0;
-    padding: 0 6px;
+    padding: 0 5px;
     justify-content: center;
     gap: 4px;
-    font-size: 12px;
+    font-size: 11.5px;
     overflow: hidden;
   }
   .v-jobs-tab-label {
@@ -2783,12 +3257,12 @@ async function handleCreateRoadmapFromJob() {
   .v-mobile-mode-actions {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     flex-shrink: 0;
   }
   .v-mobile-scrape-btn {
-    min-width: 72px;
-    padding: 0 10px;
+    min-width: 62px;
+    padding: 0 9px;
   }
   .v-watchlist-strip--empty {
     display: none;
@@ -2883,8 +3357,21 @@ async function handleCreateRoadmapFromJob() {
   .v-jobs-split[data-mobile-detail="false"] .v-jobs-detail {
     display: none;
   }
+  .v-jobs-split[data-mobile-detail="true"] .v-jobs-detail {
+    animation: vDetailSlideIn 320ms var(--ease-luxury) both;
+  }
   .v-jobs-split[data-mobile-detail="true"] .v-jobs-rail {
     display: none;
+  }
+}
+@keyframes vDetailSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 </style>

@@ -418,6 +418,13 @@ async function handleSaveProfile() {
                   @click="cycleSkill(idx)"
                 >
                   <span class="v-skill-edit__name">{{ sk.canonical_name }}</span>
+                  <span
+                    v-if="/ditambahkan|vecta roadmap/i.test(sk.evidence ?? '')"
+                    class="v-skill-edit__origin"
+                    title="Ditambahkan ke profil dari rekomendasi skill"
+                  >
+                    Ditambah
+                  </span>
                   <span class="v-skill-edit__level">{{ formatProficiency(sk.proficiency) }}</span>
                 </button>
                 <button
@@ -806,6 +813,19 @@ async function handleSaveProfile() {
   flex: 1 1 auto;
   min-width: 0;
   line-height: 1.35;
+}
+.v-skill-edit__origin {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background: var(--filter-active-tint);
+  border: 1px solid var(--filter-active-border);
+  color: var(--status-success);
 }
 .v-skill-edit__level {
   flex-shrink: 0;

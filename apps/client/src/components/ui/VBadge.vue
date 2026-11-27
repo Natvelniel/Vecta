@@ -4,13 +4,14 @@ export type BadgeTone = "neutral" | "brand" | "info" | "success" | "warning" | "
 withDefaults(
   defineProps<{
     tone?: BadgeTone;
+    wrap?: boolean;
   }>(),
-  { tone: "neutral" },
+  { tone: "neutral", wrap: false },
 );
 </script>
 
 <template>
-  <span class="v-badge" :class="`v-badge--${tone}`">
+  <span class="v-badge" :class="[`v-badge--${tone}`, { 'v-badge--wrap': wrap }]">
     <slot />
   </span>
 </template>
@@ -25,6 +26,13 @@ withDefaults(
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+}
+.v-badge--wrap {
+  white-space: normal;
+  max-width: 100%;
+  line-height: 1.35;
+  text-align: left;
+  overflow-wrap: break-word;
 }
 .v-badge--neutral {
   background: var(--bg-hover);

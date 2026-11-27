@@ -10,6 +10,9 @@ use crate::core::native_scraper::portals::compose_structured_description;
 use crate::core::worker::WorkerScrapedJob;
 
 pub fn parse_kalibrr_response(body: &Value, fallback_location: &str) -> Vec<WorkerScrapedJob> {
+    if body.get("from_alternative").and_then(|v| v.as_bool()) == Some(true) {
+        return vec![];
+    }
     let Some(jobs) = body.get("jobs").and_then(|v| v.as_array()) else {
         return vec![];
     };
@@ -140,6 +143,45 @@ pub fn parse_kalibrr_response(body: &Value, fallback_location: &str) -> Vec<Work
     out
 }
 
+pub fn filter_query_relevant_jobs(query: &str, jobs: Vec<WorkerScrapedJob>) -> Vec<WorkerScrapedJob> {
+    const GENERIC_TOKENS: &[&str] = &[
+        "full", "time", "part", "staff", "staf", "senior", "junior", "intern", "magang",
+        "specialist", "officer", "associate", "manager", "lead", "head", "kerja", "lowongan",
+        "indonesia", "remote", "hybrid", "onsite",
+    ];
+    let q_lower = query.trim().to_lowercase();
+    let all_tokens: Vec<&str> = q_lower
+        .split(|c: char| !c.is_alphanumeric())
+        .filter(|w| w.len() >= 2)
+        .collect();
+    if all_tokens.len() < 2 {
+        return jobs;
+    }
+    let core_tokens: Vec<&str> = all_tokens
+        .iter()
+        .copied()
+        .filter(|t| !GENERIC_TOKENS.contains(t))
+        .collect();
+    if core_tokens.is_empty() {
+        return jobs;
+    }
+
+    jobs.into_iter()
+        .filter(|job| {
+            let haystack = format!(
+                "{} {}",
+                job.title.to_lowercase(),
+                job.raw_description.to_lowercase()
+            );
+            core_tokens.iter().any(|tok| {
+                haystack
+                    .split(|c: char| !c.is_alphanumeric())
+                    .any(|w| w == *tok)
+            })
+        })
+        .collect()
+}
+
 pub async fn scrape(
     http: Arc<ResilientHttpClient>,
     query: &str,
@@ -202,12 +244,49 @@ pub async fn scrape(
         };
 
         let page_jobs = parse_kalibrr_response(&body, location);
-        let count = page_jobs.len();
-        out.extend(page_jobs);
-        if count < page_size as usize {
+        let raw_count = page_jobs.len();
+        out.extend(filter_query_relevant_jobs(query, page_jobs));
+        if raw_count < page_size as usize {
             break;
         }
     }
 
     Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn filter_rejects_full_time_tutor_noise_for_full_stack_developer() {
+        let jobs = vec![
+            WorkerScrapedJob {
+                source: "kalibrr".into(),
+                external_id: "kb-1".into(),
+                url: None,
+                title: "Full Time Pengajar UTBK Numerasi".into(),
+                company: "Ruangguru".into(),
+                location: Some("Pontianak".into()),
+                raw_description: "Mengajar siswa UTBK Matematika dan skolastik.".into(),
+                posted_at: None,
+                salary_text: None,
+            },
+            WorkerScrapedJob {
+                source: "kalibrr".into(),
+                external_id: "kb-2".into(),
+                url: None,
+                title: "Full Stack Web Developer".into(),
+                company: "PT Teknologi".into(),
+                location: Some("Jakarta".into()),
+                raw_description: "Membangun aplikasi React dan Laravel.".into(),
+                posted_at: None,
+                salary_text: None,
+            },
+        ];
+
+        let filtered = filter_query_relevant_jobs("Full Stack Developer", jobs);
+        assert_eq!(filtered.len(), 1);
+        assert_eq!(filtered[0].external_id, "kb-2");
+    }
 }

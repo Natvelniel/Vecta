@@ -60,10 +60,12 @@ function toggle() {
   height: 16px;
   border-radius: var(--radius-full);
   background: var(--text-primary);
-  transition: transform var(--dur-hover) var(--ease-out);
+  transition:
+    transform 300ms var(--ease-glide),
+    background-color 220ms ease-out;
 }
 .v-switch[aria-checked="true"] .v-switch__thumb {
   transform: translateX(18px);
-  background: #ffffff;
+  background: var(--brand-fg);
 }
 </style>

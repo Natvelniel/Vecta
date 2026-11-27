@@ -42,23 +42,23 @@ withDefaults(
 <template>
   <svg
     v-if="name === 'mark'"
-    :width="Math.round(size * 1.915)"
+    :width="Math.round(size * 1.333)"
     :height="size"
-    viewBox="0 0 247 129"
+    viewBox="0 0 160 120"
     preserveAspectRatio="xMidYMid meet"
     fill="none"
     aria-hidden="true"
   >
     <path
-      d="M2 2H64C76 2 84 8 92 20L155 109L144 122C139 127 132 128 122 128H108C98 128 91 123 84 113L2 2Z"
+      d="M4 5 H35 C44 5 49.5 10 55.5 21 L97.9 101 C92.8 110.5 87.5 117 77.5 117 H69.5 C62.5 117 58.8 109.5 53.8 99 Z"
       fill="currentColor"
     />
     <path
-      d="M202 2H246L208 49C200 58 192 61 180 61H148L183 14C190 5 196 2 202 2Z"
+      d="M115 5 H156 L143.81 28 C136.5 42 128 55 114 55 H81.52 L105 14.5 C108.5 8.2 111.5 5 115 5 Z"
       fill="currentColor"
     />
     <path
-      d="M150 72H191L168 100L150 72Z"
+      d="M85.5 62.5 H120.8 L103.5 98.5 Z"
       fill="currentColor"
     />
   </svg>

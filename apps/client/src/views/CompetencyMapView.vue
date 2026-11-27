@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { SkillCategory, SkillImpactItem } from "@/lib/bindings";
 import { useCompetencyStore } from "@/stores/competency";
@@ -14,6 +14,7 @@ import SalaryBenchmarkCard from "@/components/domain/SalaryBenchmarkCard.vue";
 import VButton from "@/components/ui/VButton.vue";
 import VCard from "@/components/ui/VCard.vue";
 import VIcon from "@/components/ui/VIcon.vue";
+import VSelect from "@/components/ui/VSelect.vue";
 import VSkeleton from "@/components/ui/VSkeleton.vue";
 import VSwitch from "@/components/ui/VSwitch.vue";
 
@@ -37,7 +38,30 @@ const simResults = ref<SkillImpactItem[]>([]);
 const simLoading = ref(false);
 const simPanelRef = ref<HTMLElement | null>(null);
 const simPanelVisible = ref(true);
+const filterTabsRef = ref<HTMLElement | null>(null);
+const filterTabRefs = ref<Record<string, HTMLButtonElement | null>>({});
+const filterBarStyle = ref<Record<string, string>>({
+  width: "0px",
+  transform: "translateX(0px)",
+  opacity: "0",
+});
 let simObserver: IntersectionObserver | null = null;
+let filterResizeObserver: ResizeObserver | null = null;
+
+function setFilterTabRef(id: string, el: HTMLButtonElement | null) {
+  filterTabRefs.value[id] = el;
+}
+
+function updateFilterSlider() {
+  const container = filterTabsRef.value;
+  const activeBtn = filterTabRefs.value[competencyStore.categoryFilter];
+  if (!container || !activeBtn) return;
+  filterBarStyle.value = {
+    width: `${Math.max(0, activeBtn.offsetWidth - 16)}px`,
+    transform: `translateX(${activeBtn.offsetLeft + 8}px)`,
+    opacity: "1",
+  };
+}
 
 const simAggregate = computed(() => {
   if (simResults.value.length === 0) {
@@ -89,7 +113,17 @@ watch(
 
 onBeforeUnmount(() => {
   simObserver?.disconnect();
+  filterResizeObserver?.disconnect();
 });
+
+watch(
+  () => [competencyStore.categoryFilter, Boolean(competencyStore.mapData)],
+  async () => {
+    await nextTick();
+    updateFilterSlider();
+  },
+  { immediate: true },
+);
 
 function scrollToSimPanel() {
   simPanelRef.value?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -140,15 +174,35 @@ onMounted(async () => {
   if (profileStore.userId) {
     await competencyStore.loadRolesAndMap(profileStore.userId);
   }
+  await nextTick();
+  updateFilterSlider();
+  if (typeof ResizeObserver !== "undefined" && filterTabsRef.value) {
+    filterResizeObserver = new ResizeObserver(() => updateFilterSlider());
+    filterResizeObserver.observe(filterTabsRef.value);
+  }
 });
+
+onActivated(async () => {
+  if (profileStore.userId) {
+    await competencyStore.loadRolesAndMap(profileStore.userId);
+  }
+  await nextTick();
+  updateFilterSlider();
+});
+
+const roleSelectOptions = computed(() =>
+  competencyStore.availableRoles.map((r) => ({
+    value: r.normalized_role,
+    label: `${r.normalized_role} (${r.job_count})`,
+  })),
+);
 
 const subtitle = computed(() => {
   if (!competencyStore.mapData) return "Agregasi permintaan skill pasar lokal";
   return `${competencyStore.mapData.target_role} · ${competencyStore.mapData.total_jobs} lowongan · ${competencyStore.gapCount} gap`;
 });
 
-async function handleRoleChange(e: Event) {
-  const val = (e.target as HTMLSelectElement).value;
+async function handleRoleChange(val: string) {
   if (profileStore.userId && val) {
     await competencyStore.selectRole(profileStore.userId, val);
   }
@@ -197,21 +251,16 @@ async function handleGenerateRoadmap() {
         <label v-if="competencyStore.availableRoles.length > 0" for="comp-role-select" class="sr-only">
           Pilih peran target
         </label>
-        <select
+        <VSelect
           v-if="competencyStore.availableRoles.length > 0"
           id="comp-role-select"
-          :value="competencyStore.selectedRole ?? ''"
-          class="v-role-select"
-          @change="handleRoleChange"
-        >
-          <option
-            v-for="r in competencyStore.availableRoles"
-            :key="r.normalized_role"
-            :value="r.normalized_role"
-          >
-            {{ r.normalized_role }} ({{ r.job_count }})
-          </option>
-        </select>
+          :model-value="competencyStore.selectedRole ?? ''"
+          :options="roleSelectOptions"
+          compact
+          :full-width="false"
+          aria-label="Pilih peran target"
+          @update:model-value="handleRoleChange(String($event ?? ''))"
+        />
         <VButton
           variant="primary"
           :disabled="competencyStore.gapCount === 0 || !competencyStore.selectedRole"
@@ -255,10 +304,12 @@ async function handleGenerateRoadmap() {
         </div>
 
         <div class="v-filter-bar">
-          <div class="v-filter-tabs" role="group" aria-label="Filter kategori kompetensi">
+          <div ref="filterTabsRef" class="v-filter-tabs" role="group" aria-label="Filter kategori kompetensi">
+            <span class="v-filter-tab-slider" :style="filterBarStyle" aria-hidden="true" />
             <button
               v-for="c in CLUSTERS"
               :key="c.id"
+              :ref="(el) => setFilterTabRef(c.id, el as HTMLButtonElement | null)"
               type="button"
               class="v-filter-tab"
               :aria-pressed="competencyStore.categoryFilter === c.id"
@@ -273,90 +324,93 @@ async function handleGenerateRoadmap() {
         </div>
 
         <!-- What-If Skill Impact Simulator Vertical Architectural Panel -->
-        <section v-if="simSkillIds.length > 0" ref="simPanelRef" class="v-sim-panel" role="status">
-          <div class="v-sim-panel__head">
-            <div class="v-sim-head">
-              <VIcon name="sparkle" :size="15" />
-              <strong>Simulasi What-If</strong>
-              <span class="v-sim-quota t-num">{{ simSkillIds.length }}/3</span>
-              <span class="t-meta">0 Token · Lokal</span>
-            </div>
-            <VButton
-              variant="tertiary"
-              size="compact"
-              @click="simSkillIds = []; simResults = []"
-            >
-              Reset
-            </VButton>
-          </div>
-
-          <div v-if="simLoading" class="v-sim-well t-meta">Menghitung dampak pasar lokal...</div>
-
-          <template v-else-if="simResults.length > 0">
-            <div class="v-sim-well" aria-label="Ringkasan dampak simulasi">
-              <div class="v-sim-kpi">
-                <span class="t-meta">Potensi Skor</span>
-                <strong class="v-sim-kpi__val v-sim-kpi__val--accent t-num">
-                  +{{ simAggregate.totalDelta }}%
-                </strong>
+        <Transition name="v-panel-reveal">
+          <section v-if="simSkillIds.length > 0" ref="simPanelRef" class="v-sim-panel" role="status">
+            <div class="v-sim-panel__head">
+              <div>
+                <div class="v-sim-head">
+                  <strong>Simulasi What-If</strong>
+                  <span class="v-sim-quota t-num">{{ simSkillIds.length }}/3</span>
+                </div>
+                <span class="t-meta">Estimasi lokal 0 token Gemini</span>
               </div>
-              <div class="v-sim-kpi">
-                <span class="t-meta">Lowongan Naik</span>
-                <strong class="v-sim-kpi__val t-num">{{ simAggregate.maxAffected }}</strong>
-              </div>
-              <div class="v-sim-kpi">
-                <span class="t-meta">Tembus >= 75%</span>
-                <strong
-                  class="v-sim-kpi__val t-num"
-                  :class="{ 'v-sim-kpi__val--accent': simAggregate.totalCrossing75 > 0 }"
-                >
-                  {{ simAggregate.totalCrossing75 }}
-                </strong>
-              </div>
+              <VButton
+                variant="tertiary"
+                size="compact"
+                @click="simSkillIds = []; simResults = []"
+              >
+                Reset
+              </VButton>
             </div>
 
-            <div class="v-sim-list">
-              <div v-for="item in simResults" :key="item.skill_id" class="v-sim-item">
-                <div class="v-sim-item__top">
-                  <strong class="v-sim-item__name">{{ item.canonical_name }}</strong>
-                  <button
-                    type="button"
-                    class="v-sim-item__remove"
-                    :aria-label="`Hapus ${item.canonical_name} dari simulasi`"
-                    @click="toggleSimulateSkill(item.skill_id)"
+            <div v-if="simLoading" class="v-sim-well t-meta">Menghitung dampak pasar lokal...</div>
+
+            <template v-else-if="simResults.length > 0">
+              <div class="v-sim-well" aria-label="Ringkasan dampak simulasi">
+                <div class="v-sim-kpi">
+                  <span class="v-sim-kpi__label">Potensi Skor</span>
+                  <strong class="v-sim-kpi__val v-sim-kpi__val--accent t-num">
+                    +{{ simAggregate.totalDelta }}%
+                  </strong>
+                </div>
+                <div class="v-sim-kpi">
+                  <span class="v-sim-kpi__label">Terdampak</span>
+                  <strong class="v-sim-kpi__val t-num">{{ simAggregate.maxAffected }}</strong>
+                </div>
+                <div class="v-sim-kpi">
+                  <span class="v-sim-kpi__label">&ge; 75%</span>
+                  <strong
+                    class="v-sim-kpi__val t-num"
+                    :class="{ 'v-sim-kpi__val--accent': simAggregate.totalCrossing75 > 0 }"
                   >
-                    <VIcon name="close" :size="13" />
-                  </button>
-                </div>
-                <div class="v-sim-item__metrics t-num">
-                  <span style="color: var(--status-success); font-weight: 600">
-                    +{{ item.avg_score_delta }}% skor
-                  </span>
-                  <span>·</span>
-                  <span>{{ item.affected_jobs_count }} lowongan naik</span>
-                  <template v-if="item.jobs_crossing_75_count > 0">
-                    <span>·</span>
-                    <span style="color: var(--status-success)">
-                      {{ item.jobs_crossing_75_count }} tembus >= 75%
-                    </span>
-                  </template>
+                    {{ simAggregate.totalCrossing75 }}
+                  </strong>
                 </div>
               </div>
-            </div>
-          </template>
 
-          <div class="v-sim-panel__foot">
-            <VButton
-              variant="primary"
-              size="compact"
-              class="v-sim-cta"
-              :loading="roadmapStore.generating"
-              @click="handleGenerateRoadmap"
-            >
-              Buat Roadmap dari Simulasi
-            </VButton>
-          </div>
-        </section>
+              <div class="v-sim-list">
+                <div v-for="item in simResults" :key="item.skill_id" class="v-sim-item">
+                  <div class="v-sim-item__top">
+                    <strong class="v-sim-item__name">{{ item.canonical_name }}</strong>
+                    <button
+                      type="button"
+                      class="v-sim-item__remove"
+                      :aria-label="`Hapus ${item.canonical_name} dari simulasi`"
+                      @click="toggleSimulateSkill(item.skill_id)"
+                    >
+                      <VIcon name="close" :size="13" />
+                    </button>
+                  </div>
+                  <div class="v-sim-item__metrics t-num">
+                    <span style="color: var(--status-success); font-weight: 600">
+                      +{{ item.avg_score_delta }}% skor
+                    </span>
+                    <span>·</span>
+                    <span>{{ item.affected_jobs_count }} lowongan naik</span>
+                    <template v-if="item.jobs_crossing_75_count > 0">
+                      <span>·</span>
+                      <span style="color: var(--status-success)">
+                        {{ item.jobs_crossing_75_count }} tembus &ge; 75%
+                      </span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <div class="v-sim-panel__foot">
+              <VButton
+                variant="primary"
+                size="compact"
+                class="v-sim-cta"
+                :loading="roadmapStore.generating"
+                @click="handleGenerateRoadmap"
+              >
+                Buat Roadmap dari Simulasi
+              </VButton>
+            </div>
+          </section>
+        </Transition>
 
         <Transition name="v-sheet-slide">
           <button
@@ -365,7 +419,6 @@ async function handleGenerateRoadmap() {
             class="v-sim-peek"
             @click="scrollToSimPanel"
           >
-            <VIcon name="sparkle" :size="13" />
             <span>Simulasi aktif: {{ simSkillIds.length }}/3 skill · Lihat dampak</span>
           </button>
         </Transition>
@@ -516,10 +569,24 @@ async function handleGenerateRoadmap() {
   margin-bottom: var(--space-4);
 }
 .v-filter-tabs {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-1);
   flex-wrap: wrap;
+}
+.v-filter-tab-slider {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--brand-primary);
+  transition:
+    transform 340ms var(--ease-glide),
+    width 340ms var(--ease-glide),
+    opacity 180ms ease;
+  pointer-events: none;
 }
 .v-filter-tab {
   position: relative;
@@ -531,7 +598,7 @@ async function handleGenerateRoadmap() {
   font-size: 13px;
   font-weight: 500;
   border-radius: var(--radius-control);
-  transition: color 140ms ease-out, background-color 140ms ease-out, transform var(--dur-press) ease-out;
+  transition: color 200ms ease-out, background-color 140ms ease-out, transform var(--dur-press) ease-out;
 }
 .v-filter-tab:not(:disabled):active {
   transform: scale(0.96);
@@ -545,16 +612,6 @@ async function handleGenerateRoadmap() {
 .v-filter-tab[aria-pressed="true"] {
   color: var(--text-primary);
   font-weight: 600;
-}
-.v-filter-tab[aria-pressed="true"]::after {
-  content: "";
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: -1px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--brand-primary);
 }
 .v-ledger-head,
 .v-ledger-row {
@@ -592,7 +649,7 @@ async function handleGenerateRoadmap() {
 .v-bar-fill {
   height: 100%;
   border-radius: var(--radius-full);
-  transition: width 220ms var(--ease-out);
+  transition: width var(--dur-meter, 520ms) var(--ease-luxury, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .v-empty-rows {
   padding: var(--space-12) var(--space-4);
@@ -625,7 +682,6 @@ async function handleGenerateRoadmap() {
   border-radius: var(--radius-card);
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--filter-active-border);
   box-shadow: var(--shadow-surface);
   display: flex;
   flex-direction: column;
@@ -635,7 +691,7 @@ async function handleGenerateRoadmap() {
 }
 .v-sim-panel__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-2);
   min-width: 0;
@@ -652,9 +708,9 @@ async function handleGenerateRoadmap() {
 .v-sim-quota {
   padding: 1px 7px;
   border-radius: var(--radius-full);
-  background: var(--filter-active-tint);
-  border: 1px solid var(--filter-active-border);
-  color: var(--status-success);
+  background: var(--surface-recessed);
+  border: 1px solid var(--border);
+  color: var(--text-2);
   font-size: 11px;
   font-weight: 700;
 }
@@ -670,9 +726,21 @@ async function handleGenerateRoadmap() {
 .v-sim-kpi {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 4px;
   min-width: 0;
+}
+.v-sim-kpi + .v-sim-kpi {
+  border-left: 1px solid var(--border-divider);
+  padding-left: var(--space-2);
+}
+.v-sim-kpi__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .v-sim-kpi__val {
   font-size: 16px;
